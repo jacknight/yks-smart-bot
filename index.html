@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="select-css.css" />
+
+    <title>Buzzer Controls</title>
+  </head>
+  <body>
+    <div class="layout">
+      <div class="control-panel">
+        <img src="assets/yks-logo.webp" />
+        <div class="buzz-queue">
+          <div class="buzz-list">
+            <h1>Dookie List</h1>
+            <ol></ol>
+          </div>
+          <button name="random">Random</button>
+          <button name="clear">Clear</button>
+        </div>
+        <div class="buzz-controls">
+          <button name="mode">Mode</button>
+          <p id="mode">-</p>
+          <button name="ready">&#10004;</button>
+          <p id="ready">-</p>
+        </div>
+        <div class="buzz-servers" hidden>
+          <select name="servers" id="servers" class="select-css"></select>
+          <button name="serverSelect" id="serverSelect">Channels</button>
+        </div>
+        <div class="buzz-channels" hidden>
+          <select name="channels" id="channels" class="select-css"></select>
+          <button name="channelSelect" id="channelSelect">Listen</button>
+        </div>
+      </div>
+    </div>
+    <script src="node_modules/socket.io/client-dist/socket.io.js"></script>
+    <script src="client.js"></script>
+  </body>
+</html>

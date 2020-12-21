@@ -1,0 +1,124 @@
+:root {
+  --yksgreen: rgba(131, 193, 51, 1);
+  --yksblack: rgba(10, 10, 10, 1);
+  --ykswhite: rgba(255, 255, 255, 1);
+}
+body {
+  background: var(--yksblack);
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
+  text-transform: uppercase;
+  color: var(--ykswhite);
+}
+
+button {
+  text-transform: uppercase;
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
+  background: var(--ykswhite);
+  border: var(--yksgreen) solid 1px;
+  color: var(--yksgreen);
+  font-size: 1.5rem;
+}
+
+button:hover {
+  background: var(--yksgreen);
+  color: var(--ykswhite);
+  border: var(--ykswhite) solid 1px;
+}
+
+button:active {
+  background: var(--yksblack);
+  color: var(--yksgreen);
+  border: var(--ykswhite) solid 1px;
+}
+
+.layout {
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  height: 90vh;
+}
+
+.control-panel {
+  display: grid;
+  width: 300px;
+  background: var(--yksgreen);
+  border: rgba(255, 255, 255, 1) solid 5px;
+}
+
+.control-panel img {
+  width: 100px;
+  height: 100px;
+  transform: translate3d(-40px, -40px, 0);
+  border-radius: 50%;
+}
+
+.buzz-list {
+  grid-area: queue;
+  display: grid;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+  grid-template-rows: 60px 1fr;
+}
+
+.buzz-list h1 {
+  align-self: start;
+  border-bottom: var(--ykswhite) dotted 2px;
+}
+
+.buzz-list ol {
+  align-self: start;
+  justify-self: start;
+  padding: 0;
+}
+
+.buzz-queue {
+  border-bottom: rgba(255, 255, 255, 1) solid 5px;
+  margin-top: -100px;
+}
+
+button[name="random"] {
+  grid-area: random;
+  height: 50px;
+  border-right: 0;
+}
+
+button[name="clear"] {
+  grid-area: clear;
+  height: 50px;
+}
+
+button[name="mode"] {
+  border-bottom: 0;
+}
+
+button[name="mode"]:disabled {
+  opacity: 0.5;
+}
+
+.buzz-queue {
+  display: grid;
+  grid-template-areas:
+    "queue queue"
+    "random clear";
+}
+
+.buzz-controls {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}
+
+.buzz-controls p {
+  margin-left: 5px;
+  margin-right: 5px;
+  text-align: center;
+  min-width: 100px;
+}
+
+.buzz-channels,
+.buzz-servers {
+  display: grid;
+  grid-template-columns: 1fr auto;
+}

@@ -5,6 +5,23 @@
   "main": "buzzer.js",
   "author": "Jack Knight",
   "dependencies": {
-    "discord.js": "^12.5.1"
+    "cors": "^2.8.5",
+    "discord.js": "^12.5.1",
+    "dotenv": "^8.2.0",
+    "ejs": "^3.1.5",
+    "express": "^4.17.1",
+    "fg-select-css": "^3.2.0",
+    "http": "^0.0.1-security",
+    "socket.io": "^3.0.4"
+  },
+  "scripts": {
+    "start": "node ./server.js",
+    "dev": "nodemon ./server.js"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.6"
+  },
+  "engines": {
+    "node": "15.4.0"
   }
 }
