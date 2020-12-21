@@ -66,7 +66,6 @@ io.on("connection", (socket) => {
 //
 // Bot stuff.
 const Discord = require("discord.js");
-const auth = require("./auth.json");
 
 const modes = {
   NORMAL: "normal",
@@ -323,4 +322,4 @@ __Configure__
   }
 }
 
-bot.login(auth.token);
+bot.login(process.env.AUTH_TOKEN);

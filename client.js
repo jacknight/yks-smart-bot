@@ -101,6 +101,7 @@
 
   function toggleReady() {
     readyP.textContent = readyP.textContent === "ready" ? "not ready" : "ready";
+    modeButton.disabled = readyP.textContent === "ready";
     socket.emit("changeReady", { ready: readyP.textContent });
   }
 
