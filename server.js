@@ -1,4 +1,5 @@
 // Server stuff (socket etc)
+require("dotenv").config();
 const express = require("express");
 const app = express();
 
@@ -322,4 +323,5 @@ __Configure__
   }
 }
 
+console.log(process.env);
 bot.login(process.env.AUTH_TOKEN);
