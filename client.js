@@ -1,7 +1,5 @@
 (function connect() {
-  let socket = io.connect(
-    `https://discord-buzzer.herokuapp.com:${process.env.PORT}`
-  );
+  let socket = io.connect(`https://discord-buzzer.herokuapp.com:3000`);
 
   const modeP = document.querySelector("#mode");
   const modeButton = document.querySelector("button[name='mode']");

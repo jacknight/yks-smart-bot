@@ -323,5 +323,4 @@ __Configure__
   }
 }
 
-console.log(process.env);
 bot.login(process.env.AUTH_TOKEN);
