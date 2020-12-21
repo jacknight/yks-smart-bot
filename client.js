@@ -1,5 +1,5 @@
 (function connect() {
-  let socket = io.connect("http://192.168.178.59:3000");
+  let socket = io.connect("http://localhost:3000");
 
   const modeP = document.querySelector("#mode");
   const modeButton = document.querySelector("button[name='mode']");
