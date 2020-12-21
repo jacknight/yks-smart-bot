@@ -1,9 +1,11 @@
 (function connect() {
-  let socket = io.connect(`https://discord-buzzer.herokuapp.com`);
+  let socket = io.connect(`http://localhost:3000`);
 
   const modeP = document.querySelector("#mode");
   const modeButton = document.querySelector("button[name='mode']");
   const readyButton = document.querySelector("button[name='ready']");
+  const clearButton = document.querySelector("button[name='clear']");
+  const randomButton = document.querySelector("button[name='random']");
   const readyP = document.querySelector("#ready");
   const servers = document.querySelector(".buzz-servers");
   const channels = document.querySelector(".buzz-channels");
@@ -21,6 +23,8 @@
   readyButton.addEventListener("click", toggleReady);
   listChannelsButton.addEventListener("click", listChannels);
   listenChannelsButton.addEventListener("click", listenChannel);
+  clearButton.addEventListener("click", clearQueue);
+  randomButton.addEventListener("click", randomizeQueue);
 
   socket.on("buzz", (buzzerQueue) => {
     buzzList.innerHTML = "";
@@ -56,13 +60,13 @@
       // in, and return only those servers.
       requestServers();
     } else {
-      servers.hidden = true;
-      servers.style.display = "none";
+      requestServers();
       socket.emit("requestChannels", { id: channel.guild });
     }
   });
 
   socket.on("serversList", (serversList) => {
+    serversSelect.innerHTML = "";
     serversList.forEach(({ guild, id }) => {
       // create an option
       const option = document.createElement("option");
@@ -107,13 +111,19 @@
 
   function listChannels() {
     const id = serversSelect.value;
-    servers.hidden = true;
-    servers.style.display = "none";
     socket.emit("requestChannels", { id: id });
   }
 
   function listenChannel() {
     socket.emit("changeChannel", { id: channelsSelect.value });
+  }
+
+  function clearQueue() {
+    socket.emit("clearQueue");
+  }
+
+  function randomizeQueue() {
+    socket.emit("randomizeQueue");
   }
 
   initRequest();

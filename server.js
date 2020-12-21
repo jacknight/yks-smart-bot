@@ -1,5 +1,7 @@
 // Server stuff (socket etc)
 require("dotenv").config();
+const DiscordAuth2 = require("discord-oauth2");
+const oauth = new DiscordAuth2();
 const express = require("express");
 const app = express();
 
@@ -21,7 +23,7 @@ const io = require("socket.io")(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("New connection.");
+  checkAuthorization();
   socket.on("changeMode", ({ mode }) => {
     settings.mode = mode;
     if (settings.channel) {
@@ -49,8 +51,17 @@ io.on("connection", (socket) => {
     args.push(id);
     changeChannel(args);
   });
+  socket.on("clearQueue", () => {
+    settings.buzzerQueue = [];
+    emitBuzzerQueue();
+  });
+  socket.on("randomizeQueue", () => {
+    shuffle(settings.buzzerQueue);
+    emitBuzzerQueue();
+  });
 });
 
+function checkAuthorization() {}
 //
 //
 //
@@ -321,6 +332,23 @@ __Configure__
       )
       .catch((err) => console.log(err));
   }
+}
+
+function shuffle(array) {
+  var currentIndex = array.length,
+    temporaryValue,
+    randomIndex;
+
+  while (0 !== currentIndex) {
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex -= 1;
+
+    temporaryValue = array[currentIndex];
+    array[currentIndex] = array[randomIndex];
+    array[randomIndex] = temporaryValue;
+  }
+
+  return array;
 }
 
 bot.login(process.env.AUTH_TOKEN);

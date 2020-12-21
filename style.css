@@ -11,6 +11,22 @@ body {
   color: var(--ykswhite);
 }
 
+a {
+  color: var(--ykswhite);
+  background: var(--yksgreen);
+  transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
+  padding: 20px;
+  text-decoration: none;
+  border-radius: 10px;
+  font-size: 2rem;
+}
+
+a:hover {
+  color: var(--yksblack);
+  box-shadow: 5px 5px var(--ykswhite);
+  transform: translate3d(-5px, -5px, 0);
+}
+
 button {
   text-transform: uppercase;
   font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",

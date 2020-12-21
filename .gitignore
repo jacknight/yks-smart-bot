@@ -351,3 +351,8 @@ MigrationBackup/
 
 # Environment variables
 *.env
+
+# Mac stuff
+.DS_Store
+
+TODO.md
