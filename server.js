@@ -264,6 +264,7 @@ function registerBuzz(message) {
         .send(`${message.author} buzzed in.`)
         .catch((err) => console.log(err));
       settings.buzzerQueue.push(message.author);
+      if (settings.mode === modes.CHAOS) shuffle(settings.buzzerQueue);
       emitBuzzerQueue();
     }
   }
