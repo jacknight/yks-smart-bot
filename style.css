@@ -17,14 +17,12 @@ a {
   transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
   padding: 20px;
   text-decoration: none;
-  border-radius: 10px;
-  font-size: 2rem;
+  font-size: 1.5rem;
 }
 
 a:hover {
-  color: var(--yksblack);
-  box-shadow: 5px 5px var(--ykswhite);
-  transform: translate3d(-5px, -5px, 0);
+  color: var(--yksgreen);
+  background: var(--ykswhite);
 }
 
 button {
@@ -110,7 +108,7 @@ button[name="mode"] {
   border-bottom: 0;
 }
 
-button[name="mode"]:disabled {
+button:disabled {
   opacity: 0.5;
 }
 

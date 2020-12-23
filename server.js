@@ -1,191 +1,67 @@
 // Server stuff (socket etc)
-require("dotenv").config();
-const DiscordAuth2 = require("discord-oauth2");
-const oauth = new DiscordAuth2();
-const express = require("express");
-const app = express();
 
-app.set("view engine", "ejs");
-app.use(express.static(__dirname));
-
-app.get("/", (req, res) => {
-  res.render("index");
-});
-
-const server = app.listen(process.env.PORT || 3000, () => {
-  console.log("Server running");
-});
-
-const io = require("socket.io")(server, {
-  cors: {
-    origin: "*",
-  },
-});
-
-io.on("connection", (socket) => {
-  checkAuthorization();
-  socket.on("changeMode", ({ mode }) => {
-    settings.mode = mode;
-    if (settings.channel) {
-      changeMode(settings.channel, [mode]);
-    }
-  });
-
-  socket.on("changeReady", ({ ready }) => {
-    if (settings.channel) {
-      changeReady(settings.channel, [ready]);
-    }
-  });
-  socket.on("initRequest", () => {
-    emitResponse();
-  });
-  socket.on("requestServers", () => {
-    emitServers();
-  });
-  socket.on("requestChannels", ({ id }) => {
-    emitChannels(id);
-  });
-  socket.on("changeChannel", ({ id }) => {
-    const args = [];
-    id = "<#" + id + ">";
-    args.push(id);
-    changeChannel(args);
-  });
-  socket.on("clearQueue", () => {
-    settings.buzzerQueue = [];
-    emitBuzzerQueue();
-  });
-  socket.on("randomizeQueue", () => {
-    shuffle(settings.buzzerQueue);
-    emitBuzzerQueue();
-  });
-});
-
-function checkAuthorization() {}
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
 // Bot stuff.
-const Discord = require("discord.js");
+// const Discord = require("discord.js");
 
-const modes = {
-  NORMAL: "normal",
-  CHAOS: "chaos",
-};
+// const modes = {
+//   NORMAL: "normal",
+//   CHAOS: "chaos",
+// };
 
-let settings = {
-  mode: modes.NORMAL,
-  channel: null,
-  buzz: "heep",
-  buzzerEnabled: true,
-  me: "",
-  buzzerQueue: [],
-};
+// let settings = {
+//   mode: modes.NORMAL,
+//   channel: null,
+//   buzz: "heep",
+//   buzzerEnabled: true,
+//   me: "",
+//   buzzerQueue: [],
+// };
 
-// Initialize Discord Bot
-const bot = new Discord.Client();
+// // Initialize Discord Bot
+// const bot = new Discord.Client();
 
-bot.on("ready", function (event) {
-  console.log("Logged in as: " + bot.user.tag + " (" + bot.user.id + ")");
-});
+// bot.on("ready", function (event) {
+//   console.log("Logged in as: " + bot.user.tag + " (" + bot.user.id + ")");
+// });
 
-bot.on("message", (message) => {
-  if (message.content.startsWith("!")) {
-    const args = message.content.slice(1).split(/ +/);
-    const cmd = args.shift().toLowerCase();
+// bot.on("message", (message) => {
+//   if (message.content.startsWith("!")) {
+//     const args = message.content.slice(1).split(/ +/);
+//     const cmd = args.shift().toLowerCase();
 
-    if (!checkChannel(message.channel)) {
-      if (cmd === "buzz.channel") {
-        changeChannel(args);
-      }
-      return;
-    }
+//     if (!checkChannel(message.channel)) {
+//       if (cmd === "buzz.channel") {
+//         changeChannel(args);
+//       }
+//       return;
+//     }
 
-    switch (cmd) {
-      case "buzz.channel":
-        changeChannel(args);
-        break;
-      case "buzz.nick":
-        changeNickname(message, args);
-        break;
-      case "buzz.buzz":
-        changeBuzz(message.channel, args);
-        break;
-      case "buzz.mode":
-        changeMode(message.channel, args);
-        break;
-      case "buzz.ready":
-        changeReady(message.channel);
-        break;
-      case settings.buzz:
-        registerBuzz(message);
-        break;
-      case "buzz.help":
-      default:
-        displayHelp();
-        break;
-    }
-  }
-});
-
-function emitBuzzerQueue() {
-  io.sockets.emit("buzz", settings.buzzerQueue);
-}
-function emitMode() {
-  io.sockets.emit("changeMode", { mode: settings.mode });
-}
-
-function emitReady() {
-  io.sockets.emit("changeReady", { ready: settings.buzzerEnabled });
-}
-
-function emitResponse() {
-  io.sockets.emit("initResponse", {
-    mode: settings.mode,
-    ready: settings.buzzerEnabled,
-    channel: settings.channel,
-    buzz: settings.buzz,
-  });
-  emitBuzzerQueue();
-}
-
-function emitServers() {
-  const servers = bot.guilds.cache;
-  let ids = [];
-  servers.forEach((guild, id) => {
-    ids.push({ guild: guild.name, id: id });
-  });
-  io.sockets.emit("serversList", ids);
-}
-
-function emitChannels(id) {
-  const channels = bot.guilds.resolve(id).channels.cache;
-  const ids = [];
-  channels.forEach((item, id) => {
-    if (item.type === "voice") return;
-    if (item.type === "category") return;
-    if (item.type === "text") {
-      ids.push({ topic: item.name, id: item.id });
-    }
-    // if (item.type === "category") {
-    //   item.guild.channels.cache.forEach((channel, id) => {
-    //     ids.push({ topic: channel.topic, id: channel.id });
-    //   });
-    // }
-  });
-  io.sockets.emit("channelsList", ids);
-}
+//     switch (cmd) {
+//       case "buzz.channel":
+//         changeChannel(args);
+//         break;
+//       case "buzz.nick":
+//         changeNickname(message, args);
+//         break;
+//       case "buzz.buzz":
+//         changeBuzz(message.channel, args);
+//         break;
+//       case "buzz.mode":
+//         changeMode(message.channel, args);
+//         break;
+//       case "buzz.ready":
+//         changeReady(message.channel);
+//         break;
+//       case settings.buzz:
+//         registerBuzz(message);
+//         break;
+//       case "buzz.help":
+//       default:
+//         displayHelp();
+//         break;
+//     }
+//   }
+// });
 
 function changeReady(channel) {
   settings.buzzerEnabled = !settings.buzzerEnabled;
@@ -352,4 +228,11 @@ function shuffle(array) {
   return array;
 }
 
-bot.login(process.env.AUTH_TOKEN);
+// bot.login(process.env.AUTH_TOKEN);
+
+module.exports = emitBuzzerQueue;
+module.exports = emitReady;
+module.exports = emitChannels;
+module.exports = emitMode;
+module.exports = emitResponse;
+module.exports = emitServers;

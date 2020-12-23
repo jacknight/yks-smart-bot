@@ -6,6 +6,7 @@
   "author": "Jack Knight",
   "dependencies": {
     "cors": "^2.8.5",
+    "discord-akairo": "^8.1.0",
     "discord-oauth2": "^2.6.0",
     "discord.js": "^12.5.1",
     "dotenv": "^8.2.0",
@@ -13,11 +14,12 @@
     "express": "^4.17.1",
     "fg-select-css": "^3.2.0",
     "http": "^0.0.1-security",
+    "mongoose": "^5.11.8",
     "socket.io": "^3.0.4"
   },
   "scripts": {
-    "start": "node ./server.js",
-    "dev": "nodemon ./server.js"
+    "start": "node ./bot.js",
+    "dev": "nodemon ./bot.js"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"
