@@ -62,10 +62,13 @@ class BuzzerClient extends AkairoClient {
 }
 
 mongoose
-  .connect("mongodb://127.0.0.1:27017", {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-  })
+  .connect(
+    `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PW}@cluster0.fnwjf.mongodb.net/${process.env.MONGO_DB}?retryWrites=true&w=majority`,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }
+  )
   .then(() => {
     const util = require("util");
     const client = new BuzzerClient();
