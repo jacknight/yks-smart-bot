@@ -1,4 +1,4 @@
-const socket = io.connect("http://localhost:3000");
+const socket = io.connect("https://discord-buzzer.herokuapp.com");
 (function connect() {
   socket.on("buzz", (buzzerQueue) => {
     buzzList.innerHTML = "";
@@ -16,7 +16,6 @@ const socket = io.connect("http://localhost:3000");
   });
 
   socket.on("responseReady", ({ ready }) => {
-    console.log(ready);
     readyP.textContent = ready ? "ready" : "not ready";
     modeButton.disabled = ready;
     readyButton.disabled = false;

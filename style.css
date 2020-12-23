@@ -52,13 +52,23 @@ button:active {
   justify-content: center;
   align-items: center;
   height: 90vh;
+  gap: 5px;
 }
 
+.login-link {
+  align-self: end;
+}
+
+.bot-link {
+  align-self: start;
+}
 .control-panel {
   display: grid;
   width: 300px;
   background: var(--yksgreen);
   border: rgba(255, 255, 255, 1) solid 5px;
+  margin-top: 40px;
+  align-self: end;
 }
 
 .control-panel img {
