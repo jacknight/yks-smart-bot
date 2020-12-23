@@ -14,8 +14,8 @@
     <div class="layout">
       <a
         class="login-link"
-        style="display: none"
-        href="https://discord.com/api/oauth2/authorize?client_id=789204496097214514&permissions=67136576&redirect_uri=https%3A%2F%2Fdiscord-buzzer.herokuapp.com&response_type=token&scope=identify%20bot%20guilds"
+        style="display: none; text-align: center"
+        href="https://discord.com/api/oauth2/authorize?client_id=789204496097214514&redirect_uri=https%3A%2F%2Fdiscord-buzzer.herokuapp.com&response_type=token&scope=identify"
         >Login</a
       >
       <div class="control-panel" style="display: none">
@@ -25,50 +25,46 @@
             <h1>Dookie List</h1>
             <ol></ol>
           </div>
-          <button name="random">Random</button>
-          <button name="clear">Clear</button>
+          <button name="random" disabled>Random</button>
+          <button name="clear" disabled>Clear</button>
         </div>
         <div class="buzz-controls">
-          <button name="mode">Mode</button>
+          <button name="mode" disabled>Mode</button>
           <p id="mode">-</p>
-          <button name="ready">&#10004;</button>
+          <button name="ready" disabled>&#10004;</button>
           <p id="ready">-</p>
         </div>
         <div class="buzz-servers" hidden>
-          <select name="servers" id="servers" class="select-css"></select>
-          <button name="serverSelect" id="serverSelect">Channels</button>
+          <select name="servers" id="servers" class="select-css">
+            <option value="">Choose a server</option>
+          </select>
         </div>
         <div class="buzz-channels" hidden>
           <select name="channels" id="channels" class="select-css"></select>
-          <button name="channelSelect" id="channelSelect">Listen</button>
+          <button name="channelSelect" id="channelSelect" disabled>
+            Listen
+          </button>
         </div>
       </div>
+      <a
+        class="bot-link"
+        style="display: grid; text-align: center"
+        target="_blank"
+        href="https://discord.com/api/oauth2/authorize?client_id=789204496097214514&permissions=67128384&redirect_uri=https%3A%2F%2Fdiscord-buzzer.herokuapp.com&scope=bot"
+        >Add 🤖 to Server</a
+      >
     </div>
     <script src="node_modules/socket.io/client-dist/socket.io.js"></script>
     <script src="client.js"></script>
     <script>
-      if (!localStorage.getItem("stateParameter")) {
-        const randStr = generateRandomString();
-        localStorage.setItem("stateParameter", randStr);
-        document.querySelector(".login-link").href += `&state=${btoa(randStr)}`;
-      } else {
-        document.querySelector(".login-link").href += `&state=${btoa(
-          localStorage.getItem("stateParameter")
-        )}`;
-      }
-
       window.onload = () => {
         const fragment = new URLSearchParams(window.location.hash.slice(1));
 
         if (fragment.has("access_token")) {
-          const urlState = fragment.get("state");
-          const stateParameter = localStorage.getItem("stateParameter");
-          if (stateParameter !== atob(decodeURIComponent(urlState))) {
-            return console.log("Something amiss!");
-          }
-
           const accessToken = fragment.get("access_token");
           const tokenType = fragment.get("token_type");
+          localStorage.setItem("tokenType", tokenType);
+          localStorage.setItem("accessToken", accessToken);
 
           fetch("https://discord.com/api/users/@me", {
             headers: {
@@ -77,24 +73,39 @@
           })
             .then((res) => res.json())
             .then((response) => {
-              const { username, discriminator } = response;
-              document.querySelector(".control-panel").style.display = "grid";
+              const { username, discriminator, id } = response;
+              localStorage.setItem("user_id", id);
+              localStorage.setItem("user_name", username);
+              localStorage.setItem("discriminator", discriminator);
             })
-            .catch(console.error);
+            .catch(console.error)
+            .then(
+              fetch("https://discord.com/api/users/@me/guilds", {
+                headers: {
+                  authorization: `${tokenType} ${accessToken}`,
+                },
+              })
+                .then((res) => res.json())
+                .then((response) => {
+                  requestServers();
+                  populateServersSelect(response);
+                  document.querySelector(".control-panel").style.display =
+                    "grid";
+                })
+                .catch(console.error)
+            );
         } else {
           document.querySelector(".login-link").style.display = " block";
         }
       };
 
-      function generateRandomString() {
-        const rand = Math.floor(Math.random() * 10);
-        let randStr = "";
-
-        for (let i = 0; i < 20 + rand; i++) {
-          randStr += String.fromCharCode(33 + Math.floor(Math.random() * 94));
-        }
-
-        return randStr;
+      function populateServersSelect(response) {
+        response.forEach(({ name, id }) => {
+          const option = document.createElement("option");
+          option.value = id;
+          option.textContent = name;
+          serversSelect.appendChild(option);
+        });
       }
     </script>
   </body>
