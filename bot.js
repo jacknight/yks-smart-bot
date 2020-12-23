@@ -70,7 +70,6 @@ mongoose
     }
   )
   .then(() => {
-    const util = require("util");
     const client = new BuzzerClient();
     client.login(process.env.AUTH_TOKEN);
     const io = require("socket.io")(client.server, {
@@ -189,7 +188,9 @@ mongoose
       });
 
       socket.on("randomizeQueue", ({ guild }) => {
-        util.shuffle(client.settings.get(guild.id, "buzzerQueue", []));
+        require("util").shuffle(
+          client.settings.get(guild.id, "buzzerQueue", [])
+        );
         socket.emit("buzz", client.settings.get(guild.id, "buzzerQueue", []));
       });
 
