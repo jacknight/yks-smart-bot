@@ -188,7 +188,7 @@ mongoose
       });
 
       socket.on("randomizeQueue", ({ guild }) => {
-        require("util").shuffle(
+        require("./util").shuffle(
           client.settings.get(guild.id, "buzzerQueue", [])
         );
         socket.emit("buzz", client.settings.get(guild.id, "buzzerQueue", []));
