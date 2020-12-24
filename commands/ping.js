@@ -18,7 +18,7 @@ class PingCommand extends Command {
     return null;
   }
 
-  exec(message, args) {
+  exec(message) {
     return message.reply("Pong!");
   }
 }
