@@ -5,6 +5,8 @@ class SporangeCommand extends Command {
     super("sporange", {
       regex: /sporange/i,
       category: "easter-egg",
+      cooldown: 120000,
+      ratelimit: 1,
     });
   }
 
