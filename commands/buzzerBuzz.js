@@ -1,19 +1,27 @@
 const { Command } = require("discord-akairo");
 
-class BuzzCommand extends Command {
+class BuzzerBuzzCommand extends Command {
   constructor() {
     super("buzz", {
       aliases: ["heep"],
       category: "buzzer",
       channel: "guild",
+      cooldown: 5000,
+      ratelimit: 5,
+      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
 
   exec(message) {
     if (
       message.channel.id !==
-        JSON.parse(this.client.settings.get(message.guild.id, "buzzerChannel"))
-          .id ||
+        JSON.parse(
+          this.client.settings.get(
+            message.guild.id,
+            "buzzerChannel",
+            JSON.stringify(message.channel)
+          )
+        ).id ||
       !this.client.settings.get(message.guild.id, "buzzerReady", false)
     )
       return;
@@ -42,4 +50,4 @@ class BuzzCommand extends Command {
   }
 }
 
-module.exports = BuzzCommand;
+module.exports = BuzzerBuzzCommand;

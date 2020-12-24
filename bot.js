@@ -179,7 +179,7 @@ mongoose
           "buzzerChannel",
           JSON.stringify(channelObj)
         );
-        channelObj.send("Now listening on: " + channelObj.toString());
+        channelObj.send("Buzzer now listening on " + channelObj.toString());
       });
 
       socket.on("clearQueue", ({ guild }) => {

@@ -1,4 +1,5 @@
-const socket = io.connect("https://discord-buzzer.herokuapp.com");
+// const socket = io.connect("https://discord-buzzer.herokuapp.com");
+const socket = io.connect("http://localhost:3000");
 (function connect() {
   socket.on("links", ({ bot, login }) => {
     document.querySelector(".login-link").href = login;
@@ -130,6 +131,7 @@ function toggleReady() {
   if (serversSelect.value === "") return;
   readyP.textContent = readyP.textContent === "ready" ? "not ready" : "ready";
   modeButton.disabled = readyP.textContent === "ready";
+  if (modeButton.disabled) clearQueue();
   socket.emit("changeReady", {
     ready: readyP.textContent === "ready" ? true : false,
     guild: {

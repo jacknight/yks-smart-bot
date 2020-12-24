@@ -1,12 +1,15 @@
 const { Command } = require("discord-akairo");
 
-class ToggleBuzzerCommand extends Command {
+class BuzzerToggleCommand extends Command {
   constructor() {
     super("ready", {
       aliases: ["ready", "toggle"],
       category: "buzzer",
       channel: "guild",
       prefix: "!buzz.",
+      cooldown: 10000,
+      ratelimit: 5,
+      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
   userPermissions(message) {
@@ -43,4 +46,4 @@ class ToggleBuzzerCommand extends Command {
   }
 }
 
-module.exports = ToggleBuzzerCommand;
+module.exports = BuzzerToggleCommand;

@@ -7,6 +7,7 @@ class PingCommand extends Command {
       channel: "guild",
       cooldown: 1000,
       ratelimit: 1,
+      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
 
