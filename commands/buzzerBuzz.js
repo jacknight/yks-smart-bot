@@ -36,10 +36,13 @@ class BuzzerBuzzCommand extends Command {
       !buzzerQueue.find((author) => JSON.parse(author).id === message.author.id)
     ) {
       buzzerQueue.push(JSON.stringify(message.author));
+      if (
+        this.client.settings.get(message.guild.id, "buzzerMode", "normal") ===
+        "chaos"
+      ) {
+        require("../util").shuffle(buzzerQueue);
+      }
       this.client.settings.set(message.guild.id, "buzzerQueue", buzzerQueue);
-      require("../util").shuffle(
-        this.client.settings.get(message.guild.id, "buzzerQueue", [])
-      );
       if (this.client.sockets.has(message.guild.id)) {
         this.client.sockets.get(message.guild.id).forEach((socket) => {
           socket.emit("buzz", buzzerQueue);

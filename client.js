@@ -30,15 +30,6 @@ const socket = io.connect("http://localhost:3000");
     modeP.textContent = mode;
   });
 
-  socket.on("changeMode", ({ mode }) => {
-    modeP.textContent = mode;
-  });
-
-  socket.on("changeReady", ({ ready }) => {
-    readyP.textContent = ready ? "ready" : "not ready";
-    modeButton.disabled = ready;
-  });
-
   socket.on("serversList", (serversList) => {
     serversList.forEach((server) => {
       socket.emit("requestChannels", { id: server.id });
