@@ -9,16 +9,15 @@ class BuzzCommand extends Command {
     });
   }
 
-  condition(message) {
-    return (
-      message.channel.id ===
-        JSON.parse(this.client.settings.get(message.guild.id, "buzzerChannel"))
-          .id &&
-      this.client.settings.get(message.guild.id, "buzzerReady", false)
-    );
-  }
-
   exec(message) {
+    if (
+      message.channel.id !==
+        JSON.parse(this.client.settings.get(message.guild.id, "buzzerChannel"))
+          .id ||
+      !this.client.settings.get(message.guild.id, "buzzerReady", false)
+    )
+      return;
+
     const buzzerQueue = this.client.settings.get(
       message.guild.id,
       "buzzerQueue",
