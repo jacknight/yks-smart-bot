@@ -10,6 +10,7 @@ const model = require("./db/model");
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
+const { emit } = require("./db/model");
 
 class BuzzerClient extends AkairoClient {
   constructor() {
@@ -80,6 +81,11 @@ mongoose
 
     client.sockets = new Map();
     io.on("connection", (socket) => {
+      socket.emit("links", {
+        bot: process.env.DISCORD_BOT_LINK,
+        login: process.env.DISCORD_LOGIN_LINK,
+      });
+
       socket.on("identifySocket", ({ guild }) => {
         if (!client.sockets.has(guild.id)) {
           client.sockets.set(guild.id, [socket]);

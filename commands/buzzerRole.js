@@ -13,7 +13,7 @@ class BuzzerRoleCommand extends Command {
 
   userPermissions(message) {
     if (!message.member.hasPermission("KICK_MEMBERS")) {
-      return "Only for Jack";
+      return "You don't have permission.";
     }
     return null;
   }
