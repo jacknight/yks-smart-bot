@@ -1,5 +1,10 @@
-const socket = io.connect("https://discord-buzzer.herokuapp.com");
+// const socket = io.connect("https://discord-buzzer.herokuapp.com");
+const socket = io.connect("http://localhost:3000");
 (function connect() {
+  socket.on("links", ({ bot, login }) => {
+    document.querySelector(".login-link").href = login;
+    document.querySelector(".bot-link").href = bot;
+  });
   socket.on("buzz", (buzzerQueue) => {
     buzzList.innerHTML = "";
     if (buzzerQueue.length === 0) return;
@@ -50,6 +55,8 @@ const socket = io.connect("https://discord-buzzer.herokuapp.com");
     });
   });
 })();
+
+// Set up bot and login links from env
 
 // Each bot server maps to an array of channels.
 let serverChannelsMap = new Map();
