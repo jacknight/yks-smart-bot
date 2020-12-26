@@ -79,6 +79,21 @@ mongoose
       },
     });
 
+    client.on("ready", () => {
+      console.log("Ready");
+    });
+
+    client.on("guildMemberAdd", (member) => {
+      if (!channel) return;
+      try {
+        member.guild.systemChannel.send(
+          `Welcome, ${member}! You don't have to be insane to post here, but it helps.`
+        );
+      } catch (err) {
+        console.log(err);
+      }
+    });
+
     client.sockets = new Map();
     io.on("connection", (socket) => {
       socket.emit("links", {
