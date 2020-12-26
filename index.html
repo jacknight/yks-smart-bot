@@ -12,9 +12,7 @@
   </head>
   <body>
     <div class="layout">
-      <a class="login-link" style="display: none; text-align: center" href=""
-        >Login</a
-      >
+      <a class="login-link" style="display: none" href="">Login</a>
       <div class="control-panel" style="display: none">
         <img src="assets/yks-logo.webp" />
         <div class="buzz-queue">
@@ -50,6 +48,7 @@
         href=""
         >Add 🤖 to Server</a
       >
+      <a class="logout-link" style="display: none" href="">Logout</a>
     </div>
     <script src="node_modules/socket.io/client-dist/socket.io.js"></script>
     <script src="client.js"></script>
@@ -58,6 +57,7 @@
         const fragment = new URLSearchParams(window.location.hash.slice(1));
 
         if (fragment.has("access_token")) {
+          document.querySelector(".logout-link").style.display = "block";
           const accessToken = fragment.get("access_token");
           const tokenType = fragment.get("token_type");
           localStorage.setItem("tokenType", tokenType);

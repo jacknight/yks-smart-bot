@@ -18,27 +18,34 @@ class BuzzerNickCommand extends Command {
     const buzzerRole = this.client.settings
       .get(message.guild.id, "buzzerRole", "buzzer")
       .toLowerCase();
+    const buzzerRoleObj = this.client.util.resolveRole(
+      buzzerRole,
+      message.guild.roles.cache
+    );
     if (
       !message.member.roles.cache.some((role) => {
         return role.name.toLowerCase() === buzzerRole;
       })
     ) {
-      return "You don't have permission.";
+      return message.channel.send(
+        `Only users with the role ${
+          buzzerRoleObj ? buzzerRoleObj : buzzerRole
+        } can change my nickname.`
+      );
     }
     return null;
   }
 
   async exec(message, { nick }) {
-    console.log(nick);
-    if (
-      await message.guild.members.cache
-        .get(this.client.user.id)
-        .setNickname(nick)
-    ) {
-      return message.channel.send(
-        `Hey, ${message.author}: thanks for the new name!`
-      );
-    } else {
+    try {
+      if (
+        await message.guild.members.cache
+          .get(this.client.user.id)
+          .setNickname(nick)
+      ) {
+        return message.channel.send(`Hey, check out my new name!`);
+      }
+    } catch {
       return message.channel.send(`No.`);
     }
   }

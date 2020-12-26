@@ -47,7 +47,11 @@ class BuzzerChannelCommand extends Command {
     }
 
     if (channel.type !== "text") {
-      return message.reply(`${channel} is not a text channel. No change.`);
+      try {
+        return message.reply(`${channel} is not a text channel. No change.`);
+      } catch (err) {
+        console.log(err);
+      }
     }
 
     this.client.settings.set(
@@ -55,7 +59,11 @@ class BuzzerChannelCommand extends Command {
       "buzzerChannel",
       JSON.stringify(channel)
     );
-    return channel.send(`Buzzer now listening on ${channel}.`);
+    try {
+      return channel.send(`Buzzer now listening on ${channel}.`);
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
 

@@ -47,7 +47,11 @@ class BuzzerClearCommand extends Command {
         socket.emit("buzz", []);
       });
     }
-    return message.channel.send("Dookie list cleared out.");
+    try {
+      return message.channel.send("Buzzer list cleared out.");
+    } catch (err) {
+      console.log(err);
+    }
   }
 }
 

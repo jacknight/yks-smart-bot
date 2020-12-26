@@ -27,16 +27,24 @@ class BuzzerToggleCommand extends Command {
     return null;
   }
 
-  async exec(message) {
+  exec(message) {
     const oldReady = this.client.settings.get(
       message.guild.id,
       "buzzerReady",
       false
     );
     const newReady = !oldReady;
-    await this.client.settings.set(message.guild.id, "buzzerReady", newReady);
+    this.client.settings.set(message.guild.id, "buzzerReady", newReady);
+    if (newReady) {
+      // clear the queue when the buzzer is re-enabled
+      this.client.settings.set(message.guild.id, "buzzerQueue", []);
+    }
     if (this.client.sockets.has(message.guild.id)) {
       this.client.sockets.get(message.guild.id).forEach((socket) => {
+        socket.emit(
+          "buzz",
+          this.client.settings.get(message.guild.id, "buzzerQueue", [])
+        );
         socket.emit("responseReady", { ready: newReady });
       });
     }

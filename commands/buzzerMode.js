@@ -28,6 +28,11 @@ class BuzzerModeCommand extends Command {
   }
 
   exec(message) {
+    if (this.client.settings.get(message.guild.id, "buzzerReady", false)) {
+      return message.channel.send(
+        "You can't change the mode while the buzzer is enabled."
+      );
+    }
     // There must be a better way to do this...
     if (
       JSON.parse(
@@ -55,12 +60,16 @@ class BuzzerModeCommand extends Command {
       });
     }
 
-    if (newMode === "chaos") {
-      return message.channel.send(
-        `Buddy...you are now in **${newMode} mode!!!**`
-      );
-    } else {
-      return message.channel.send(`You are now in **${newMode} mode**`);
+    try {
+      if (newMode === "chaos") {
+        return message.channel.send(
+          `Buddy...you are now in **${newMode} mode!!!**`
+        );
+      } else {
+        return message.channel.send(`You are now in **${newMode} mode**`);
+      }
+    } catch (err) {
+      console.log(err);
     }
   }
 }

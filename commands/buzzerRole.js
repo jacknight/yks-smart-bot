@@ -15,7 +15,14 @@ class BuzzerRoleCommand extends Command {
   }
 
   userPermissions(message) {
-    if (!message.member.hasPermission("KICK_MEMBERS")) {
+    if (
+      !message.member.hasPermission("KICK_MEMBERS") &&
+      !message.member.roles.cache.some(
+        (role) =>
+          role.name ===
+          this.client.settings.set(message.guild.id, "buzzerRole", "Buzzer")
+      )
+    ) {
       return "You don't have permission.";
     }
     return null;

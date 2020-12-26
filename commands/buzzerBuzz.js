@@ -48,7 +48,11 @@ class BuzzerBuzzCommand extends Command {
           socket.emit("buzz", buzzerQueue);
         });
       }
-      return message.channel.send(`${message.author} buzzed in!`);
+      try {
+        return message.channel.send(`${message.author} buzzed in!`);
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 }

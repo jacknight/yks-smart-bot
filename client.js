@@ -1,8 +1,11 @@
-const socket = io.connect("https://discord-buzzer.herokuapp.com");
+// const socket = io.connect("https://discord-buzzer.herokuapp.com");
+const socket = io.connect("http://localhost:3000");
+
 (function connect() {
-  socket.on("links", ({ bot, login }) => {
+  socket.on("links", ({ bot, login, logout }) => {
     document.querySelector(".login-link").href = login;
     document.querySelector(".bot-link").href = bot;
+    document.querySelector(".logout-link").href = logout;
   });
   socket.on("buzz", (buzzerQueue) => {
     buzzList.innerHTML = "";
@@ -46,8 +49,6 @@ const socket = io.connect("https://discord-buzzer.herokuapp.com");
   });
 })();
 
-// Set up bot and login links from env
-
 // Each bot server maps to an array of channels.
 let serverChannelsMap = new Map();
 
@@ -82,6 +83,7 @@ function serverChange() {
   channelsSelect.innerHTML = "";
   if (serverChannelsMap.has(serversSelect.value)) {
     unidentifySocket();
+    localStorage.setItem("server", serversSelect.value);
     identifySocket();
     requestMode();
     requestReady();
@@ -151,11 +153,15 @@ function randomizeQueue() {
 }
 
 function unidentifySocket() {
-  socket.emit("unidentifySocket", { guild: { id: prevServer } });
+  socket.emit("unidentifySocket", {
+    guild: { id: localStorage.getItem("server") },
+  });
 }
 
 function identifySocket() {
-  socket.emit("identifySocket", { guild: { id: serversSelect.value } });
+  socket.emit("identifySocket", {
+    guild: { id: localStorage.getItem("server") },
+  });
 }
 
 function requestMode() {

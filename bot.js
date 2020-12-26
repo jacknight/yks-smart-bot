@@ -84,6 +84,7 @@ mongoose
       socket.emit("links", {
         bot: process.env.DISCORD_BOT_LINK,
         login: process.env.DISCORD_LOGIN_LINK,
+        logout: process.env.DISCORD_LOGOUT_LINK,
       });
 
       socket.on("identifySocket", ({ guild }) => {
@@ -103,7 +104,7 @@ mongoose
         }
       });
 
-      socket.on("changeMode", ({ guild, mode }) => {
+      socket.on("changeMode", ({ guild, mode, user }) => {
         client.settings.set(guild.id, "buzzerMode", mode);
         const guildObj = client.util.resolveGuild(
           guild.id,

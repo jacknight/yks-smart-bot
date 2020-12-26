@@ -42,17 +42,21 @@ class BuzzerRandomizeCommand extends Command {
     }
     if (buzzerQueue.length > 0) {
       var num = 1;
-      return message.channel.send(
-        `Randomized the dookie list: ${buzzerQueue.reduce((str, buzz) => {
-          return (
-            str +
-            `${num}. ${this.client.util.resolveUser(
-              JSON.parse(buzz).id,
-              message.guild.members.cache
-            )}\n`
-          );
-        }, "\n")}`
-      );
+      try {
+        return message.channel.send(
+          `Randomized the dookie list: ${buzzerQueue.reduce((str, buzz) => {
+            return (
+              str +
+              `${num}. ${this.client.util.resolveUser(
+                JSON.parse(buzz).id,
+                message.guild.members.cache
+              )}\n`
+            );
+          }, "\n")}`
+        );
+      } catch (err) {
+        console.log(err);
+      }
     }
   }
 }

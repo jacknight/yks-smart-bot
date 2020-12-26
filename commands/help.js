@@ -12,6 +12,15 @@ class HelpCommand extends Command {
   }
 
   exec(message) {
+    const buzzerRoleName = this.client.settings
+      .get(message.guild.id, "buzzerRole", "buzzer")
+      .toLowerCase();
+    let buzzerRole = this.client.util.resolveRole(
+      buzzerRoleName,
+      message.guild.roles.cache
+    );
+    if (!buzzerRole) buzzerRole = buzzerRoleName;
+
     const buzzerChannelID = JSON.parse(
       this.client.settings.get(
         message.guild.id,
@@ -24,6 +33,8 @@ class HelpCommand extends Command {
       buzzerChannelID,
       message.guild.channels.cache
     );
+
+    const buzzerNick = message.guild.me.nickname;
 
     const helpEmbed = {
       color: 0x83c133,
@@ -40,27 +51,37 @@ class HelpCommand extends Command {
       fields: [
         {
           name: "Buzz in",
-          value: "!heep",
+          value: "`!heep`",
           inline: false,
         },
         {
-          name: "Change buzzer channel",
-          value: `!buzz.channel ${buzzerChannel}`,
+          name: `Randomize the buzzer list`,
+          value: `\`!buzz.random\` (${buzzerRole} only)`,
           inline: false,
         },
         {
-          name: "Change bot nickname",
-          value: `!buzz.nick "${this.client.user.username}"`,
+          name: `Clear the buzzer list`,
+          value: `\`!buzz.clear\` (${buzzerRole} only)`,
           inline: false,
         },
         {
-          name: "Toggle buzzer mode",
-          value: "!buzz.mode",
+          name: `Toggle buzzer mode (chaos/normal)`,
+          value: `\`!buzz.mode\` (${buzzerRole} only)`,
           inline: false,
         },
         {
-          name: "Enable/disable buzzer",
-          value: "!buzz.ready",
+          name: `Enable/disable buzzer`,
+          value: `\`!buzz.ready\` (${buzzerRole} only)`,
+          inline: false,
+        },
+        {
+          name: `Change buzzer channel`,
+          value: `\`!buzz.channel #${buzzerChannel.name}\` (${buzzerRole} only)`,
+          inline: false,
+        },
+        {
+          name: `Change bot nickname`,
+          value: `\`!buzz.nick "${buzzerNick}"\` (${buzzerRole} only)`,
           inline: false,
         },
       ],

@@ -12,7 +12,11 @@ class PingCommand extends Command {
   }
 
   userPermissions(message) {
-    if (!message.member.roles.cache.some((role) => role.name === "Jack")) {
+    if (
+      !message.member.roles.cache.some(
+        (role) => role.name.toLowercase() === "jack"
+      )
+    ) {
       return "Only for Jack";
     }
     return null;

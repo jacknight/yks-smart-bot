@@ -57,6 +57,11 @@ button:active {
 
 .login-link {
   align-self: end;
+  text-align: center;
+}
+
+.logout-link {
+  text-align: center;
 }
 
 .bot-link {
@@ -98,11 +103,6 @@ button:active {
   padding: 0;
 }
 
-.buzz-queue {
-  border-bottom: rgba(255, 255, 255, 1) solid 5px;
-  margin-top: -100px;
-}
-
 button[name="random"] {
   grid-area: random;
   height: 50px;
@@ -127,6 +127,8 @@ button:disabled {
   grid-template-areas:
     "queue queue"
     "random clear";
+  border-bottom: rgba(255, 255, 255, 1) solid 5px;
+  margin-top: -100px;
 }
 
 .buzz-controls {
