@@ -33,7 +33,7 @@ class BuzzerToggleCommand extends Command {
       "buzzerReady",
       false
     );
-    const newReady = !oldReady;
+    const newReady = oldReady ? false : true;
     this.client.settings.set(message.guild.id, "buzzerReady", newReady);
     if (newReady) {
       // clear the queue when the buzzer is re-enabled

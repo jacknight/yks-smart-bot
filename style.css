@@ -51,21 +51,21 @@ button:active {
   display: grid;
   justify-content: center;
   align-items: center;
-  height: 90vh;
   gap: 5px;
 }
 
 .login-link {
-  align-self: end;
+  /* align-self: end; */
   text-align: center;
 }
 
 .logout-link {
   text-align: center;
+  /* align-self: start; */
 }
 
 .bot-link {
-  align-self: start;
+  /* align-self: start; */
 }
 .control-panel {
   display: grid;

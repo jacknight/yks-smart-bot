@@ -11,6 +11,8 @@ require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const { emit } = require("./db/model");
+const { default: fetch } = require("node-fetch");
+const SessionModel = require("./db/sessions");
 
 class BuzzerClient extends AkairoClient {
   constructor() {
@@ -82,7 +84,6 @@ mongoose
     client.on("ready", () => {});
 
     client.on("guildMemberAdd", (member) => {
-      console.log(member);
       try {
         member.guild.systemChannel.send(
           `Welcome, ${member}! You don't have to be insane to post here, but it helps.`
@@ -98,6 +99,84 @@ mongoose
         bot: process.env.DISCORD_BOT_LINK,
         login: process.env.DISCORD_LOGIN_LINK,
         logout: process.env.DISCORD_LOGOUT_LINK,
+      });
+
+      socket.on("authorize", ({ sessionId }) => {
+        // Lookup session, refresh token.
+        SessionModel.findOne({ id: sessionId })
+          .then((doc) => {
+            const tokenType = doc.session.tokenType;
+            const accessToken = doc.session.accessToken;
+
+            fetch("https://discord.com/api/users/@me/guilds", {
+              headers: {
+                authorization: `${tokenType} ${accessToken}`,
+              },
+            })
+              .then((res) => res.json())
+              .then((response) => {
+                socket.emit("servers", response);
+              });
+          })
+          .catch((err) => {});
+      });
+
+      socket.on("login", ({ code }) => {
+        // Exchange code for access token,
+        // and associate it with a session ID in the db.
+        const data = {
+          client_id: process.env.DISCORD_BOT_CLIENT_ID,
+          client_secret: process.env.DISCORD_BOT_CLIENT_SECRET,
+          grant_type: "authorization_code",
+          redirect_uri: process.env.DISCORD_BOT_REDIRECT_URI,
+          code: code,
+          scope: "identify guilds",
+        };
+        fetch("https://discord.com/api/oauth2/token", {
+          method: "POST",
+          body: new URLSearchParams(data),
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+        })
+          .then((res) => res.json())
+          .then((info) => {
+            const crypto = require("crypto");
+            const sessionId = crypto.randomBytes(16).toString("base64");
+            const expireDate = new Date(info.expires_in * 1000 + Date.now());
+
+            const session = new SessionModel({
+              id: sessionId,
+              session: {
+                accessToken: info.access_token,
+                tokenType: info.token_type,
+                expirationDate: expireDate,
+                refreshToken: info.refresh_token,
+                scope: info.scope,
+              },
+            });
+            session
+              .save()
+              .then((doc) => {})
+              .catch((err) => console.log(err));
+
+            // client.settings.set(sessionId, "accessToken", info.access_token);
+            // client.settings.set(sessionId, "tokenType", info.token_type);
+            // client.settings.set(sessionId, "expirationDate", expireDate);
+            // client.settings.set(sessionId, "refreshToken", info.refresh_token);
+            // client.settings.set(sessionId, "scope", info.scope);
+            socket.emit("sessionId", sessionId);
+            fetch("https://discord.com/api/users/@me/guilds", {
+              headers: {
+                authorization: `${info.token_type} ${info.access_token}`,
+              },
+            })
+              .then((res) => res.json())
+              .then((response) => {
+                socket.emit("servers", response);
+              });
+          })
+          .catch((err) => console.log(err));
       });
 
       socket.on("identifySocket", ({ guild }) => {
@@ -211,6 +290,44 @@ mongoose
         require("./util").shuffle(
           client.settings.get(guild.id, "buzzerQueue", [])
         );
+        const guildObj = client.util.resolveGuild(
+          guild.id,
+          client.guilds.cache
+        );
+        if (guildObj) {
+          const channel = JSON.parse(
+            client.settings.get(
+              guild.id,
+              "buzzerChannel",
+              JSON.stringify(guildObj.channels.cache.first())
+            )
+          );
+
+          const channelObj = client.util.resolveChannel(
+            channel.id,
+            guildObj.channels.cache
+          );
+
+          try {
+            var num = 0;
+            return channelObj.send(
+              `Randomized the dookie list: ${client.settings
+                .get(guild.id, "buzzerQueue", [])
+                .reduce((str, buzz) => {
+                  num++;
+                  return (
+                    str +
+                    `${num}. ${client.util.resolveUser(
+                      JSON.parse(buzz).id,
+                      guildObj.members.cache
+                    )}\n`
+                  );
+                }, "\n")}`
+            );
+          } catch (err) {
+            console.log(err);
+          }
+        }
         socket.emit("buzz", client.settings.get(guild.id, "buzzerQueue", []));
       });
 

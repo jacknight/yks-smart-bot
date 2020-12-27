@@ -34,7 +34,9 @@ class HelpCommand extends Command {
       message.guild.channels.cache
     );
 
-    const buzzerNick = message.guild.me.nickname;
+    const buzzerNick = message.guild.me.nickname
+      ? message.guild.me.nickname
+      : message.guild.me.username;
 
     const helpEmbed = {
       color: 0x83c133,

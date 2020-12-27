@@ -1,6 +1,18 @@
-const socket = io.connect("https://discord-buzzer.herokuapp.com");
+// const socket = io.connect("https://discord-buzzer.herokuapp.com");
+const socket = io.connect("http://localhost:3000");
 
 (function connect() {
+  socket.on("sessionId", (sessionId) => {
+    localStorage.setItem("sessionId", sessionId);
+  });
+
+  socket.on("servers", (response) => {
+    requestServers();
+    populateServersSelect(response);
+    document.querySelector(".control-panel").style.display = "grid";
+    document.querySelector(".logout-link").style.display = "block";
+  });
+
   socket.on("links", ({ bot, login, logout }) => {
     document.querySelector(".login-link").href = login;
     document.querySelector(".bot-link").href = bot;
@@ -63,6 +75,7 @@ const serversSelect = document.querySelector("select[name='servers']");
 const channelsSelect = document.querySelector("select[name='channels']");
 const listenButton = document.querySelector("button[name='channelSelect']");
 const buzzList = document.querySelector(".buzz-list ol");
+const logoutLink = document.querySelector(".logout-link");
 
 randomButton.addEventListener("click", randomizeQueue);
 clearButton.addEventListener("click", clearQueue);
@@ -72,6 +85,9 @@ listenButton.addEventListener("click", listenChannel);
 serversSelect.addEventListener("focus", serverSave);
 serversSelect.addEventListener("change", serverChange);
 serversSelect.addEventListener("focus", serverSave);
+logoutLink.addEventListener("click", () =>
+  localStorage.removeItem("sessionId")
+);
 
 let prevServer = "";
 function serverSave() {
@@ -173,4 +189,21 @@ function requestReady() {
 
 function requestQueue() {
   socket.emit("requestQueue", { guild: { id: serversSelect.value } });
+}
+
+function login(code) {
+  socket.emit("login", { code: code });
+}
+
+function authorize(sessionId) {
+  socket.emit("authorize", { sessionId: sessionId });
+}
+
+function populateServersSelect(response) {
+  response.forEach(({ name, id }) => {
+    const option = document.createElement("option");
+    option.value = id;
+    option.textContent = name;
+    serversSelect.appendChild(option);
+  });
 }

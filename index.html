@@ -54,56 +54,20 @@
     <script src="client.js"></script>
     <script>
       window.onload = () => {
-        const fragment = new URLSearchParams(window.location.hash.slice(1));
-
-        if (fragment.has("access_token")) {
-          document.querySelector(".logout-link").style.display = "block";
-          const accessToken = fragment.get("access_token");
-          const tokenType = fragment.get("token_type");
-          localStorage.setItem("tokenType", tokenType);
-          localStorage.setItem("accessToken", accessToken);
-
-          fetch("https://discord.com/api/users/@me", {
-            headers: {
-              authorization: `${tokenType} ${accessToken}`,
-            },
-          })
-            .then((res) => res.json())
-            .then((response) => {
-              const { username, discriminator, id } = response;
-              localStorage.setItem("user_id", id);
-              localStorage.setItem("user_name", username);
-              localStorage.setItem("discriminator", discriminator);
-            })
-            .catch(console.error)
-            .then(
-              fetch("https://discord.com/api/users/@me/guilds", {
-                headers: {
-                  authorization: `${tokenType} ${accessToken}`,
-                },
-              })
-                .then((res) => res.json())
-                .then((response) => {
-                  requestServers();
-                  populateServersSelect(response);
-                  document.querySelector(".control-panel").style.display =
-                    "grid";
-                })
-                .catch(console.error)
-            );
+        const sessionId = localStorage.getItem("sessionId");
+        if (sessionId) {
+          authorize(sessionId);
         } else {
-          document.querySelector(".login-link").style.display = " block";
+          const fragment = new URLSearchParams(window.location.search.slice(1));
+
+          if (fragment.has("code")) {
+            document.querySelector(".logout-link").style.display = "block";
+            login(fragment.get("code"));
+          } else {
+            document.querySelector(".login-link").style.display = " block";
+          }
         }
       };
-
-      function populateServersSelect(response) {
-        response.forEach(({ name, id }) => {
-          const option = document.createElement("option");
-          option.value = id;
-          option.textContent = name;
-          serversSelect.appendChild(option);
-        });
-      }
     </script>
   </body>
 </html>
