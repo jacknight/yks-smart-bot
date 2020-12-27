@@ -79,12 +79,10 @@ mongoose
       },
     });
 
-    client.on("ready", () => {
-      console.log("Ready");
-    });
+    client.on("ready", () => {});
 
     client.on("guildMemberAdd", (member) => {
-      if (!channel) return;
+      console.log(member);
       try {
         member.guild.systemChannel.send(
           `Welcome, ${member}! You don't have to be insane to post here, but it helps.`
