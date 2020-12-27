@@ -43,6 +43,19 @@ const socket = io.connect("https://discord-buzzer.herokuapp.com");
   });
 
   socket.on("serversList", (serversList) => {
+    const options = Array.from(document.querySelectorAll("#servers option"));
+    console.log(options);
+    options.forEach((option) => {
+      if (option.value == "") return;
+      if (
+        !serversList.some((server) => {
+          console.log(option, option.value, server.id);
+          return option.value === server.id;
+        })
+      ) {
+        option.remove();
+      }
+    });
     serversList.forEach((server) => {
       socket.emit("requestChannels", { id: server.id });
     });

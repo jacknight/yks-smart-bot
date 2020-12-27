@@ -160,11 +160,6 @@ mongoose
               .then((doc) => {})
               .catch((err) => console.log(err));
 
-            // client.settings.set(sessionId, "accessToken", info.access_token);
-            // client.settings.set(sessionId, "tokenType", info.token_type);
-            // client.settings.set(sessionId, "expirationDate", expireDate);
-            // client.settings.set(sessionId, "refreshToken", info.refresh_token);
-            // client.settings.set(sessionId, "scope", info.scope);
             socket.emit("sessionId", sessionId);
             fetch("https://discord.com/api/users/@me/guilds", {
               headers: {
