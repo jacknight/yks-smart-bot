@@ -216,10 +216,12 @@ mongoose
             guildObj.channels.cache
           );
 
-          if (mode === "chaos") {
-            channelObj.send(`Buddy...you are now in **${mode} mode!!!**`);
-          } else {
-            channelObj.send(`You are now in **${mode} mode**`);
+          if (channelObj) {
+            if (mode === "chaos") {
+              channelObj.send(`Buddy...you are now in **${mode} mode!!!**`);
+            } else {
+              channelObj.send(`You are now in **${mode} mode**`);
+            }
           }
         }
       });
