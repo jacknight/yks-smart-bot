@@ -124,7 +124,7 @@ mongoose
         SessionModel.findOne({ id: sessionId })
           .then((doc) => {
             const today = new Date();
-            if (!doc.session || doc.session.expirationDate <= today) {
+            if (!doc || !doc.session || doc.session.expirationDate <= today) {
               return socket.emit("sessionExpired");
             }
             const tokenType = doc.session.tokenType;
