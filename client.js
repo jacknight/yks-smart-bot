@@ -45,9 +45,8 @@ const socket = io.connect(
       );
     document.querySelector(".login-link").href = login + redirect_uri;
     document.querySelector(".bot-link").href = bot + redirect_uri;
-    document.querySelector(".logout-link").href = encodeURIComponent(
-      window.location.protocol + "//" + window.location.host
-    );
+    document.querySelector(".logout-link").href =
+      window.location.protocol + "//" + window.location.host;
   });
 
   socket.on("buzz", (buzzerQueue) => {
