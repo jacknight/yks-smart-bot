@@ -81,8 +81,11 @@ mongoose
       },
     });
 
+    // Need this here before we reference other "client.on" items.
+    // According to documentation, this is important.
     client.on("ready", () => {});
 
+    // New member greeting.
     client.on("guildMemberAdd", (member) => {
       try {
         member.guild.systemChannel.send(
@@ -93,18 +96,37 @@ mongoose
       }
     });
 
+    // We need a collection of sockets that we emit to
+    // when the guild they are viewing on the control panel
+    // updates in any way. The map is:
+    // key: guild ID
+    // value: [socket1, socket2, ..., socketN]
     client.sockets = new Map();
+
+    // When someone connects to the web control panel,
+    // we monitor the connection for emit events and
+    // potentially respond to them with our own emit.
     io.on("connection", (socket) => {
+      // Provide the web control panel with the right
+      // href values to authorize the bot, login, logout.
+      // This is mainly just to make dev/prod switching
+      // easier for me.
       socket.emit("links", {
         bot: process.env.DISCORD_BOT_LINK,
         login: process.env.DISCORD_LOGIN_LINK,
         logout: process.env.DISCORD_LOGOUT_LINK,
       });
 
+      // The user already had a session ID stored in their
+      // browser so they'll try to use it here.
       socket.on("authorize", ({ sessionId }) => {
-        // Lookup session, refresh token.
+        // Lookup session, see if it's still valid.
         SessionModel.findOne({ id: sessionId })
           .then((doc) => {
+            const today = new Date();
+            if (!doc.session || doc.session.expirationDate <= today) {
+              return socket.emit("sessionExpired");
+            }
             const tokenType = doc.session.tokenType;
             const accessToken = doc.session.accessToken;
 
@@ -123,6 +145,7 @@ mongoose
           });
       });
 
+      // User logged out, remove the session ID from the database.
       socket.on("logout", ({ sessionId }) => {
         // Remove sessionId from the database.
         SessionModel.deleteOne({ id: sessionId }).catch((err) => {
@@ -130,6 +153,18 @@ mongoose
         });
       });
 
+      // User logged in. We need to:
+      // 1. Try the code provided by discord on this login.
+      // 2. Generate a random session ID for the user to store in
+      //    their browser, and also for the server to use as a key
+      //    in the database to:
+      // 3. Store the resulting access token, expiration, user, etc.
+      // 4. Indicate login success to the web front end with the
+      //    session ID.
+      // 5. Emit the list of servers the user is a member of. This
+      //    is then cross-referenced with the list of servers the
+      //    bot is a member of and the list is whittled down to only
+      //    the relevant servers.
       socket.on("login", ({ code }) => {
         // Exchange code for access token,
         // and associate it with a session ID in the db.
@@ -150,24 +185,36 @@ mongoose
         })
           .then((res) => res.json())
           .then((info) => {
+            if (!info.access_token) {
+              return socket.emit("sessionExpired");
+            }
             const crypto = require("crypto");
             const sessionId = crypto.randomBytes(16).toString("base64");
             const expireDate = new Date(info.expires_in * 1000 + Date.now());
 
-            const session = new SessionModel({
-              id: sessionId,
-              session: {
-                accessToken: info.access_token,
-                tokenType: info.token_type,
-                expirationDate: expireDate,
-                refreshToken: info.refresh_token,
-                scope: info.scope,
+            fetch("https://discord.com/api/users/@me", {
+              headers: {
+                authorization: `${info.token_type} ${info.access_token}`,
               },
-            });
-            session
-              .save()
-              .then((doc) => {})
-              .catch((err) => console.log(err));
+            })
+              .then((res) => res.json())
+              .then((response) => {
+                const session = new SessionModel({
+                  id: sessionId,
+                  session: {
+                    accessToken: info.access_token,
+                    tokenType: info.token_type,
+                    expirationDate: expireDate,
+                    refreshToken: info.refresh_token,
+                    scope: info.scope,
+                    userId: response.message ? "" : response.id,
+                  },
+                });
+                session
+                  .save()
+                  .then((doc) => {})
+                  .catch((err) => console.log(err));
+              });
 
             socket.emit("sessionId", sessionId);
             fetch("https://discord.com/api/users/@me/guilds", {
@@ -183,6 +230,9 @@ mongoose
           .catch((err) => console.log(err));
       });
 
+      // There is a socket connection for this particular guild, so
+      // any changes made to this guild's settings need to be propagated
+      // to this socket.
       socket.on("identifySocket", ({ guild }) => {
         if (!client.sockets.has(guild.id)) {
           client.sockets.set(guild.id, [socket]);
@@ -191,6 +241,8 @@ mongoose
         }
       });
 
+      // User changed servers on the web front end, and no longer
+      // need updates for this guild.
       socket.on("unidentifySocket", ({ guild }) => {
         if (client.sockets.has(guild.id)) {
           const idx = client.sockets.get(guild.id).indexOf(socket);
@@ -200,75 +252,192 @@ mongoose
         }
       });
 
-      socket.on("changeMode", ({ guild, mode, user }) => {
-        client.settings.set(guild.id, "buzzerMode", mode);
-        const guildObj = client.util.resolveGuild(
-          guild.id,
-          client.guilds.cache
-        );
-        if (guildObj) {
-          let channel = JSON.parse(
-            client.settings.get(
+      // Toggle buzzer mode.
+      socket.on("changeMode", ({ guild, mode, sessionId }) => {
+        if (guild.id === "") return;
+        SessionModel.findOne({ id: sessionId }).then((doc) => {
+          if (doc.session) {
+            const guildObj = client.util.resolveGuild(
               guild.id,
-              "buzzerChannel",
-              JSON.stringify(
-                guildObj.channels.cache
-                  .filter((channel) => {
-                    return channel.type === "text";
-                  })
-                  .first()
-              )
-            )
-          );
+              client.guilds.cache
+            );
+            if (guildObj) {
+              // Check role permissions
+              if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+                return socket.emit("commandUnauthorized", {
+                  command: "changeMode",
+                });
+              }
+              client.settings.set(guild.id, "buzzerMode", mode);
 
-          let channelObj = client.util.resolveChannel(
-            channel.id,
-            guildObj.channels.cache
-          );
+              socket.emit("responseMode", {
+                mode: mode,
+              });
 
-          if (channelObj) {
-            if (mode === "chaos") {
-              channelObj.send(`Buddy...you are now in **${mode} mode!!!**`);
-            } else {
-              channelObj.send(`You are now in **${mode} mode**`);
+              let channelObj = getBuzzerChannel(guildObj);
+              if (channelObj) {
+                if (mode === "chaos") {
+                  channelObj.send(`Buddy...you are now in **${mode} mode!!!**`);
+                } else {
+                  channelObj.send(`You are now in **${mode} mode**`);
+                }
+              }
             }
           }
-        }
+        });
       });
 
-      socket.on("changeReady", ({ guild, ready }) => {
+      // Enable/disabled the buzzer.
+      socket.on("changeReady", ({ guild, ready, sessionId }) => {
         if (guild.id === "") return;
-
-        client.settings.set(guild.id, "buzzerReady", ready);
-        const guildObj = client.util.resolveGuild(
-          guild.id,
-          client.guilds.cache
-        );
-        if (guildObj) {
-          const channel = JSON.parse(
-            client.settings.get(
+        SessionModel.findOne({ id: sessionId }).then((doc) => {
+          if (doc.session) {
+            const guildObj = client.util.resolveGuild(
               guild.id,
-              "buzzerChannel",
-              JSON.stringify(
-                guildObj.channels.cache
-                  .filter((channel) => {
-                    return channel.type === "text";
-                  })
-                  .first()
-              )
-            )
-          );
+              client.guilds.cache
+            );
+            if (guildObj) {
+              // Check role permissions
+              if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+                return socket.emit("commandUnauthorized", {
+                  command: "changeReady",
+                });
+              }
 
-          const channelObj = client.util.resolveChannel(
-            channel.id,
-            guildObj.channels.cache
-          );
-          console.log(channelObj);
+              client.settings.set(guildObj.id, "buzzerReady", ready);
+              console.log("Not doing thisVVV ?");
+              socket.emit("responseReady", {
+                ready: ready,
+                clear: true,
+              });
+              console.log("Didn't do this? ^^^^");
+              const channelObj = getBuzzerChannel(guildObj);
 
-          if (channelObj) {
-            channelObj.send(`Buzzer is **${ready ? "ready" : "not ready"}**`);
+              if (channelObj) {
+                channelObj.send(
+                  `Buzzer is **${ready ? "ready" : "not ready"}**`
+                );
+              }
+            }
           }
-        }
+        });
+      });
+
+      socket.on("changeChannel", ({ guild, id, sessionId }) => {
+        if (guild.id === "") return;
+        SessionModel.findOne({ id: sessionId }).then((doc) => {
+          if (doc.session) {
+            const guildObj = client.util.resolveGuild(
+              guild.id,
+              client.guilds.cache
+            );
+
+            if (guildObj) {
+              // Check role permissions
+              if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+                return socket.emit("commandUnauthorized", {
+                  command: "changeChannel",
+                });
+              }
+
+              const channelObj = client.util.resolveChannel(
+                id,
+                guildObj.channels.cache
+              );
+              client.settings.set(
+                guildObj.id,
+                "buzzerChannel",
+                JSON.stringify(channelObj)
+              );
+              if (channelObj) {
+                channelObj.send(
+                  "Buzzer now listening on " + channelObj.toString()
+                );
+              }
+            }
+          }
+        });
+      });
+
+      socket.on("clearQueue", ({ guild, sessionId }) => {
+        if (guild.id === "") return;
+        SessionModel.findOne({ id: sessionId }).then((doc) => {
+          if (doc.session) {
+            const guildObj = client.util.resolveGuild(
+              guild.id,
+              client.guilds.cache
+            );
+
+            if (guildObj) {
+              // Check role permissions
+              if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+                return socket.emit("commandUnauthorized", {
+                  command: "clearQueue",
+                });
+              }
+              client.settings.set(guildObj.id, "buzzerQueue", []);
+              const channelObj = getBuzzerChannel(guildObj);
+              if (channelObj) {
+                channelObj.send("Cleared the dookie list.");
+              }
+              socket.emit(
+                "buzz",
+                client.settings.get(guild.id, "buzzerQueue", [])
+              );
+            }
+          }
+        });
+      });
+
+      socket.on("randomizeQueue", ({ guild, sessionId }) => {
+        if (guild.id === "") return;
+        SessionModel.findOne({ id: sessionId }).then((doc) => {
+          if (doc.session) {
+            const guildObj = client.util.resolveGuild(
+              guild.id,
+              client.guilds.cache
+            );
+
+            if (guildObj) {
+              // Check role permissions
+              if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+                return socket.emit("commandUnauthorized", {
+                  command: "randomizeQueue",
+                });
+              }
+              require("./util").shuffle(
+                client.settings.get(guild.id, "buzzerQueue", [])
+              );
+              const channelObj = getBuzzerChannel(guildObj);
+
+              try {
+                var num = 0;
+                if (channelObj) {
+                  return channelObj.send(
+                    `Randomized the dookie list: ${client.settings
+                      .get(guild.id, "buzzerQueue", [])
+                      .reduce((str, buzz) => {
+                        num++;
+                        return (
+                          str +
+                          `${num}. ${client.util.resolveUser(
+                            JSON.parse(buzz).id,
+                            guildObj.members.cache
+                          )}\n`
+                        );
+                      }, "\n")}`
+                  );
+                }
+              } catch (err) {
+                console.log(err);
+              }
+              socket.emit(
+                "buzz",
+                client.settings.get(guild.id, "buzzerQueue", [])
+              );
+            }
+          }
+        });
       });
 
       socket.on("requestServers", () => {
@@ -279,93 +448,11 @@ mongoose
         emitChannels(id);
       });
 
-      socket.on("changeChannel", ({ guild, id }) => {
-        const guildObj = client.util.resolveGuild(
-          guild.id,
-          client.guilds.cache
-        );
-        const channelObj = client.util.resolveChannel(
-          id,
-          guildObj.channels.cache
-        );
-        client.settings.set(
-          guildObj.id,
-          "buzzerChannel",
-          JSON.stringify(channelObj)
-        );
-        if (channelObj) {
-          channelObj.send("Buzzer now listening on " + channelObj.toString());
-        }
-      });
-
-      socket.on("clearQueue", ({ guild }) => {
-        const guildObj = client.util.resolveGuild(
-          guild.id,
-          client.guilds.cache
-        );
-        if (guildObj) {
-          client.settings.set(guildObj.id, "buzzerQueue", []);
-          socket.emit("buzz", client.settings.get(guild.id, "buzzerQueue", []));
-        }
-      });
-
-      socket.on("randomizeQueue", ({ guild }) => {
-        require("./util").shuffle(
-          client.settings.get(guild.id, "buzzerQueue", [])
-        );
-        const guildObj = client.util.resolveGuild(
-          guild.id,
-          client.guilds.cache
-        );
-        if (guildObj) {
-          const channel = JSON.parse(
-            client.settings.get(
-              guild.id,
-              "buzzerChannel",
-              JSON.stringify(
-                guildObj.channels.cache
-                  .filter((channel) => {
-                    return channel.type === "text";
-                  })
-                  .first()
-              )
-            )
-          );
-
-          const channelObj = client.util.resolveChannel(
-            channel.id,
-            guildObj.channels.cache
-          );
-
-          try {
-            var num = 0;
-            if (channelObj) {
-              return channelObj.send(
-                `Randomized the dookie list: ${client.settings
-                  .get(guild.id, "buzzerQueue", [])
-                  .reduce((str, buzz) => {
-                    num++;
-                    return (
-                      str +
-                      `${num}. ${client.util.resolveUser(
-                        JSON.parse(buzz).id,
-                        guildObj.members.cache
-                      )}\n`
-                    );
-                  }, "\n")}`
-              );
-            }
-          } catch (err) {
-            console.log(err);
-          }
-        }
-        socket.emit("buzz", client.settings.get(guild.id, "buzzerQueue", []));
-      });
-
       socket.on("requestReady", ({ guild }) => {
         if (client.guilds.cache.has(guild.id)) {
           socket.emit("responseReady", {
             ready: client.settings.get(guild.id, "buzzerReady", false),
+            clear: false,
           });
         }
       });
@@ -405,6 +492,34 @@ mongoose
         }
       });
       io.sockets.emit("channelsList", ids);
+    }
+
+    function getBuzzerChannel(guildObj) {
+      const channel = JSON.parse(
+        client.settings.get(
+          guildObj.id,
+          "buzzerChannel",
+          JSON.stringify(
+            guildObj.channels.cache
+              .filter((channel) => {
+                return channel.type === "text";
+              })
+              .first()
+          )
+        )
+      );
+
+      return client.util.resolveChannel(channel.id, guildObj.channels.cache);
+    }
+
+    function userHasBuzzerRole(guildObj, userId) {
+      const member = client.util.resolveMember(userId, guildObj.members.cache);
+      return member.roles.cache.some((role) => {
+        return (
+          role.name.toLowerCase() ===
+          client.settings.get(guildObj.id, "buzzerRole", "buzzer").toLowerCase()
+        );
+      });
     }
   })
   .catch((err) => console.log(err));
