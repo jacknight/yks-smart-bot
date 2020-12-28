@@ -36,7 +36,7 @@ class HelpCommand extends Command {
 
     const buzzerNick = message.guild.me.nickname
       ? message.guild.me.nickname
-      : message.guild.me.username;
+      : message.guild.me.user.username;
 
     const helpEmbed = {
       color: 0x83c133,
@@ -54,6 +54,11 @@ class HelpCommand extends Command {
         {
           name: "Buzz in",
           value: "`!heep`",
+          inline: false,
+        },
+        {
+          name: "Configure buzzer role",
+          value: `\`!buzz.role\` ${buzzerRole} `,
           inline: false,
         },
         {
