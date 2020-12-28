@@ -88,9 +88,21 @@ mongoose
     // New member greeting.
     client.on("guildMemberAdd", (member) => {
       try {
-        member.guild.systemChannel.send(
-          `Welcome, ${member}! You don't have to be insane to post here, but it helps.`
-        );
+        if (member.id === "141822351321989120") {
+          // gorb
+          member.guild.systemChannel.send("gorb");
+        } else if (member.id === "251217007045902348") {
+          // tay
+          member.guild.systemChannel.send("Tay is back!");
+        } else if (member.id === "329288617564569602") {
+          member.guild.systemChannel.send(
+            "My master! My master has returned! I kept telling them you would!"
+          );
+        } else {
+          member.guild.systemChannel.send(
+            `Welcome, ${member}! You don't have to be insane to post here, but it helps.`
+          );
+        }
       } catch (err) {
         console.log(err);
       }
