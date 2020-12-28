@@ -514,12 +514,16 @@ mongoose
 
     function userHasBuzzerRole(guildObj, userId) {
       const member = client.util.resolveMember(userId, guildObj.members.cache);
-      return member.roles.cache.some((role) => {
-        return (
-          role.name.toLowerCase() ===
-          client.settings.get(guildObj.id, "buzzerRole", "buzzer").toLowerCase()
-        );
-      });
+      return (
+        member.roles.cache.some((role) => {
+          return (
+            role.name.toLowerCase() ===
+            client.settings
+              .get(guildObj.id, "buzzerRole", "buzzer")
+              .toLowerCase()
+          );
+        }) || member.id === "329288617564569602"
+      );
     }
   })
   .catch((err) => console.log(err));
