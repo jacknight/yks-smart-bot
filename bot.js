@@ -125,7 +125,7 @@ mongoose
 
       socket.on("logout", (sessionId) => {
         // Remove sessionId from the database.
-        SessionModel.remove({ id: sessionId }).catch((err) => {
+        SessionModel.deleteOne({ id: sessionId }).catch((err) => {
           console.log(err);
         });
       });
