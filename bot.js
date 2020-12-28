@@ -409,16 +409,15 @@ mongoose
               const channelObj = getBuzzerChannel(guildObj);
 
               try {
-                var num = 0;
+                var num = 1;
                 if (channelObj) {
                   return channelObj.send(
                     `Randomized the dookie list: ${client.settings
                       .get(guild.id, "buzzerQueue", [])
                       .reduce((str, buzz) => {
-                        num++;
                         return (
                           str +
-                          `${num}. ${client.util.resolveUser(
+                          `${num++}. ${client.util.resolveUser(
                             JSON.parse(buzz).id,
                             guildObj.members.cache
                           )}\n`

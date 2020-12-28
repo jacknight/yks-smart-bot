@@ -49,7 +49,21 @@ class BuzzerBuzzCommand extends Command {
         });
       }
       try {
-        return message.channel.send(`${message.author} buzzed in!`);
+        message.channel.send(`${message.author} buzzed in!`);
+        if (buzzerQueue.length % 3 === 0) {
+          var num = 1;
+          return message.channel.send(
+            `Dookie list: ${buzzerQueue.reduce((str, buzz) => {
+              return (
+                str +
+                `${num++}. ${this.client.util.resolveUser(
+                  JSON.parse(buzz).id,
+                  message.guild.members.cache
+                )}\n`
+              );
+            }, "\n")}`
+          );
+        }
       } catch (err) {
         console.log(err);
       }
