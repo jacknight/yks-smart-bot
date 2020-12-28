@@ -177,14 +177,15 @@ mongoose
       //    is then cross-referenced with the list of servers the
       //    bot is a member of and the list is whittled down to only
       //    the relevant servers.
-      socket.on("login", ({ code }) => {
+      socket.on("login", ({ code, redirect_uri }) => {
         // Exchange code for access token,
         // and associate it with a session ID in the db.
+        console.log(code, redirect_uri);
         const data = {
           client_id: process.env.DISCORD_BOT_CLIENT_ID,
           client_secret: process.env.DISCORD_BOT_CLIENT_SECRET,
           grant_type: "authorization_code",
-          redirect_uri: process.env.DISCORD_BOT_REDIRECT_URI,
+          redirect_uri: redirect_uri,
           code: code,
           scope: "identify guilds",
         };

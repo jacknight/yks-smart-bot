@@ -242,8 +242,8 @@ function requestQueue() {
   socket.emit("requestQueue", { guild: { id: serversSelect.value } });
 }
 
-function login(code) {
-  socket.emit("login", { code: code });
+function login(fields) {
+  socket.emit("login", fields);
 }
 
 function authorize(sessionId) {
