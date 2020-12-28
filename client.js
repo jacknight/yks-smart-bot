@@ -1,4 +1,6 @@
-const socket = io.connect("https://discord-buzzer.herokuapp.com");
+const socket = io.connect(
+  window.location.protocol + "//" + window.location.host
+);
 
 (function connect() {
   socket.on("commandUnauthorized", ({ command }) => {
@@ -36,10 +38,16 @@ const socket = io.connect("https://discord-buzzer.herokuapp.com");
   });
 
   socket.on("links", ({ bot, login, logout }) => {
-    document.querySelector(".login-link").href = login;
-    document.querySelector(".bot-link").href = bot;
-    document.querySelector(".logout-link").href = logout;
+    const redirect_uri =
+      "&redirect_uri=" +
+      encodeURIComponent(
+        window.location.protocol + "//" + window.location.host
+      );
+    document.querySelector(".login-link").href = login + redirect_uri;
+    document.querySelector(".bot-link").href = bot + redirect_uri;
+    document.querySelector(".logout-link").href = redirect_uri;
   });
+
   socket.on("buzz", (buzzerQueue) => {
     buzzList.innerHTML = "";
     if (buzzerQueue.length === 0) return;
