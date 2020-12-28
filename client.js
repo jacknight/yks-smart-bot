@@ -94,17 +94,12 @@ clearButton.addEventListener("click", clearQueue);
 modeButton.addEventListener("click", toggleMode);
 readyButton.addEventListener("click", toggleReady);
 listenButton.addEventListener("click", listenChannel);
-serversSelect.addEventListener("focus", serverSave);
 serversSelect.addEventListener("change", serverChange);
-serversSelect.addEventListener("focus", serverSave);
-logoutLink.addEventListener("click", () =>
-  localStorage.removeItem("sessionId")
-);
-
-let prevServer = "";
-function serverSave() {
-  prevServer = serversSelect.value;
-}
+logoutLink.addEventListener("click", () => {
+  const sessionId = localStorage.getItem("sessionId");
+  localStorage.removeItem("sessionId");
+  socket.emit("logout", sessionId);
+});
 
 function serverChange() {
   channelsSelect.innerHTML = "";
