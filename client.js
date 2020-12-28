@@ -99,7 +99,7 @@ serversSelect.addEventListener("change", serverChange);
 logoutLink.addEventListener("click", () => {
   const sessionId = localStorage.getItem("sessionId");
   localStorage.removeItem("sessionId");
-  socket.emit("logout", sessionId);
+  socket.emit("logout", { sessionId: sessionId });
 });
 
 function serverChange() {

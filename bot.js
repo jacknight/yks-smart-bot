@@ -101,7 +101,7 @@ mongoose
         logout: process.env.DISCORD_LOGOUT_LINK,
       });
 
-      socket.on("authorize", (sessionId) => {
+      socket.on("authorize", ({ sessionId }) => {
         // Lookup session, refresh token.
         SessionModel.findOne({ id: sessionId })
           .then((doc) => {
@@ -123,7 +123,7 @@ mongoose
           });
       });
 
-      socket.on("logout", (sessionId) => {
+      socket.on("logout", ({ sessionId }) => {
         // Remove sessionId from the database.
         SessionModel.deleteOne({ id: sessionId }).catch((err) => {
           console.log(err);
