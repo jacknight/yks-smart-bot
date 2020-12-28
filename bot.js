@@ -202,7 +202,13 @@ mongoose
             client.settings.get(
               guild.id,
               "buzzerChannel",
-              JSON.stringify(guildObj.channels.cache.first())
+              JSON.stringify(
+                guildObj.channels.cache
+                  .filter((channel) => {
+                    return channel.type === "text";
+                  })
+                  .first()
+              )
             )
           );
 
@@ -234,15 +240,21 @@ mongoose
             client.settings.get(
               guild.id,
               "buzzerChannel",
-              JSON.stringify(guildObj.channels.cache.first())
+              JSON.stringify(
+                guildObj.channels.cache
+                  .filter((channel) => {
+                    return channel.type === "text";
+                  })
+                  .first()
+              )
             )
           );
 
-          console.log(guildObj.channels.cache.first());
           const channelObj = client.util.resolveChannel(
             channel.id,
             guildObj.channels.cache
           );
+          console.log(channelObj);
 
           if (channelObj) {
             channelObj.send(`Buzzer is **${ready ? "ready" : "not ready"}**`);
@@ -301,7 +313,13 @@ mongoose
             client.settings.get(
               guild.id,
               "buzzerChannel",
-              JSON.stringify(guildObj.channels.cache.first())
+              JSON.stringify(
+                guildObj.channels.cache
+                  .filter((channel) => {
+                    return channel.type === "text";
+                  })
+                  .first()
+              )
             )
           );
 
