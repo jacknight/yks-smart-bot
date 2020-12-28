@@ -238,12 +238,15 @@ mongoose
             )
           );
 
+          console.log(guildObj.channels.cache.first());
           const channelObj = client.util.resolveChannel(
             channel.id,
             guildObj.channels.cache
           );
 
-          channelObj.send(`Buzzer is **${ready ? "ready" : "not ready"}**`);
+          if (channelObj) {
+            channelObj.send(`Buzzer is **${ready ? "ready" : "not ready"}**`);
+          }
         }
       });
 
@@ -269,7 +272,9 @@ mongoose
           "buzzerChannel",
           JSON.stringify(channelObj)
         );
-        channelObj.send("Buzzer now listening on " + channelObj.toString());
+        if (channelObj) {
+          channelObj.send("Buzzer now listening on " + channelObj.toString());
+        }
       });
 
       socket.on("clearQueue", ({ guild }) => {
@@ -307,20 +312,22 @@ mongoose
 
           try {
             var num = 0;
-            return channelObj.send(
-              `Randomized the dookie list: ${client.settings
-                .get(guild.id, "buzzerQueue", [])
-                .reduce((str, buzz) => {
-                  num++;
-                  return (
-                    str +
-                    `${num}. ${client.util.resolveUser(
-                      JSON.parse(buzz).id,
-                      guildObj.members.cache
-                    )}\n`
-                  );
-                }, "\n")}`
-            );
+            if (channelObj) {
+              return channelObj.send(
+                `Randomized the dookie list: ${client.settings
+                  .get(guild.id, "buzzerQueue", [])
+                  .reduce((str, buzz) => {
+                    num++;
+                    return (
+                      str +
+                      `${num}. ${client.util.resolveUser(
+                        JSON.parse(buzz).id,
+                        guildObj.members.cache
+                      )}\n`
+                    );
+                  }, "\n")}`
+              );
+            }
           } catch (err) {
             console.log(err);
           }
