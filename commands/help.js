@@ -19,7 +19,7 @@ class HelpCommand extends Command {
       buzzerRoleName,
       message.guild.roles.cache
     );
-    if (!buzzerRole) buzzerRole = buzzerRoleName;
+    if (!buzzerRole) buzzerRole = "@" + buzzerRoleName;
 
     const buzzerChannelID = JSON.parse(
       this.client.settings.get(
