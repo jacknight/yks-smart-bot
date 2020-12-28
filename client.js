@@ -1,5 +1,4 @@
-const socket = io.connect("http://localhost:3000");
-// const socket = io.connect("https://discord-buzzer.herokuapp.com");
+const socket = io.connect("https://discord-buzzer.herokuapp.com");
 
 (function connect() {
   socket.on("sessionId", (sessionId) => {
