@@ -305,12 +305,10 @@ mongoose
               }
 
               client.settings.set(guildObj.id, "buzzerReady", ready);
-              console.log("Not doing thisVVV ?");
               socket.emit("responseReady", {
                 ready: ready,
                 clear: true,
               });
-              console.log("Didn't do this? ^^^^");
               const channelObj = getBuzzerChannel(guildObj);
 
               if (channelObj) {
