@@ -6,6 +6,7 @@ class GorbCommand extends Command {
       cooldown: 3600000,
       ratelimit: 1,
       regex: /^gorb$/i,
+      category: "eater-egg",
     });
   }
 

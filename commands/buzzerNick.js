@@ -10,7 +10,6 @@ class BuzzerNickCommand extends Command {
       args: [{ id: "nick", type: "phrase" }],
       cooldown: 60000,
       ratelimit: 1,
-      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
 

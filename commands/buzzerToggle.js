@@ -9,7 +9,6 @@ class BuzzerToggleCommand extends Command {
       prefix: "!buzz.",
       cooldown: 10000,
       ratelimit: 5,
-      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
   userPermissions(message) {

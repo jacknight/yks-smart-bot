@@ -8,7 +8,6 @@ class BuzzerBuzzCommand extends Command {
       channel: "guild",
       cooldown: 5000,
       ratelimit: 5,
-      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
 

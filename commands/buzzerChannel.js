@@ -10,7 +10,6 @@ class BuzzerChannelCommand extends Command {
       args: [{ id: "channel", type: "channel" }],
       cooldown: 10000,
       ratelimit: 1,
-      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
 

@@ -7,7 +7,6 @@ class HelpCommand extends Command {
       channel: "guild",
       cooldown: 60000,
       ratelimit: 1,
-      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
 

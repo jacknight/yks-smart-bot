@@ -10,7 +10,6 @@ class BuzzerRoleCommand extends Command {
       args: [{ id: "role", type: "role" }],
       cooldown: 120000,
       ratelimit: 1,
-      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
 
