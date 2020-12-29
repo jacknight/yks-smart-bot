@@ -15,7 +15,7 @@ class BestCommand extends Command {
 
   async exec(message, { num }) {
     if (num < 1) return;
-    if (num === 100) {
+    if (num === 101) {
       return message.channel.send(
         "We already know Episode 100 is the best. This is for all the other ones."
       );
@@ -65,9 +65,10 @@ class BestCommand extends Command {
       JSON.stringify(Array.from(bestEpTotals.entries()))
     );
 
+    console.log([...bestEpTotals.entries()]);
     const sortedTotals = new Map(
       [...bestEpTotals.entries()].sort((a, b) => {
-        return a[1] > b[1];
+        return b[1] - a[1];
       })
     );
     let totalString = "";
