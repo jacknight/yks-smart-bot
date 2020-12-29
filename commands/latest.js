@@ -34,7 +34,7 @@ class LatestCommand extends Command {
         .trim()
         .slice(0, -1);
       const epLink = mainFeed.items[0].link;
-      const embed = {
+      const mainEmbed = {
         color: 0x83c133,
         title: mainFeed.title,
         author: {
@@ -59,7 +59,6 @@ class LatestCommand extends Command {
           },
         ],
       };
-      message.channel.send({ embed });
 
       // Bonus feed
       const bonusFeed = await parser.parseURL(BONUS_FEED_RSS);
@@ -103,6 +102,7 @@ class LatestCommand extends Command {
           },
         ],
       };
+      message.channel.send({ embed: mainEmbed });
       message.channel.send({ embed: bonusEmbed });
     }
   }
