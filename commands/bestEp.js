@@ -15,18 +15,17 @@ class BestCommand extends Command {
 
   async exec(message, { num }) {
     if (num < 1) return;
+    if (num === 100) {
+      return message.channel.send(
+        "We already know Episode 100 is the best. This is for all the other ones."
+      );
+    }
 
     const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
     let mainArray = mainFeed.items[0].title.split(":");
     const epNum = Number(mainArray[0].trim().split(" ")[1]);
 
     if (num > epNum) return;
-
-    if (num === 100) {
-      return message.channel.send(
-        "We already know Episode 100 is the best. This is for all the other ones."
-      );
-    }
 
     let temp = JSON.parse(
       await this.client.settings.get(message.guild.id, "bestEpByUser", '""')
