@@ -68,6 +68,10 @@ class BestCommand extends Command {
     console.log([...bestEpTotals.entries()]);
     const sortedTotals = new Map(
       [...bestEpTotals.entries()].sort((a, b) => {
+        if (b[1] === a[1]) {
+          // recency bias.
+          return b[0] - a[0];
+        }
         return b[1] - a[1];
       })
     );
