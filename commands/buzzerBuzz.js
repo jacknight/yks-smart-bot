@@ -3,7 +3,7 @@ const { Command } = require("discord-akairo");
 class BuzzerBuzzCommand extends Command {
   constructor() {
     super("buzz", {
-      aliases: ["heep"],
+      aliases: ["heep", "meep"],
       category: "buzzer",
       channel: "guild",
       cooldown: 5000,
