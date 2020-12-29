@@ -10,11 +10,15 @@ class DadsCommand extends Command {
   }
 
   exec(message) {
-    const self = this;
-    if (!this.client.dads) {
-      this.client.dads = true;
+    if (!this.client.globalRates.get(message.guild.id)) {
+      this.client.globalRates.set(message.guild.id, new Set());
+    }
+
+    if (!this.client.globalRates.get(message.guild.id).has("dads")) {
+      this.client.globalRates.get(message.guild.id).add("dads");
+      const self = this;
       setTimeout(function () {
-        self.client.dads = false;
+        self.client.globalRates.get(message.guild.id).delete("dads");
       }, 30000);
 
       const responses = [

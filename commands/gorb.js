@@ -11,11 +11,15 @@ class GorbCommand extends Command {
   }
 
   exec(message) {
-    const self = this;
-    if (!this.client.gorb) {
-      this.client.gorb = true;
+    if (!this.client.globalRates.get(message.guild.id)) {
+      this.client.globalRates.set(message.guild.id, new Set());
+    }
+
+    if (!this.client.globalRates.get(message.guild.id).has("gorb")) {
+      this.client.globalRates.get(message.guild.id).add("gorb");
+      const self = this;
       setTimeout(function () {
-        self.client.gorb = false;
+        self.client.globalRates.get(message.guild.id).delete("gorb");
       }, 3600000);
       message.channel.send("gorb");
     }

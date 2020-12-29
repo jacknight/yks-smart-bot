@@ -20,6 +20,13 @@ class BuzzerClient extends AkairoClient {
 
     this.settings = new MongooseProvider(model);
 
+    // Rate limit certain commands per guild in memory.
+    // I don't think it's necessary to do this with the
+    // database, it's not that crucial.
+    // Key: guild.id
+    // Value: Set<command>
+    this.globalRates = new Map();
+
     this.commandHandler = new CommandHandler(this, {
       directory: "./commands/",
       prefix: "!",
@@ -94,7 +101,7 @@ mongoose
         } else if (member.id === "251217007045902348") {
           // tay
           member.guild.systemChannel.send("Tay is back!");
-        } else if (member.id === "329288617564569602") {
+        } else if (member.id === client.ownerID) {
           member.guild.systemChannel.send(
             "My master! My master has returned! I kept telling them you would!"
           );
@@ -532,7 +539,7 @@ mongoose
               .get(guildObj.id, "buzzerRole", "buzzer")
               .toLowerCase()
           );
-        }) || member.id === "329288617564569602"
+        }) || member.id === client.ownerID
       );
     }
   })

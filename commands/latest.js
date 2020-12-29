@@ -9,18 +9,20 @@ class LatestCommand extends Command {
   constructor() {
     super("latest", {
       aliases: ["latest", "eps", "recent"],
-      cooldown: 3600000,
-      ratelimit: 5,
     });
   }
 
   async exec(message) {
-    const self = this;
-    if (!this.client.latest) {
-      this.client.latest = true;
+    if (!this.client.globalRates.get(message.guild.id)) {
+      this.client.globalRates.set(message.guild.id, new Set());
+    }
+
+    if (!this.client.globalRates.get(message.guild.id).has("latest")) {
+      this.client.globalRates.get(message.guild.id).add("latest");
+      const self = this;
       setTimeout(function () {
-        self.client.latest = false;
-      }, 60000);
+        self.client.globalRates.get(message.guild.id).delete("latest");
+      }, 3600000);
 
       // Main feed
       const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
