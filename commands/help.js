@@ -56,6 +56,11 @@ class HelpCommand extends Command {
           inline: false,
         },
         {
+          name: "Best episode",
+          value: "`!best <episode number>`",
+          inline: false,
+        },
+        {
           name: "Buzz in",
           value: "`!heep`",
           inline: false,
