@@ -13,6 +13,9 @@ const mongoose = require("mongoose");
 const { emit } = require("./db/model");
 const { default: fetch } = require("node-fetch");
 const SessionModel = require("./db/sessions");
+const Parser = require("rss-parser");
+const parser = new Parser();
+const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
 
 class BuzzerClient extends AkairoClient {
   constructor() {
@@ -545,30 +548,12 @@ mongoose
     }
 
     async function setPresence() {
-      const latestEp = await fetch(
-        "https://api.spotify.com/v1/shows/21X5WeU1eZTuyYmBbq613H/episodes",
-        {
-          method: "GET",
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${process.env.SPOTIFY_AUTH_TOKEN}`,
-          },
-        }
-      )
-        .then((response) => response.json())
-        .then((data) => {
-          if (data?.items?.length > 0) {
-            return data.items[0];
-          }
-          return null;
-        });
-
-      if (latestEp) {
+      const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
+      if (mainFeed?.items) {
         client.user.setPresence({
           status: "online",
           activity: {
-            name: latestEp.name,
+            name: mainFeed.items[0].title,
             type: "LISTENING",
             url: null,
           },
