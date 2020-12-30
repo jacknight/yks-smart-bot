@@ -18,6 +18,7 @@ a {
   padding: 20px;
   text-decoration: none;
   font-size: 1.5rem;
+  text-align: center;
 }
 
 a:hover {
@@ -54,12 +55,9 @@ button:active {
   gap: 5px;
 }
 
-.login-link {
-  text-align: center;
-}
-
-.logout-link {
-  text-align: center;
+.layout form {
+  align-self: center;
+  justify-self: center;
 }
 
 .control-panel {

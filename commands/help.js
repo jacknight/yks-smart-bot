@@ -11,12 +11,16 @@ class HelpCommand extends Command {
   }
 
   exec(message) {
-    const buzzerRoleName = this.client.settings
-      .get(message.guild.id, "buzzerRole", "buzzer")
-      .toLowerCase();
+    const buzzerRoleName = this.client.settings.get(
+      message.guild.id,
+      "buzzerRole",
+      "buzzer"
+    );
     let buzzerRole = this.client.util.resolveRole(
       buzzerRoleName,
-      message.guild.roles.cache
+      message.guild.roles.cache,
+      false,
+      true
     );
     if (!buzzerRole) buzzerRole = "@" + buzzerRoleName;
 
