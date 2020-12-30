@@ -42,16 +42,16 @@ class HelpCommand extends Command {
       : message.guild.me.user.username;
 
     const helpEmbed = {
-      color: 0x83c133,
+      color: 0xffff00,
       title: "Help",
       author: {
         icon_url:
-          "https://res.cloudinary.com/pippa/image/fetch/h_500,w_500,f_auto/https://assets.pippa.io/shows/5d137ece8b774eb816199f63/1562125598000-ef38e8a9cd086f609f806209d1341102.jpeg",
-        url: "https://shows.acast.com/yourkickstartersucks",
+          "https://raw.githubusercontent.com/jacknight/buzzer/main/assets/bolt.png?token=AAEN3TXSCUCW6TQNMO3JAOS75R4G2",
+        url: "https://buzzerd.herokuapp.com",
       },
       thumbnail: {
         url:
-          "https://res.cloudinary.com/pippa/image/fetch/h_500,w_500,f_auto/https://assets.pippa.io/shows/5d137ece8b774eb816199f63/1562125598000-ef38e8a9cd086f609f806209d1341102.jpeg",
+          "https://raw.githubusercontent.com/jacknight/buzzer/main/assets/bolt.png?token=AAEN3TXSCUCW6TQNMO3JAOS75R4G2",
       },
       fields: [
         {
