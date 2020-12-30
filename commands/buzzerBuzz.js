@@ -53,12 +53,12 @@ class BuzzerBuzzCommand extends Command {
           var num = 1;
           return message.channel.send(
             `Dookie list: ${buzzerQueue.reduce((str, buzz) => {
+              const member = this.client.util.resolveMember(
+                JSON.parse(buzz).id,
+                message.guild.members.cache
+              );
               return (
-                str +
-                `${num++}. ${this.client.util.resolveUser(
-                  JSON.parse(buzz).id,
-                  message.guild.members.cache
-                )}\n`
+                str + `${num++}. ${member.nickname || member.user.username}\n`
               );
             }, "\n")}`
           );
