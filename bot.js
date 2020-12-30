@@ -191,7 +191,6 @@ mongoose
       socket.on("login", ({ code, redirect_uri }) => {
         // Exchange code for access token,
         // and associate it with a session ID in the db.
-        console.log(code, redirect_uri);
         const data = {
           client_id: process.env.DISCORD_BOT_CLIENT_ID,
           client_secret: process.env.DISCORD_BOT_CLIENT_SECRET,
@@ -535,9 +534,6 @@ mongoose
 
     function userHasBuzzerRole(guildObj, userId) {
       const member = client.util.resolveMember(userId, guildObj.members.cache);
-      console.log(userId);
-      console.log(guildObj.members.cache);
-      console.log(member);
       return (
         member.roles.cache.some((role) => {
           return (
