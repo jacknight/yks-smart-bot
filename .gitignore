@@ -350,7 +350,7 @@ MigrationBackup/
 .ionide/
 
 # Environment variables
-*.env
+*.env*
 
 # Mac stuff
 .DS_Store

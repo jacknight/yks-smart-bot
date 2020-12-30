@@ -88,9 +88,10 @@ mongoose
       },
     });
 
-    // Need this here before we reference other "client.on" items.
-    // According to documentation, this is important.
-    client.on("ready", () => {});
+    // Set bot status
+    client.on("ready", () => {
+      setPresence();
+    });
 
     // New member greeting.
     client.on("guildMemberAdd", (member) => {
@@ -541,6 +542,36 @@ mongoose
           );
         }) || member.id === client.ownerID
       );
+    }
+
+    async function setPresence() {
+      const latestEp = await fetch(
+        "https://api.spotify.com/v1/shows/21X5WeU1eZTuyYmBbq613H/episodes",
+        {
+          method: "GET",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.SPOTIFY_AUTH_TOKEN}`,
+          },
+        }
+      )
+        .then((response) => response.json())
+        .then((data) => {
+          if (data?.items?.length > 0) {
+            return data.items[0];
+          }
+          return null;
+        });
+
+      client.user.setPresence({
+        status: "online",
+        activity: {
+          name: latestEp.name,
+          type: "LISTENING",
+          url: null,
+        },
+      });
     }
   })
   .catch((err) => console.log(err));
