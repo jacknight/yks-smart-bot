@@ -25,7 +25,7 @@ class BuzzerListCommand extends Command {
 
     var num = 1;
     return message.channel.send(
-      `Buzz list: ${buzzerQueue.reduce((str, buzz) => {
+      `Dookie list: ${buzzerQueue.reduce((str, buzz) => {
         const member = this.client.util.resolveMember(
           JSON.parse(buzz).id,
           message.guild.members.cache
