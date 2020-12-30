@@ -44,12 +44,12 @@ class BuzzerRandomizeCommand extends Command {
       try {
         return message.channel.send(
           `Randomized the dookie list: ${buzzerQueue.reduce((str, buzz) => {
+            const member = this.client.util.resolveMember(
+              JSON.parse(buzz).id,
+              message.guild.members.cache
+            );
             return (
-              str +
-              `${num++}. ${this.client.util.resolveUser(
-                JSON.parse(buzz).id,
-                message.guild.members.cache
-              )}\n`
+              str + `${num++}. ${member.nickname || member.user.username}\n`
             );
           }, "\n")}`
         );
