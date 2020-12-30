@@ -9,7 +9,6 @@ class BuzzerClearCommand extends Command {
       prefix: "!buzz.",
       cooldown: 1000,
       ratelimit: 1,
-      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
 
@@ -48,7 +47,7 @@ class BuzzerClearCommand extends Command {
       });
     }
     try {
-      return message.channel.send("Buzzer list cleared out.");
+      return message.channel.send("Cleared the dookie list.");
     } catch (err) {
       console.log(err);
     }

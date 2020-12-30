@@ -62,7 +62,11 @@
 
           if (fragment.has("code")) {
             document.querySelector(".logout-link").style.display = "block";
-            login(fragment.get("code"));
+            login({
+              code: fragment.get("code"),
+              redirect_uri:
+                window.location.protocol + "//" + window.location.host,
+            });
           } else {
             document.querySelector(".login-link").style.display = " block";
           }

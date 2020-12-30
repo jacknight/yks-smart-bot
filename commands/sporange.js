@@ -7,7 +7,6 @@ class SporangeCommand extends Command {
       category: "easter-egg",
       cooldown: 28800000, // 3 times a day
       ratelimit: 1,
-      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
 

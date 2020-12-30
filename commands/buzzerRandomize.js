@@ -9,7 +9,6 @@ class BuzzerRandomizeCommand extends Command {
       prefix: "!buzz.",
       cooldown: 1000,
       ratelimit: 1,
-      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
 
@@ -47,7 +46,7 @@ class BuzzerRandomizeCommand extends Command {
           `Randomized the dookie list: ${buzzerQueue.reduce((str, buzz) => {
             return (
               str +
-              `${num}. ${this.client.util.resolveUser(
+              `${num++}. ${this.client.util.resolveUser(
                 JSON.parse(buzz).id,
                 message.guild.members.cache
               )}\n`

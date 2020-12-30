@@ -55,18 +55,13 @@ button:active {
 }
 
 .login-link {
-  /* align-self: end; */
   text-align: center;
 }
 
 .logout-link {
   text-align: center;
-  /* align-self: start; */
 }
 
-.bot-link {
-  /* align-self: start; */
-}
 .control-panel {
   display: grid;
   width: 300px;

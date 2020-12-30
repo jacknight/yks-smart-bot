@@ -7,7 +7,6 @@ class HelpCommand extends Command {
       channel: "guild",
       cooldown: 60000,
       ratelimit: 1,
-      ignoreCooldown: ["329288617564569602"], // me :)
     });
   }
 
@@ -51,6 +50,16 @@ class HelpCommand extends Command {
           "https://res.cloudinary.com/pippa/image/fetch/h_500,w_500,f_auto/https://assets.pippa.io/shows/5d137ece8b774eb816199f63/1562125598000-ef38e8a9cd086f609f806209d1341102.jpeg",
       },
       fields: [
+        {
+          name: "List latest episodes",
+          value: "`!latest`",
+          inline: false,
+        },
+        {
+          name: "Best episode",
+          value: "`!best <episode number>`",
+          inline: false,
+        },
         {
           name: "Buzz in",
           value: "`!heep`",

@@ -5,6 +5,7 @@ class HelloCommand extends Command {
     super("hello", {
       cooldown: 3600000,
       ratelimit: 1,
+      category: "converse",
       regex: /(hello|hey|hi|howdy|sup|good morning|good afternoon|good evening)/i,
     });
   }
