@@ -346,8 +346,10 @@ mongoose
       });
 
       socket.on("changeChannel", ({ guild, id, sessionId }) => {
+        console.log(guild, id, sessionId);
         if (guild.id === "") return;
         SessionModel.findOne({ id: sessionId }).then((doc) => {
+          console.log(doc);
           if (doc.session) {
             const guildObj = client.util.resolveGuild(
               guild.id,
