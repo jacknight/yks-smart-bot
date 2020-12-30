@@ -564,14 +564,16 @@ mongoose
           return null;
         });
 
-      client.user.setPresence({
-        status: "online",
-        activity: {
-          name: latestEp.name,
-          type: "LISTENING",
-          url: null,
-        },
-      });
+      if (latestEp) {
+        client.user.setPresence({
+          status: "online",
+          activity: {
+            name: latestEp.name,
+            type: "LISTENING",
+            url: null,
+          },
+        });
+      }
     }
   })
   .catch((err) => console.log(err));
