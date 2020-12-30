@@ -65,7 +65,6 @@ class BestCommand extends Command {
       JSON.stringify(Array.from(bestEpTotals.entries()))
     );
 
-    console.log([...bestEpTotals.entries()]);
     const sortedTotals = new Map(
       [...bestEpTotals.entries()].sort((a, b) => {
         if (b[1] === a[1]) {
