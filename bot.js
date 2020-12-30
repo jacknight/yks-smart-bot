@@ -118,7 +118,16 @@ mongoose
                 socket.emit("servers", response);
               });
           })
-          .catch((err) => {});
+          .catch((err) => {
+            console.log(err);
+          });
+      });
+
+      socket.on("logout", ({ sessionId }) => {
+        // Remove sessionId from the database.
+        SessionModel.deleteOne({ id: sessionId }).catch((err) => {
+          console.log(err);
+        });
       });
 
       socket.on("login", ({ code }) => {
@@ -202,7 +211,13 @@ mongoose
             client.settings.get(
               guild.id,
               "buzzerChannel",
-              JSON.stringify(guildObj.channels.cache.first())
+              JSON.stringify(
+                guildObj.channels.cache
+                  .filter((channel) => {
+                    return channel.type === "text";
+                  })
+                  .first()
+              )
             )
           );
 
@@ -234,7 +249,13 @@ mongoose
             client.settings.get(
               guild.id,
               "buzzerChannel",
-              JSON.stringify(guildObj.channels.cache.first())
+              JSON.stringify(
+                guildObj.channels.cache
+                  .filter((channel) => {
+                    return channel.type === "text";
+                  })
+                  .first()
+              )
             )
           );
 
@@ -242,8 +263,11 @@ mongoose
             channel.id,
             guildObj.channels.cache
           );
+          console.log(channelObj);
 
-          channelObj.send(`Buzzer is **${ready ? "ready" : "not ready"}**`);
+          if (channelObj) {
+            channelObj.send(`Buzzer is **${ready ? "ready" : "not ready"}**`);
+          }
         }
       });
 
@@ -269,7 +293,9 @@ mongoose
           "buzzerChannel",
           JSON.stringify(channelObj)
         );
-        channelObj.send("Buzzer now listening on " + channelObj.toString());
+        if (channelObj) {
+          channelObj.send("Buzzer now listening on " + channelObj.toString());
+        }
       });
 
       socket.on("clearQueue", ({ guild }) => {
@@ -296,7 +322,13 @@ mongoose
             client.settings.get(
               guild.id,
               "buzzerChannel",
-              JSON.stringify(guildObj.channels.cache.first())
+              JSON.stringify(
+                guildObj.channels.cache
+                  .filter((channel) => {
+                    return channel.type === "text";
+                  })
+                  .first()
+              )
             )
           );
 
@@ -307,20 +339,22 @@ mongoose
 
           try {
             var num = 0;
-            return channelObj.send(
-              `Randomized the dookie list: ${client.settings
-                .get(guild.id, "buzzerQueue", [])
-                .reduce((str, buzz) => {
-                  num++;
-                  return (
-                    str +
-                    `${num}. ${client.util.resolveUser(
-                      JSON.parse(buzz).id,
-                      guildObj.members.cache
-                    )}\n`
-                  );
-                }, "\n")}`
-            );
+            if (channelObj) {
+              return channelObj.send(
+                `Randomized the dookie list: ${client.settings
+                  .get(guild.id, "buzzerQueue", [])
+                  .reduce((str, buzz) => {
+                    num++;
+                    return (
+                      str +
+                      `${num}. ${client.util.resolveUser(
+                        JSON.parse(buzz).id,
+                        guildObj.members.cache
+                      )}\n`
+                    );
+                  }, "\n")}`
+              );
+            }
           } catch (err) {
             console.log(err);
           }

@@ -1,11 +1,34 @@
 const socket = io.connect("https://discord-buzzer.herokuapp.com");
 
 (function connect() {
+  socket.on("commandUnauthorized", ({ command }) => {
+    if (command === "changeReady") {
+      alert("You don't have permission to toggle the buzzer.");
+    } else if (command === "changeMode") {
+      alert("You don't have permission to toggle the mode.");
+    } else if (command === "changeChannel") {
+      alert("You don't have permission to change the buzzer channel.");
+    } else if (command === "randomizeQueue") {
+      alert("You don't have permission to randomize the list.");
+    } else if (command === "clearQueue") {
+      alert("You don't have permission to clear the list.");
+    }
+  });
+
   socket.on("sessionId", (sessionId) => {
     localStorage.setItem("sessionId", sessionId);
   });
 
+  socket.on("sessionExpired", () => {
+    logout();
+    document.querySelector(".login-link").style.display = " block";
+  });
+
   socket.on("servers", (response) => {
+    if (response.message && response.message === "401: Unauthorized") {
+      return logout();
+    }
+
     requestServers();
     populateServersSelect(response);
     document.querySelector(".control-panel").style.display = "grid";
@@ -32,10 +55,13 @@ const socket = io.connect("https://discord-buzzer.herokuapp.com");
     });
   });
 
-  socket.on("responseReady", ({ ready }) => {
+  socket.on("responseReady", ({ ready, clear }) => {
     readyP.textContent = ready ? "ready" : "not ready";
     modeButton.disabled = ready;
     readyButton.disabled = false;
+    if (ready && clear) {
+      clearQueue();
+    }
   });
 
   socket.on("responseMode", ({ mode }) => {
@@ -44,12 +70,10 @@ const socket = io.connect("https://discord-buzzer.herokuapp.com");
 
   socket.on("serversList", (serversList) => {
     const options = Array.from(document.querySelectorAll("#servers option"));
-    console.log(options);
     options.forEach((option) => {
       if (option.value == "") return;
       if (
         !serversList.some((server) => {
-          console.log(option, option.value, server.id);
           return option.value === server.id;
         })
       ) {
@@ -94,16 +118,16 @@ clearButton.addEventListener("click", clearQueue);
 modeButton.addEventListener("click", toggleMode);
 readyButton.addEventListener("click", toggleReady);
 listenButton.addEventListener("click", listenChannel);
-serversSelect.addEventListener("focus", serverSave);
 serversSelect.addEventListener("change", serverChange);
-serversSelect.addEventListener("focus", serverSave);
-logoutLink.addEventListener("click", () =>
-  localStorage.removeItem("sessionId")
-);
+logoutLink.addEventListener("click", logout);
 
-let prevServer = "";
-function serverSave() {
-  prevServer = serversSelect.value;
+function logout() {
+  const sessionId = localStorage.getItem("sessionId");
+  if (sessionId) {
+    localStorage.removeItem("sessionId");
+    socket.emit("logout", { sessionId: sessionId });
+  }
+  window.location.href = document.querySelector(".logout-link").href;
 }
 
 function serverChange() {
@@ -137,46 +161,52 @@ function requestServers() {
 
 function toggleMode() {
   if (serversSelect.value === "") return;
-  modeP.textContent = modeP.textContent === "normal" ? "chaos" : "normal";
   socket.emit("changeMode", {
-    mode: modeP.textContent,
+    mode: modeP.textContent === "chaos" ? "normal" : "chaos",
     guild: {
       id: serversSelect.value,
     },
+    sessionId: localStorage.getItem("sessionId"),
   });
 }
 
 function toggleReady() {
   if (serversSelect.value === "") return;
-  readyP.textContent = readyP.textContent === "ready" ? "not ready" : "ready";
-  modeButton.disabled = readyP.textContent === "ready";
-  if (modeButton.disabled) clearQueue();
+  const newReady = readyP.textContent === "ready" ? false : true;
   socket.emit("changeReady", {
-    ready: readyP.textContent === "ready" ? true : false,
+    ready: newReady,
     guild: {
       id: serversSelect.value,
     },
+    sessionId: localStorage.getItem("sessionId"),
   });
 }
 
-function listChannels() {
-  const id = serversSelect.value;
-  socket.emit("requestChannels", { id: id });
+function clearQueue() {
+  socket.emit("clearQueue", {
+    guild: { id: serversSelect.value },
+    sessionId: localStorage.getItem("sessionId"),
+  });
+}
+
+function randomizeQueue() {
+  socket.emit("randomizeQueue", {
+    guild: { id: serversSelect.value },
+    sessionId: localStorage.getItem("sessionId"),
+  });
 }
 
 function listenChannel() {
   socket.emit("changeChannel", {
     guild: { id: serversSelect.value },
     id: channelsSelect.value,
+    sessionId: localStorage.getItem("sessionId"),
   });
 }
 
-function clearQueue() {
-  socket.emit("clearQueue", { guild: { id: serversSelect.value } });
-}
-
-function randomizeQueue() {
-  socket.emit("randomizeQueue", { guild: { id: serversSelect.value } });
+function listChannels() {
+  const id = serversSelect.value;
+  socket.emit("requestChannels", { id: id });
 }
 
 function unidentifySocket() {
