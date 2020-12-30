@@ -351,7 +351,7 @@ mongoose
         SessionModel.findOne({ id: sessionId }).then((doc) => {
           console.log(doc);
           if (doc.session) {
-            const guildObj = client.util.resolveGuild(
+            var guildObj = client.util.resolveGuild(
               guild.id,
               client.guilds.cache
             );
