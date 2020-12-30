@@ -346,12 +346,10 @@ mongoose
       });
 
       socket.on("changeChannel", ({ guild, id, sessionId }) => {
-        console.log(guild, id, sessionId);
         if (guild.id === "") return;
         SessionModel.findOne({ id: sessionId }).then((doc) => {
-          console.log(doc);
           if (doc.session) {
-            var guildObj = client.util.resolveGuild(
+            const guildObj = client.util.resolveGuild(
               guild.id,
               client.guilds.cache
             );
@@ -537,6 +535,9 @@ mongoose
 
     function userHasBuzzerRole(guildObj, userId) {
       const member = client.util.resolveMember(userId, guildObj.members.cache);
+      console.log(userId);
+      console.log(guildObj.members.cache);
+      console.log(member);
       return (
         member.roles.cache.some((role) => {
           return (
