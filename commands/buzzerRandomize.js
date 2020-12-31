@@ -12,6 +12,20 @@ class BuzzerRandomizeCommand extends Command {
     });
   }
 
+  userPermissions(message) {
+    const buzzerRole = this.client.settings
+      .get(message.guild.id, "buzzerRole", "buzzer")
+      .toLowerCase();
+    if (
+      !message.member.roles.cache.some((role) => {
+        return role.name.toLowerCase() === buzzerRole;
+      })
+    ) {
+      return "You don't have permission.";
+    }
+    return null;
+  }
+
   exec(message) {
     if (
       message.channel.id !==

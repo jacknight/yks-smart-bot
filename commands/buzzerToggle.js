@@ -11,6 +11,7 @@ class BuzzerToggleCommand extends Command {
       ratelimit: 5,
     });
   }
+
   userPermissions(message) {
     if (
       !message.member.roles.cache.some(
