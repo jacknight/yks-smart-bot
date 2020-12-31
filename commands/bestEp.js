@@ -17,15 +17,30 @@ class BestCommand extends Command {
     if (num < 1) return;
     if (num === 101) {
       return message.channel.send(
-        "We already know Episode 100 is the best. This is for all the other ones."
+        "We already know Episode 101 is the best. This is for all the other ones."
       );
     }
 
-    const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
-    let mainArray = mainFeed.items[0].title.split(":");
-    const epNum = Number(mainArray[0].trim().split(" ")[1]);
+    // Check if provided argument is bigger than the latest known episode.
+    let latestEpNum = await this.client.settings.get(
+      this.client.user.id,
+      "latestEpNum",
+      0
+    );
+    if (num > latestEpNum) {
+      // Maybe a new episode has been released and it's really good...
+      const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
+      let mainArray = mainFeed.items[0].title.split(":");
+      latestEpNum = Number(mainArray[0].trim().split(" ")[1]);
+      await this.client.settings.set(
+        this.client.user.id,
+        "latestEpNum",
+        latestEpNum
+      );
 
-    if (num > epNum) return;
+      // Ok, they just gave an invalid episode. Nice try.
+      if (num > latestEpNum) return message.channel.send("Not an episode.");
+    }
 
     let temp = JSON.parse(
       await this.client.settings.get(message.guild.id, "bestEpByUser", '""')
