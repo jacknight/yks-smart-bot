@@ -75,6 +75,11 @@ class HelpCommand extends Command {
           inline: false,
         },
         {
+          name: `Display the buzzer list`,
+          value: `\`!buzz.list\` (${buzzerRole} only)`,
+          inline: false,
+        },
+        {
           name: `Randomize the buzzer list`,
           value: `\`!buzz.random\` (${buzzerRole} only)`,
           inline: false,
