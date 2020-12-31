@@ -15,7 +15,7 @@ class BuzzerRoleCommand extends Command {
 
   userPermissions(message) {
     if (
-      !message.member.hasPermission("KICK_MEMBERS") &&
+      !message.member.hasPermission("MANAGE_ROLES") &&
       !message.member.roles.cache.some(
         (role) =>
           role.name ===
