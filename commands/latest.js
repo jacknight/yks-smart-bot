@@ -9,10 +9,17 @@ class LatestCommand extends Command {
   constructor() {
     super("latest", {
       aliases: ["latest", "eps", "recent"],
+      args: [
+        {
+          id: "feed",
+          type: ["main", "premium", "bonus", "patreon", "both"],
+          default: "both",
+        },
+      ],
     });
   }
 
-  async exec(message) {
+  async exec(message, { feed }) {
     if (!this.client.globalRates.get(message.guild.id)) {
       this.client.globalRates.set(message.guild.id, new Set());
     }
@@ -104,8 +111,19 @@ class LatestCommand extends Command {
           },
         ],
       };
-      message.channel.send({ embed: mainEmbed });
-      message.channel.send({ embed: bonusEmbed });
+
+      if (feed === "main" || feed === "both") {
+        message.channel.send({ embed: mainEmbed });
+      }
+
+      if (
+        feed === "bonus" ||
+        feed === "premium" ||
+        feed === "patreon" ||
+        feed === "both"
+      ) {
+        message.channel.send({ embed: bonusEmbed });
+      }
     }
   }
 }
