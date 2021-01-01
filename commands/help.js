@@ -42,7 +42,7 @@ class HelpCommand extends Command {
       : message.guild.me.user.username;
 
     const helpEmbed = {
-      color: 0xffff00,
+      color: 0x83c133,
       title: "Help",
       author: {
         icon_url:
