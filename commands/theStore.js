@@ -3,7 +3,7 @@ const { Command } = require("discord-akairo");
 class TheStoreCommand extends Command {
   constructor() {
     super("thestore", {
-      regex: /(a|an|the) [A-Za-z ]*store/i,
+      regex: /\b(a|an|the)\b [A-Za-z ]*\bstore\b/i,
       category: "easter-egg",
       cooldown: 28800000, // 3 times a day
       ratelimit: 1,
