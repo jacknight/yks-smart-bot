@@ -109,10 +109,6 @@ mongoose
           member.guild.systemChannel.send(
             "My master! My master has returned! I kept telling them you would!"
           );
-        } else {
-          member.guild.systemChannel.send(
-            `Welcome, ${member}! You don't have to be insane to post here, but it helps.`
-          );
         }
       } catch (err) {
         console.log(err);
