@@ -11,7 +11,14 @@ class SporangeCommand extends Command {
   }
 
   exec(message) {
-    return message.channel.send("it's a new kind of orange");
+    if (!this.client.globalRates.get(message.guild.id).has("sporange")) {
+      this.client.globalRates.get(message.guild.id).add("sporange");
+      const self = this;
+      setTimeout(function () {
+        self.client.globalRates.get(message.guild.id).delete("sporange");
+      }, 1000 * 60 * 60 * 24 * 7); // once a week.
+      return message.channel.send("it's a new kind of orange");
+    }
   }
 }
 

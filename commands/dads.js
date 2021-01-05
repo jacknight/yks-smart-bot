@@ -19,7 +19,7 @@ class DadsCommand extends Command {
       const self = this;
       setTimeout(function () {
         self.client.globalRates.get(message.guild.id).delete("dads");
-      }, 30000);
+      }, 1000 * 60 * 60); // once per hour
 
       const responses = [
         "Dads always be having untimely deaths.",

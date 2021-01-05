@@ -19,7 +19,7 @@ class FeetCommand extends Command {
       const self = this;
       setTimeout(function () {
         self.client.globalRates.get(message.guild.id).delete("feet");
-      }, 3600000);
+      }, 1000 * 60 * 60 * 24); // once per day
 
       message.channel.send("Is that you, Quentin?");
     }

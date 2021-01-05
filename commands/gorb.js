@@ -20,7 +20,7 @@ class GorbCommand extends Command {
       const self = this;
       setTimeout(function () {
         self.client.globalRates.get(message.guild.id).delete("gorb");
-      }, 3600000);
+      }, 1000 * 60 * 60 * 24); // once a day.
       message.channel.send("gorb");
     }
   }

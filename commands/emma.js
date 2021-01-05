@@ -19,7 +19,7 @@ class EmmaCommand extends Command {
       const self = this;
       setTimeout(function () {
         self.client.globalRates.get(message.guild.id).delete("emma");
-      }, 3600000);
+      }, 1000 * 60 * 60); // once per hour
 
       const responses = [
         ":hornypest:",
