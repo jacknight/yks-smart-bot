@@ -22,14 +22,16 @@ class EmmaCommand extends Command {
       }, 1000 * 60 * 60); // once per hour
 
       const responses = [
-        ":hornypest:",
-        ":hornytoo:",
-        ":emma:",
-        ":emma2:",
-        ":emma3:",
+        this.client.util.resolveEmoji("hornypest", message.guild.emojis.cache),
+        this.client.util.resolveEmoji("hornytoo", message.guild.emojis.cache),
+        this.client.util.resolveEmoji("emma", message.guild.emojis.cache),
+        this.client.util.resolveEmoji("emma2", message.guild.emojis.cache),
+        this.client.util.resolveEmoji("emma3", message.guild.emojis.cache),
       ];
       const response = responses[Math.floor(Math.random() * responses.length)];
-      message.channel.send(response);
+      if (response) {
+        message.channel.send(response.toString());
+      }
     }
   }
 }

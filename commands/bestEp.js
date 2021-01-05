@@ -7,79 +7,91 @@ class BestCommand extends Command {
   constructor() {
     super("best", {
       aliases: ["best"],
-      cooldown: 3600000,
-      ratelimit: 1,
-      args: [{ id: "num", type: "number" }],
+      // cooldown: 3600000,
+      // ratelimit: 1,
+      args: [{ id: "num", type: "number", default: "list" }],
     });
   }
 
   async exec(message, { num }) {
-    if (num < 1) return;
-    if (num === 101) {
-      return message.channel.send(
-        "We already know Episode 101 is the best. This is for all the other ones."
-      );
-    }
+    const listOnly = num === "list";
+    if (!listOnly) {
+      if (num < 1) return;
+      if (num === 101) {
+        return message.channel.send(
+          "We already know Episode 101 is the best. This is for all the other ones."
+        );
+      }
 
-    // Check if provided argument is bigger than the latest known episode.
-    let latestEpNum = await this.client.settings.get(
-      this.client.user.id,
-      "latestEpNum",
-      0
-    );
-    if (num > latestEpNum) {
-      // Maybe a new episode has been released and it's really good...
-      const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
-      let mainArray = mainFeed.items[0].title.split(":");
-      latestEpNum = Number(mainArray[0].trim().split(" ")[1]);
-      await this.client.settings.set(
+      // Check if provided argument is bigger than the latest known episode.
+      let latestEpNum = await this.client.settings.get(
         this.client.user.id,
         "latestEpNum",
-        latestEpNum
+        0
       );
 
-      // Ok, they just gave an invalid episode. Nice try.
-      if (num > latestEpNum) return message.channel.send("Not an episode.");
+      if (num > latestEpNum) {
+        // Maybe a new episode has been released and it's really good...
+        const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
+        let mainArray = mainFeed.items[0].title.split(":");
+        latestEpNum = Number(mainArray[0].trim().split(" ")[1]);
+        await this.client.settings.set(
+          this.client.user.id,
+          "latestEpNum",
+          latestEpNum
+        );
+
+        // Ok, they just gave an invalid episode. Nice try.
+        if (num > latestEpNum) return message.channel.send("Not an episode.");
+      }
+      let tempBestEpByUser = JSON.parse(
+        await this.client.settings.get(message.guild.id, "bestEpByUser", '""')
+      );
+      var bestEpByUser = !tempBestEpByUser
+        ? new Map()
+        : new Map(tempBestEpByUser);
     }
 
-    let temp = JSON.parse(
-      await this.client.settings.get(message.guild.id, "bestEpByUser", '""')
-    );
-    let bestEpByUser = !temp ? new Map() : new Map(temp);
-
-    temp = JSON.parse(
+    let tempBestEpTotals = JSON.parse(
       await this.client.settings.get(message.guild.id, "bestEpTotals", '""')
     );
-    let bestEpTotals = !temp ? new Map() : new Map(temp);
+    let bestEpTotals = !tempBestEpTotals
+      ? new Map()
+      : new Map(tempBestEpTotals);
 
-    const prevUserVote = bestEpByUser.get(message.author.id);
-    if (prevUserVote === num) {
-      return;
-    } else if (prevUserVote) {
-      const newTotal = bestEpTotals.get(prevUserVote) - 1;
-      if (newTotal === 0) {
-        bestEpTotals.delete(prevUserVote);
-      } else {
-        bestEpTotals.set(prevUserVote, newTotal);
+    if (!listOnly) {
+      const prevUserVote = bestEpByUser.get(message.author.id);
+      if (prevUserVote === num) {
+        return;
+      } else if (prevUserVote) {
+        const newTotal = bestEpTotals.get(prevUserVote) - 1;
+        if (newTotal === 0) {
+          bestEpTotals.delete(prevUserVote);
+        } else {
+          bestEpTotals.set(prevUserVote, newTotal);
+        }
+        message.channel.send(
+          `${message.author} thought Episode ${prevUserVote} was the best. Now...`
+        );
       }
+
+      bestEpByUser.set(message.author.id, num);
+      bestEpTotals.set(num, (bestEpTotals.get(num) || 0) + 1);
+      await this.client.settings.set(
+        message.guild.id,
+        "bestEpByUser",
+        JSON.stringify(Array.from(bestEpByUser.entries()))
+      );
+      await this.client.settings.set(
+        message.guild.id,
+        "bestEpTotals",
+        JSON.stringify(Array.from(bestEpTotals.entries()))
+      );
+
       message.channel.send(
-        `${message.author} thought Episode ${prevUserVote} was the best. Now...`
+        `${message.author} thinks Episode ${num} is the best.`
       );
     }
-
-    bestEpByUser.set(message.author.id, num);
-    bestEpTotals.set(num, (bestEpTotals.get(num) || 0) + 1);
-    await this.client.settings.set(
-      message.guild.id,
-      "bestEpByUser",
-      JSON.stringify(Array.from(bestEpByUser.entries()))
-    );
-    await this.client.settings.set(
-      message.guild.id,
-      "bestEpTotals",
-      JSON.stringify(Array.from(bestEpTotals.entries()))
-    );
-
     const sortedTotals = new Map(
       [...bestEpTotals.entries()].sort((a, b) => {
         if (b[1] === a[1]) {
@@ -89,6 +101,7 @@ class BestCommand extends Command {
         return b[1] - a[1];
       })
     );
+
     let totalString = "";
     let count = 0;
     sortedTotals.forEach((val, key) => {
@@ -96,11 +109,7 @@ class BestCommand extends Command {
       count++;
       totalString += `**${count}.** Episode ${key} (${val})\n`;
     });
-
-    message.channel.send(
-      `${message.author} thinks Episode ${num} is the best.\nHere's the top 10:`
-    );
-    message.channel.send(totalString);
+    message.channel.send("Here's the top 10:\n" + totalString);
   }
 }
 
