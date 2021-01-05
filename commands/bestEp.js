@@ -7,8 +7,8 @@ class BestCommand extends Command {
   constructor() {
     super("best", {
       aliases: ["best"],
-      // cooldown: 3600000,
-      // ratelimit: 1,
+      cooldown: 1000 * 60 * 30, // once every 30 min
+      ratelimit: 1,
       args: [{ id: "num", type: "number", default: "list" }],
     });
   }

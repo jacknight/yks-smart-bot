@@ -4,7 +4,7 @@ class EmmaCommand extends Command {
   constructor() {
     super("emma", {
       aliases: ["emma"],
-      cooldown: 3600000,
+      cooldown: 1000 * 60 * 30, // once per 30 min
       ratelimit: 1,
     });
   }
