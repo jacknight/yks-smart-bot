@@ -105,7 +105,7 @@ class BestCommand extends Command {
     let totalString = "";
     let count = 0;
     sortedTotals.forEach((val, key) => {
-      if (count === 11) return;
+      if (count === 10) return;
       count++;
       totalString += `**${count}.** Episode ${key} (${val})\n`;
     });
