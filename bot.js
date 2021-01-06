@@ -293,7 +293,7 @@ mongoose
                 mode: mode,
               });
 
-              let channelObj = getBuzzerChannel(guildObj);
+              let channelObj = await getBuzzerChannel(guildObj);
               if (channelObj) {
                 if (mode === "chaos") {
                   channelObj.send(`Buddy...you are now in **${mode} mode!!!**`);
@@ -328,7 +328,7 @@ mongoose
                 ready: ready,
                 clear: true,
               });
-              const channelObj = getBuzzerChannel(guildObj);
+              const channelObj = await getBuzzerChannel(guildObj);
 
               if (channelObj) {
                 channelObj.send(
@@ -393,7 +393,7 @@ mongoose
                 });
               }
               await client.settings.set(guildObj.id, "buzzerQueue", []);
-              const channelObj = getBuzzerChannel(guildObj);
+              const channelObj = await getBuzzerChannel(guildObj);
               if (channelObj) {
                 channelObj.send("Cleared the dookie list.");
               }
@@ -429,7 +429,7 @@ mongoose
               );
               require("./util").shuffle(buzzerQueue);
               await client.settings.set(guild.id, "buzzerQueue", buzzerQueue);
-              const channelObj = getBuzzerChannel(guildObj);
+              const channelObj = await getBuzzerChannel(guildObj);
 
               try {
                 var num = 1;
