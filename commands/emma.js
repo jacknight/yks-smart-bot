@@ -4,7 +4,7 @@ class EmmaCommand extends Command {
   constructor() {
     super("emma", {
       aliases: ["emma"],
-      cooldown: 1000 * 60 * 30, // once per 30 min
+      cooldown: 1000 * 60, // once per min
       ratelimit: 1,
     });
   }
@@ -19,7 +19,7 @@ class EmmaCommand extends Command {
       const self = this;
       setTimeout(function () {
         self.client.globalRates.get(message.guild.id).delete("emma");
-      }, 1000 * 60 * 60); // once per hour
+      }, 1000 * 60); // once per min
 
       const responses = [
         this.client.util.resolveEmoji("hornypest", message.guild.emojis.cache),

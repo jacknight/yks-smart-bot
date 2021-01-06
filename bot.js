@@ -457,10 +457,7 @@ mongoose
               } catch (err) {
                 console.log(err);
               }
-              socket.emit(
-                "buzz",
-                await client.settings.get(guild.id, "buzzerQueue", [])
-              );
+              socket.emit("buzz", buzzerQueue);
             }
           }
         });
