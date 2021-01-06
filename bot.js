@@ -441,11 +441,14 @@ mongoose
                           JSON.parse(buzz).id,
                           guildObj.members.cache
                         );
-                        return str + member
-                          ? `${num++}. ${
-                              member.nickname || member.user.username
-                            }\n`
-                          : "";
+                        return (
+                          str +
+                          (member
+                            ? `${num++}. ${
+                                member.nickname || member.user.username
+                              }\n`
+                            : "")
+                        );
                       },
                       "\n"
                     )}`
