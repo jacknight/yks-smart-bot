@@ -408,7 +408,7 @@ mongoose
 
       socket.on("randomizeQueue", ({ guild, sessionId }) => {
         if (guild.id === "") return;
-        SessionModel.findOne({ id: sessionId }).then((doc) => {
+        SessionModel.findOne({ id: sessionId }).then(async (doc) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(
               guild.id,
@@ -422,18 +422,21 @@ mongoose
                   command: "randomizeQueue",
                 });
               }
-              require("./util").shuffle(
-                client.settings.get(guild.id, "buzzerQueue", [])
+              let buzzerQueue = await client.settings.get(
+                guild.id,
+                "buzzerQueue",
+                []
               );
+              require("./util").shuffle(buzzerQueue);
+              await client.settings.set(guild.id, "buzzerQueue", buzzerQueue);
               const channelObj = getBuzzerChannel(guildObj);
 
               try {
                 var num = 1;
                 if (channelObj) {
                   return channelObj.send(
-                    `Randomized the dookie list: ${client.settings
-                      .get(guild.id, "buzzerQueue", [])
-                      .reduce((str, buzz) => {
+                    `Randomized the dookie list: ${buzzerQueue.reduce(
+                      (str, buzz) => {
                         const member = client.util.resolveMember(
                           JSON.parse(buzz).id,
                           guildObj.members.cache
@@ -443,7 +446,9 @@ mongoose
                               member.nickname || member.user.username
                             }\n`
                           : "";
-                      }, "\n")}`
+                      },
+                      "\n"
+                    )}`
                   );
                 }
               } catch (err) {

@@ -26,28 +26,32 @@ class BuzzerRandomizeCommand extends Command {
     return null;
   }
 
-  exec(message) {
+  async exec(message) {
     if (
       message.channel.id !==
         JSON.parse(
-          this.client.settings.get(
+          await this.client.settings.get(
             message.guild.id,
             "buzzerChannel",
             JSON.stringify(message.channel)
           )
         ).id ||
-      !this.client.settings.get(message.guild.id, "buzzerReady", false)
+      !(await this.client.settings.get(message.guild.id, "buzzerReady", false))
     )
       return;
 
-    const buzzerQueue = this.client.settings.get(
+    const buzzerQueue = await this.client.settings.get(
       message.guild.id,
       "buzzerQueue",
       []
     );
 
     require("../util").shuffle(buzzerQueue);
-    this.client.settings.set(message.guild.id, "buzzerQueue", buzzerQueue);
+    await this.client.settings.set(
+      message.guild.id,
+      "buzzerQueue",
+      buzzerQueue
+    );
     if (this.client.sockets.has(message.guild.id)) {
       this.client.sockets.get(message.guild.id).forEach((socket) => {
         socket.emit("buzz", buzzerQueue);
