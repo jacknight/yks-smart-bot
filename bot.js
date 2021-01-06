@@ -434,13 +434,15 @@ mongoose
                     `Randomized the dookie list: ${client.settings
                       .get(guild.id, "buzzerQueue", [])
                       .reduce((str, buzz) => {
-                        return (
-                          str +
-                          `${num++}. ${client.util.resolveUser(
-                            JSON.parse(buzz).id,
-                            guildObj.members.cache
-                          )}\n`
+                        const member = client.util.resolveMember(
+                          JSON.parse(buzz).id,
+                          guildObj.members.cache
                         );
+                        return str + member
+                          ? `${num++}. ${
+                              member.nickname || member.user.username
+                            }\n`
+                          : "";
                       }, "\n")}`
                   );
                 }
