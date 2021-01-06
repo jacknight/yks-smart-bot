@@ -13,25 +13,28 @@ class BuzzerRoleCommand extends Command {
     });
   }
 
-  userPermissions(message) {
+  async userPermissions(message) {
     if (
       !message.member.hasPermission("MANAGE_ROLES") &&
-      !message.member.roles.cache.some(
-        (role) =>
-          role.name ===
-          this.client.settings.set(message.guild.id, "buzzerRole", "Buzzer")
-      )
+      !message.member.roles.cache.some(async (role) => {
+        role.name ===
+          (await this.client.settings.set(
+            message.guild.id,
+            "buzzerRole",
+            "Buzzer"
+          ));
+      })
     ) {
       return "You don't have permission.";
     }
     return null;
   }
 
-  exec(message, { role }) {
+  async exec(message, { role }) {
     if (!role) {
       return message.channel.send(`That role does not exist.`);
     }
-    this.client.settings.set(message.guild.id, "buzzerRole", role.name);
+    await this.client.settings.set(message.guild.id, "buzzerRole", role.name);
     return message.channel.send(
       `Only users with the role \`${role.name}\` can configure the buzzer.`
     );

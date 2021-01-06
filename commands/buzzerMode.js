@@ -12,8 +12,8 @@ class BuzzerModeCommand extends Command {
     });
   }
 
-  userPermissions(message) {
-    const buzzerRole = this.client.settings
+  async userPermissions(message) {
+    const buzzerRole = await this.client.settings
       .get(message.guild.id, "buzzerRole", "buzzer")
       .toLowerCase();
     if (
@@ -26,8 +26,10 @@ class BuzzerModeCommand extends Command {
     return null;
   }
 
-  exec(message) {
-    if (this.client.settings.get(message.guild.id, "buzzerReady", false)) {
+  async exec(message) {
+    if (
+      await this.client.settings.get(message.guild.id, "buzzerReady", false)
+    ) {
       return message.channel.send(
         "You can't change the mode while the buzzer is enabled."
       );
@@ -35,7 +37,7 @@ class BuzzerModeCommand extends Command {
     // There must be a better way to do this...
     if (
       JSON.parse(
-        this.client.settings.get(
+        await this.client.settings.get(
           message.guild.id,
           "buzzerChannel",
           JSON.stringify(message.channel)
@@ -45,13 +47,13 @@ class BuzzerModeCommand extends Command {
       return;
     }
 
-    const oldMode = this.client.settings.get(
+    const oldMode = await this.client.settings.get(
       message.guild.id,
       "buzzerMode",
       "normal"
     );
     const newMode = oldMode === "normal" ? "chaos" : "normal";
-    this.client.settings.set(message.guild.id, "buzzerMode", newMode);
+    await this.client.settings.set(message.guild.id, "buzzerMode", newMode);
 
     if (this.client.sockets.has(message.guild.id)) {
       this.client.sockets.get(message.guild.id).forEach((socket) => {

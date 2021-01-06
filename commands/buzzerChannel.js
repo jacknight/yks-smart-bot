@@ -13,8 +13,8 @@ class BuzzerChannelCommand extends Command {
     });
   }
 
-  userPermissions(message) {
-    const buzzerRole = this.client.settings
+  async userPermissions(message) {
+    const buzzerRole = await this.client.settings
       .get(message.guild.id, "buzzerRole", "buzzer")
       .toLowerCase();
     if (
@@ -27,7 +27,7 @@ class BuzzerChannelCommand extends Command {
     return null;
   }
 
-  exec(message, { channel }) {
+  async exec(message, { channel }) {
     if (!channel) {
       return message.channel.send(`That channel does not exist.`);
     }
@@ -35,7 +35,7 @@ class BuzzerChannelCommand extends Command {
     // There must be a better way to do this...
     if (
       JSON.parse(
-        this.client.settings.get(
+        await this.client.settings.get(
           message.guild.id,
           "buzzerChannel",
           JSON.stringify(message.channel)
@@ -53,7 +53,7 @@ class BuzzerChannelCommand extends Command {
       }
     }
 
-    this.client.settings.set(
+    await this.client.settings.set(
       message.guild.id,
       "buzzerChannel",
       JSON.stringify(channel)

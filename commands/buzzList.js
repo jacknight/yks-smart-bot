@@ -12,8 +12,8 @@ class BuzzerListCommand extends Command {
     });
   }
 
-  userPermissions(message) {
-    const buzzerRole = this.client.settings
+  async userPermissions(message) {
+    const buzzerRole = await this.client.settings
       .get(message.guild.id, "buzzerRole", "buzzer")
       .toLowerCase();
     if (
@@ -26,8 +26,8 @@ class BuzzerListCommand extends Command {
     return null;
   }
 
-  exec(message) {
-    const buzzerQueue = this.client.settings.get(
+  async exec(message) {
+    const buzzerQueue = await this.client.settings.get(
       message.guild.id,
       "buzzerQueue",
       []

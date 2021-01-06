@@ -12,8 +12,8 @@ class BuzzerRandomizeCommand extends Command {
     });
   }
 
-  userPermissions(message) {
-    const buzzerRole = this.client.settings
+  async userPermissions(message) {
+    const buzzerRole = await this.client.settings
       .get(message.guild.id, "buzzerRole", "buzzer")
       .toLowerCase();
     if (
