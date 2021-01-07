@@ -15,7 +15,6 @@ const Parser = require("rss-parser");
 const parser = new Parser();
 const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
 const Canvas = require("canvas");
-const Discord = require("discord.js");
 
 class BuzzerClient extends AkairoClient {
   constructor() {
@@ -129,7 +128,7 @@ mongoose
         );
         ctx.drawImage(avatar, 450, 20, 200, 200);
 
-        const attachment = new Discord.MessageAttachment(
+        const attachment = client.util.attachment(
           canvas.toBuffer(),
           "welcome-image.png"
         );
