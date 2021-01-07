@@ -33,15 +33,13 @@ class LatestCommand extends Command {
 
       // Main feed
       const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
-      let mainArray = mainFeed.items[0].title.split(":");
-      const epNum = mainArray[0].trim();
-      mainArray = mainArray.slice(1);
-      const epTitle = mainArray
-        .reduce((title, item) => {
-          return title + item + ":";
-        }, "")
-        .trim()
-        .slice(0, -1);
+      const epNum = mainFeed.items[0].title.match(/Episode [0-9]+/i);
+      let epTitle =
+        mainFeed.items[0].title.substring(0, epNum.index) +
+        mainFeed.items[0].title
+          .substring(epNum.index + epNum[0].length)
+          .split(":")
+          .join(" ");
       const epLink = mainFeed.items[0].link;
       const mainEmbed = {
         color: 0x83c133,
@@ -58,7 +56,7 @@ class LatestCommand extends Command {
         fields: [
           {
             name: epNum,
-            value: epTitle,
+            value: epTitle ? epTitle : ".",
             inline: false,
           },
           {
@@ -78,15 +76,15 @@ class LatestCommand extends Command {
       ) {
         itemNum++;
       }
-      let bonusArray = bonusFeed.items[itemNum].title.split(":");
-      const bonusEpNum = bonusArray[0].trim();
-      bonusArray = bonusArray.slice(1);
-      const bonusEpTitle = bonusArray
-        .reduce((title, item) => {
-          return title + item + ":";
-        }, "")
-        .trim()
-        .slice(0, -1);
+      const bonusEpNum = bonusFeed.items[itemNum].title.match(
+        /Episode [0-9]+/i
+      );
+      const bonusEpTitle =
+        bonusFeed.items[itemNum].title.substring(0, bonusEpNum.index) +
+        bonusFeed.items[itemNum].title
+          .substring(bonusEpNum.index + bonusEpNum[0].length)
+          .split(":")
+          .join(" ");
       const bonusEpLink = bonusFeed.items[itemNum].link;
       const bonusEmbed = {
         color: 0xddaf74,
@@ -101,7 +99,7 @@ class LatestCommand extends Command {
         fields: [
           {
             name: bonusEpNum,
-            value: bonusEpTitle,
+            value: bonusEpTitle ? bonusEpTitle : ".",
             inline: false,
           },
           {
@@ -122,6 +120,7 @@ class LatestCommand extends Command {
         feed === "patreon" ||
         feed === "both"
       ) {
+        console.log(bonusEmbed);
         message.channel.send({ embed: bonusEmbed });
       }
     }
