@@ -120,7 +120,6 @@ class LatestCommand extends Command {
         feed === "patreon" ||
         feed === "both"
       ) {
-        console.log(bonusEmbed);
         message.channel.send({ embed: bonusEmbed });
       }
     }
