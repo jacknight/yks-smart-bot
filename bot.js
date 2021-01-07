@@ -96,20 +96,6 @@ mongoose
       setPresence();
     });
 
-    client.on("message", (message) => {
-      console.log("JACK -", message);
-      if (message.content === "!test") {
-        const attachment = new Discord.MessageAttachment(
-          "./assets/yks-logo.jpg"
-        );
-        message.channel.send("Test...", attachment).catch((err) => {
-          console.log(err);
-        });
-      } else if (message.content === "!join") {
-        client.emit("guildMemberAdd", message.member);
-      }
-    });
-
     // New member greetings
     client.on("guildMemberAdd", async (member) => {
       try {
