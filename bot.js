@@ -104,6 +104,8 @@ mongoose
         message.channel.send("Test...", attachment).catch((err) => {
           console.log(err);
         });
+      } else if (message.content === "!join") {
+        client.emit("guildMemberAdd", message.member);
       }
     });
 
