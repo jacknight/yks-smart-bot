@@ -5,6 +5,7 @@
   "main": "buzzer.js",
   "author": "Jack Knight",
   "dependencies": {
+    "canvas": "^2.6.1",
     "cors": "^2.8.5",
     "discord-akairo": "^8.1.0",
     "discord-oauth2": "^2.6.0",

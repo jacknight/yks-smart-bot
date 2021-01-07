@@ -4,18 +4,18 @@ const {
   InhibitorHandler,
   ListenerHandler,
   MongooseProvider,
-  ClientUtil,
 } = require("discord-akairo");
 const model = require("./db/model");
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const { emit } = require("./db/model");
 const { default: fetch } = require("node-fetch");
 const SessionModel = require("./db/sessions");
 const Parser = require("rss-parser");
 const parser = new Parser();
 const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
+const Canvas = require("canvas");
+const Discord = require("discord.js");
 
 class BuzzerClient extends AkairoClient {
   constructor() {
@@ -96,18 +96,73 @@ mongoose
       setPresence();
     });
 
-    // New member greeting.
-    client.on("guildMemberAdd", (member) => {
+    // New member greetings
+    client.on("guildMemberAdd", async (member) => {
       try {
+        const canvas = Canvas.createCanvas(1000, 1000);
+        const ctx = canvas.getContext("2d");
+        const background = await Canvas.loadImage("./assets/jf-blessing.png");
+        ctx.drawImage(background, 0, 0, 423, canvas.height);
+
+        //JF has blessed your timeline.
+        //say "thank you mr. jf"
+        //for good fortune in the new year
+        ctx.font = applyText(
+          canvas,
+          `${member.displayName},\nJF has blessed\nyour timeline.\nsay "thank you\nmr. jf" for\ngood fortune\nin the new year`
+        );
+        ctx.fillStyle = "#83c133";
+        ctx.fillText(
+          `${member.displayName},\nJF has blessed\nyour timeline.\nsay "thank you\nmr. jf" for\ngood fortune\nin the new year`,
+          450,
+          300,
+          550
+        );
+        // Pick up the pen
+        ctx.beginPath();
+        // Start the arc to form a circle
+        ctx.arc(550, 120, 100, 0, Math.PI * 2, true);
+        // Put the pen down
+        ctx.closePath();
+        // Clip off the region you drew on
+        ctx.clip();
+
+        const avatar = await Canvas.loadImage(
+          member.user.displayAvatarURL({ format: "jpg" })
+        );
+        ctx.drawImage(avatar, 450, 20, 200, 200);
+
+        const attachment = new Discord.MessageAttachment(
+          canvas.toBuffer(),
+          "welcome-image.png"
+        );
+
         if (member.id === "141822351321989120") {
           // gorb
-          member.guild.systemChannel.send("gorb");
+          member.guild.systemChannel.send("gorb", attachment);
         } else if (member.id === "251217007045902348") {
           // tay
-          member.guild.systemChannel.send("Tay is back!");
+          member.guild.systemChannel.send("Tay is back!", attachment);
         } else if (member.id === client.ownerID) {
           member.guild.systemChannel.send(
-            "My master! My master has returned! I kept telling them you would!"
+            "My master! My master has returned! I kept telling them you would!",
+            attachment
+          );
+        } else {
+          const responses = [
+            "You don't have to be insane to post here, but it's a \"good to have.\"",
+            "You may have heard that insanity is a requirement in this server. That's not entirely true. But it doesn't hurt.",
+            "Being insane and posting here go hand-in-hand for a lot of folks. But that's not to say it's a prerequisite for you to be insane.",
+            "Insane and posting here? Yeah, it's true. That's quite common. But by no means required.",
+            "You don't have to be insane to post here, but it helps.",
+            "I give it a month.",
+            "Make yourself at home.\nOh ok, you're going straight for the nasty channel. Ah! Well. Nevertheless,",
+          ];
+          member.guild.systemChannel.send(
+            `Welcome, ${member}! ${
+              responses[Math.floor(Math.random() * responses.length)]
+            }`,
+            attachment
           );
         }
       } catch (err) {
@@ -564,6 +619,23 @@ mongoose
           },
         });
       }
+    }
+
+    // New member greeting.
+    function applyText(canvas, text) {
+      const ctx = canvas.getContext("2d");
+
+      // Declare a base size of the font
+      let fontSize = 70;
+
+      do {
+        // Assign the font to the context and decrement it so it can be measured again
+        ctx.font = `${(fontSize -= 10)}px sans-serif`;
+        // Compare pixel width of the text to the canvas minus the approximate avatar size
+      } while (ctx.measureText(text).width > canvas.width - 400);
+
+      // Return the result to use in the actual canvas
+      return ctx.font;
     }
   })
   .catch((err) => console.log(err));
