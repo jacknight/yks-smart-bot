@@ -96,6 +96,14 @@ mongoose
       setPresence();
     });
 
+    client.on("message", (message) => {
+      if (message.content === "!test") {
+        message.channel.send("Test...", {
+          files: ["./assets/yks-logo.jpg"],
+        });
+      }
+    });
+
     // New member greetings
     client.on("guildMemberAdd", async (member) => {
       try {
