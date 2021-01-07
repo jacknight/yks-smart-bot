@@ -609,7 +609,7 @@ mongoose
 
     async function setPresence() {
       const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
-      if (mainFeed?.items) {
+      if (mainFeed && mainFeed.items) {
         client.user.setPresence({
           status: "online",
           activity: {
