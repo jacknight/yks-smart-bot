@@ -96,12 +96,6 @@ mongoose
       setPresence();
     });
 
-    client.on("message", (message) => {
-      if (message.content === "!join") {
-        client.emit("guildMemberAdd", message.member);
-      }
-    });
-
     // New member greetings
     client.on("guildMemberAdd", async (member) => {
       try {
