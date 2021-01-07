@@ -97,6 +97,7 @@ mongoose
     });
 
     client.on("message", (message) => {
+      console.log("JACK -", message);
       if (message.content === "!test") {
         const attachment = new Discord.MessageAttachment(
           "./assets/yks-logo.jpg"
