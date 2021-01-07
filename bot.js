@@ -98,8 +98,11 @@ mongoose
 
     client.on("message", (message) => {
       if (message.content === "!test") {
-        message.channel.send("Test...", {
-          files: ["./assets/yks-logo.jpg"],
+        const attachment = new Discord.MessageAttachment(
+          "./assets/yks-logo.jpg"
+        );
+        message.channel.send("Test...", attachment).catch((err) => {
+          console.log(err);
         });
       }
     });
