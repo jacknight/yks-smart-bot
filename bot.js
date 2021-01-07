@@ -104,9 +104,6 @@ mongoose
         const background = await Canvas.loadImage("./assets/jf-blessing.png");
         ctx.drawImage(background, 0, 0, 423, canvas.height);
 
-        //JF has blessed your timeline.
-        //say "thank you mr. jf"
-        //for good fortune in the new year
         ctx.font = applyText(
           canvas,
           `${member.displayName},\nJF has blessed\nyour timeline.\nsay "thank you\nmr. jf" for\ngood fortune\nin the new year`
