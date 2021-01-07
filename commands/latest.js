@@ -41,6 +41,10 @@ class LatestCommand extends Command {
           .split(":")
           .join(" ");
       const epLink = mainFeed.items[0].link;
+      const overCastLink = "https://overcast.fm/itunes1204911385";
+      const appleLink =
+        "https://podcasts.apple.com/us/podcast/your-kickstarter-sucks/id1204911385";
+
       const mainEmbed = {
         color: 0x83c133,
         title: mainFeed.title,
@@ -60,8 +64,10 @@ class LatestCommand extends Command {
             inline: false,
           },
           {
-            name: "Link",
-            value: `[Acast](${epLink})`,
+            name: "Links",
+            value: `[Acast](${epLink})
+[Overcast](${overCastLink})
+[Apple](${appleLink})`,
             inline: false,
           },
         ],
