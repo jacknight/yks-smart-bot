@@ -200,7 +200,7 @@ mongoose
     //           headers: {
     //             authorization: `${tokenType} ${accessToken}`,
     //           },
-    //         })
+    //           })
     //           .then((res) => res.json())
     //           .then((response) => {
     //             socket.emit("servers", response);
