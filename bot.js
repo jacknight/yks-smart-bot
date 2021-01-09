@@ -93,6 +93,7 @@ mongoose
     // Set bot status
     client.on("ready", () => {
       setPresence();
+      createWeekendTimeout();
     });
 
     // New member greetings
@@ -611,6 +612,32 @@ mongoose
           },
         });
       }
+    }
+
+    function createWeekendTimeout() {
+      const lastDayOfWeek = require("date-fns/lastDayOfWeek");
+      const add = require("date-fns/add");
+      const sub = require("date-fns/sub");
+
+      let nowUtc = new Date();
+      // Make "last day of the week" a friday (week starts on saturday - 6)
+      let friday5pmPacificInUTC = lastDayOfWeek(nowUtc, { weekStartsOn: 6 });
+      // Get the server timezone offset to UTC (given in minutes -> convert to hours)
+      let utcOffset = friday5pmPacificInUTC.getTimezoneOffset() / 60;
+      // California is UTC-8. 5pm is 17 hours into the day.
+      // (17 + 8 - utcOffset) to get 5pm Pacific time from UTC midnight.
+      friday5pmPacificInUTC = add(friday5pmPacificInUTC, {
+        hours: 17 + 8 - utcOffset,
+      });
+
+      // Set a timeout for as much time between now and friday 5pm pacific.
+      setTimeout(() => {
+        client.guilds.cache.forEach((guild) => {
+          guild.systemChannel.send("It's Friday 5pm Pacific.", {
+            files: ["./assets/weekend.mp4"],
+          });
+        });
+      }, friday5pmPacificInUTC.getTime() - nowUtc.getTime());
     }
 
     // New member greeting.
