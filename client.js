@@ -3,6 +3,8 @@ const socket = io.connect(
 );
 
 (function connect() {
+  // User tried to perform an action that they are not permissioned
+  // for on the server.
   socket.on("commandUnauthorized", ({ command }) => {
     if (command === "changeReady") {
       alert("You don't have permission to toggle the buzzer.");
@@ -17,26 +19,35 @@ const socket = io.connect(
     }
   });
 
+  // Store session ID created by the server after logging in.
   socket.on("sessionId", (sessionId) => {
     localStorage.setItem("sessionId", sessionId);
   });
 
+  // Session id in local storage no longer valid, or otherwise
+  // missing from the database. Simply authorize again.
   socket.on("sessionExpired", () => {
     logout();
-    document.querySelector(".login-link").style.display = " block";
+    document.querySelector(".login-link").style.display = "block";
   });
 
+  // List of servers the user is a member of.
   socket.on("servers", (response) => {
     if (response.message && response.message === "401: Unauthorized") {
       return logout();
     }
 
-    requestServers();
+    // This will populate the select with every server the user
+    // is a member of. Later on, this will be whittled down when
+    // the list of servers the bot is a member of is returned.
     populateServersSelect(response);
+    requestServers();
+
     document.querySelector(".control-panel").style.display = "grid";
     document.querySelector(".logout-link").style.display = "block";
   });
 
+  // Login/Logout/Add-bot link href values.
   socket.on("links", ({ bot, login, logout }) => {
     const redirect_uri =
       "&redirect_uri=" +
@@ -49,6 +60,7 @@ const socket = io.connect(
       window.location.protocol + "//" + window.location.host;
   });
 
+  // A user buzzed in, so we have a new queue.
   socket.on("buzz", (buzzerQueue) => {
     buzzList.innerHTML = "";
     if (buzzerQueue.length === 0) return;
@@ -64,6 +76,8 @@ const socket = io.connect(
     });
   });
 
+  // Getting an update (or the initial value) of the
+  // buzzer enabled/disabled value.
   socket.on("responseReady", ({ ready, clear }) => {
     readyP.textContent = ready ? "ready" : "not ready";
     modeButton.disabled = ready;
@@ -73,12 +87,16 @@ const socket = io.connect(
     }
   });
 
+  // Getting an update (or the initial value) of the
+  // buzzer mode (chaos/normal).
   socket.on("responseMode", ({ mode }) => {
     modeP.textContent = mode;
   });
 
+  // List of servers the bot is a member of.
   socket.on("serversList", (serversList) => {
     const options = Array.from(document.querySelectorAll("#servers option"));
+    // Remove any server which both the user and bot are not mutual members.
     options.forEach((option) => {
       if (option.value == "") return;
       if (
@@ -89,11 +107,13 @@ const socket = io.connect(
         option.remove();
       }
     });
+    // Request the channel list for each server.
     serversList.forEach((server) => {
       socket.emit("requestChannels", { id: server.id });
     });
   });
 
+  // A list of channels for a requested server.
   socket.on("channelsList", (channelList) => {
     channelList.forEach((channel) => {
       if (!serverChannelsMap.has(channel.guild)) {

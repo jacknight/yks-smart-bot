@@ -20,6 +20,7 @@ class BuzzerClient extends AkairoClient {
   constructor() {
     super({ ownerID: "329288617564569602" }, { disableMentions: "everyone" });
 
+    // Database provider stored on the client.
     this.settings = new MongooseProvider(model);
 
     // Rate limit certain commands per guild in memory.
@@ -34,7 +35,7 @@ class BuzzerClient extends AkairoClient {
       prefix: "!",
       defaultCooldown: 1000,
       allowMention: true,
-      aliasReplacement: /-/g,
+      aliasReplacement: /-/g, // !thiscommandworks and !this-command-works
     });
     this.inhibitorHandler = new InhibitorHandler(this, {
       directory: "./inhibitors/",
@@ -82,21 +83,34 @@ mongoose
     }
   )
   .then(() => {
+    // TODO: Do a little housekeeping with the session IDs
+    // stored in the db by removing expired ones. At the
+    // moment, they only get removed when the user explicitly
+    // click logout.
     const client = new BuzzerClient();
     client.login(process.env.AUTH_TOKEN);
+
+    // Using Socket.io to communicate with the frontend component
+    // of the bot. Since commands can be triggered from the chat
+    // or from a website, sockets keep them in sync.
     const io = require("socket.io")(client.server, {
       cors: {
         origin: "*",
       },
     });
 
-    // Set bot status
     client.on("ready", () => {
+      // Set bot status
       setPresence();
+      // 5pm Friday Pacific time... do something to celebrate.
+      createWeekendTimeout();
     });
 
     // New member greetings
     client.on("guildMemberAdd", async (member) => {
+      // Build a dynamic composite image that welcomes the user with
+      // their own display name and avatar.
+
       const canvas = Canvas.createCanvas(1000, 1000);
       const ctx = canvas.getContext("2d");
       const background = await Canvas.loadImage("./assets/jf-blessing.png");
@@ -113,15 +127,18 @@ mongoose
         300,
         550
       );
-      // Pick up the pen
+
       ctx.beginPath();
-      // Start the arc to form a circle
+      // X-Coordinate (550) - center of the circle is to the right of the bg image
+      // Y-Coordinate (120) - 20px padding from the top for the 100px radius circle.
+      // Radius (100) - circle has 200px diameter.
+      // Start Angle, End Angle - Go from 0º to 360º
+      // Counterclockwise - true
       ctx.arc(550, 120, 100, 0, Math.PI * 2, true);
-      // Put the pen down
       ctx.closePath();
-      // Clip off the region you drew on
       ctx.clip();
 
+      // Load avatar into that clipped off circle
       const avatar = await Canvas.loadImage(
         member.user.displayAvatarURL({ format: "jpg" })
       );
@@ -167,11 +184,19 @@ mongoose
     // updates in any way. The map is:
     // key: guild ID
     // value: [socket1, socket2, ..., socketN]
+    //
+    // TODO: This is currently stored in memory. So when the
+    // bot crashes or otherwise restarts, and this information
+    // is lost and the user is forced to refresh the site to
+    // get updated information (and they don't know anything
+    // has gone wrong!)
     client.sockets = new Map();
 
     // When someone connects to the web control panel,
     // we monitor the connection for emit events and
-    // potentially respond to them with our own emit.
+    // potentially respond to them with our own emit,
+    // or if it's general server information to all
+    // sockets currently observing that server.
     io.on("connection", (socket) => {
       // Provide the web control panel with the right
       // href values to authorize the bot, login, logout.
@@ -203,6 +228,9 @@ mongoose
             })
               .then((res) => res.json())
               .then((response) => {
+                // Emit the list of servers this user is a member of
+                // in order to display only the servers which both
+                // the bot and the user are members.
                 socket.emit("servers", response);
               });
           })
@@ -290,6 +318,9 @@ mongoose
             })
               .then((res) => res.json())
               .then((response) => {
+                // Emit the list of servers this user is a member of
+                // in order to display only the servers which both
+                // the bot and the user are members.
                 socket.emit("servers", response);
               });
           })
@@ -318,9 +349,10 @@ mongoose
         }
       });
 
-      // Toggle buzzer mode.
+      // Toggle buzzer mode (chaos/normal)
       socket.on("changeMode", ({ guild, mode, sessionId }) => {
         if (guild.id === "") return;
+        // Look up user associated with session ID.
         SessionModel.findOne({ id: sessionId }).then(async (doc) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(
@@ -330,6 +362,7 @@ mongoose
             if (guildObj) {
               // Check role permissions
               if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+                // Raise an alert on the frontend
                 return socket.emit("commandUnauthorized", {
                   command: "changeMode",
                 });
@@ -356,6 +389,7 @@ mongoose
       // Enable/disabled the buzzer.
       socket.on("changeReady", ({ guild, ready, sessionId }) => {
         if (guild.id === "") return;
+        // Look up user associated with session ID.
         SessionModel.findOne({ id: sessionId }).then(async (doc) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(
@@ -365,6 +399,7 @@ mongoose
             if (guildObj) {
               // Check role permissions
               if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+                // Raise an alert on the frontend
                 return socket.emit("commandUnauthorized", {
                   command: "changeReady",
                 });
@@ -389,6 +424,7 @@ mongoose
 
       socket.on("changeChannel", ({ guild, id, sessionId }) => {
         if (guild.id === "") return;
+        // Look up user associated with session ID.
         SessionModel.findOne({ id: sessionId }).then(async (doc) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(
@@ -399,6 +435,7 @@ mongoose
             if (guildObj) {
               // Check role permissions
               if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+                // Raise an alert on the frontend
                 return socket.emit("commandUnauthorized", {
                   command: "changeChannel",
                 });
@@ -425,6 +462,7 @@ mongoose
 
       socket.on("clearQueue", ({ guild, sessionId }) => {
         if (guild.id === "") return;
+        // Look up user associated with session ID.
         SessionModel.findOne({ id: sessionId }).then(async (doc) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(
@@ -435,6 +473,7 @@ mongoose
             if (guildObj) {
               // Check role permissions
               if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+                // Raise an alert on the frontend
                 return socket.emit("commandUnauthorized", {
                   command: "clearQueue",
                 });
@@ -455,6 +494,7 @@ mongoose
 
       socket.on("randomizeQueue", ({ guild, sessionId }) => {
         if (guild.id === "") return;
+        // Look up user associated with session ID.
         SessionModel.findOne({ id: sessionId }).then(async (doc) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(
@@ -465,6 +505,7 @@ mongoose
             if (guildObj) {
               // Check role permissions
               if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+                // Raise an alert on the frontend
                 return socket.emit("commandUnauthorized", {
                   command: "randomizeQueue",
                 });
@@ -511,24 +552,28 @@ mongoose
       });
 
       socket.on("requestServers", () => {
+        // Emit list of servers of which the bot is a member
         emitServers();
       });
 
       socket.on("requestChannels", ({ id }) => {
+        // Emit list of channels for the given server id.
         emitChannels(id);
       });
 
       socket.on("requestReady", async ({ guild }) => {
         if (client.guilds.cache.has(guild.id)) {
+          // Emit current buzzer status (ready/not ready)
           socket.emit("responseReady", {
             ready: await client.settings.get(guild.id, "buzzerReady", false),
-            clear: false,
+            clear: false, // don't ever clear the buzzer list in this scenario
           });
         }
       });
 
       socket.on("requestMode", async ({ guild }) => {
         if (client.guilds.cache.has(guild.id)) {
+          // Emit current buzzer mode (chaos/normal)
           socket.emit("responseMode", {
             mode: await client.settings.get(guild.id, "buzzerMode", "normal"),
           });
@@ -537,6 +582,7 @@ mongoose
 
       socket.on("requestQueue", async ({ guild }) => {
         if (client.guilds.cache.has(guild.id)) {
+          // Emit current buzzer list
           socket.emit(
             "buzz",
             await client.settings.get(guild.id, "buzzerQueue", [])
@@ -545,6 +591,7 @@ mongoose
       });
     });
 
+    // Emit list of servers of which the bot is a member
     function emitServers() {
       const servers = client.guilds.cache;
       let ids = [];
@@ -554,14 +601,16 @@ mongoose
       io.sockets.emit("serversList", ids);
     }
 
+    // Emit list of channels for the given server id
     function emitChannels(id) {
       const channels = client.guilds.resolve(id).channels.cache;
       const ids = [];
-      channels.forEach((item) => {
-        if (item.type === "voice") return;
-        if (item.type === "category") return;
-        if (item.type === "text") {
-          ids.push({ guild: id, topic: item.name, id: item.id });
+      channels.forEach((channel) => {
+        // Bot currently only active on text channels.
+        if (channel.type === "voice") return;
+        if (channel.type === "category") return;
+        if (channel.type === "text") {
+          ids.push({ guild: id, topic: channel.name, id: channel.id });
         }
       });
       io.sockets.emit("channelsList", ids);
@@ -569,22 +618,21 @@ mongoose
 
     async function getBuzzerChannel(guildObj) {
       const channel = JSON.parse(
+        // Get the configured buzzer channel from the db.
+        // If none set, use the system channel. This will
+        // often be the "#general" topic.
         await client.settings.get(
           guildObj.id,
           "buzzerChannel",
-          JSON.stringify(
-            guildObj.channels.cache
-              .filter((channel) => {
-                return channel.type === "text";
-              })
-              .first()
-          )
+          JSON.stringify(guildObj.systemChannel)
         )
       );
 
       return client.util.resolveChannel(channel.id, guildObj.channels.cache);
     }
 
+    // Actions coming in from the frontend need to be
+    // checked for permission.
     function userHasBuzzerRole(guildObj, userId) {
       const member = client.util.resolveMember(userId, guildObj.members.cache);
       return (
@@ -599,6 +647,10 @@ mongoose
       );
     }
 
+    // Set the bot's presence.
+    // Currently setting to "Listening to" the latest
+    // main feed YKS episode. Wanted to spoof rich
+    // presence spotify but bots don't have that option.
     async function setPresence() {
       const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
       if (mainFeed && mainFeed.items) {
@@ -613,7 +665,34 @@ mongoose
       }
     }
 
-    // New member greeting.
+    // On Friday 5pm Pacific time, drop a little celebratory
+    // gif or video that it's finally the weekend.
+    function createWeekendTimeout() {
+      const lastDayOfWeek = require("date-fns/lastDayOfWeek");
+      const add = require("date-fns/add");
+
+      let nowUtc = new Date();
+      // Make "last day of the week" a friday (week starts on saturday - 6)
+      let friday5pmPacificInUTC = lastDayOfWeek(nowUtc, { weekStartsOn: 6 });
+      // Get the server timezone offset to UTC (given in minutes -> convert to hours)
+      let utcServerOffset = friday5pmPacificInUTC.getTimezoneOffset() / 60;
+      // California is UTC-8. 5pm is 17 hours into the day.
+      // (17 + 8 - utcServerOffset) to get 5pm Pacific time from UTC midnight.
+      friday5pmPacificInUTC = add(friday5pmPacificInUTC, {
+        hours: 17 + 8 - utcServerOffset,
+      });
+
+      // Set a timeout for as much time between now and friday 5pm pacific.
+      setTimeout(() => {
+        client.guilds.cache.forEach((guild) => {
+          guild.systemChannel.send("It's Friday 5pm Pacific.", {
+            files: ["./assets/weekend.mp4"],
+          });
+        });
+      }, friday5pmPacificInUTC.getTime() - nowUtc.getTime());
+    }
+
+    // New member greeting helper to reduce size of text as necessary.
     function applyText(canvas, text) {
       const ctx = canvas.getContext("2d");
 
