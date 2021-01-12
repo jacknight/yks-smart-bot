@@ -104,7 +104,6 @@ class ListenCommand extends Command {
     if (!ep) {
       return message.channel.send("Couldn't find that episode.");
     }
-    console.log(ep);
     // Hard coded for now
     const voiceChannel = message.member.voice.channel
       ? message.member.voice.channel
@@ -116,7 +115,9 @@ class ListenCommand extends Command {
     this.client.listen = {
       voiceChannel,
       connection,
-      dispatcher: connection.play(ep.enclosure.url),
+      dispatcher: connection.play(ep.enclosure.url, {
+        bitrate: voiceChannel.bitrate,
+      }),
     };
 
     const epNum = ep.title.match(/Episode [0-9]+/i);
