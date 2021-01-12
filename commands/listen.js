@@ -115,11 +115,9 @@ class ListenCommand extends Command {
     this.client.listen = {
       voiceChannel,
       connection,
-      dispatcher: connection.play(ep.enclosure.url, {
-        bitrate: voiceChannel.bitrate,
-      }),
+      dispatcher: connection.play(ep.enclosure.url),
     };
-    console.log(voiceChannel.bitrate);
+    this.client.listen.dispatcher.setBitrate(voiceChannel.bitrate);
 
     const epNum = ep.title.match(/Episode [0-9]+/i);
     let epTitle =
