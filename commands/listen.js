@@ -10,14 +10,19 @@ class ListenCommand extends Command {
       args: [
         {
           id: "action",
-          type: ["play", "pause", "stop"],
+          type: "string",
           default: "play",
+        },
+        {
+          id: "episode",
+          type: "number",
+          default: 0,
         },
       ],
     });
   }
 
-  async exec(message, { action }) {
+  async exec(message, { action, episode }) {
     if (action !== "play" && !this.client.listen) {
       return message.channel.send("I'm not playing anything right now.");
     }
@@ -40,7 +45,7 @@ class ListenCommand extends Command {
     if (this.client.listen) {
       switch (action) {
         case "play":
-          if (this.client.listen.dispatcher.paused) {
+          if (this.client.listen.dispatcher.paused && episode === 0) {
             await this.client.listen.dispatcher.resume();
             return message.channel.send(
               `Resuming from ${parseStreamTime(
@@ -70,7 +75,9 @@ class ListenCommand extends Command {
           );
 
         default:
-          return message.channel.send("Not a valid argument.");
+          return message.channel.send(
+            "Not a valid option for the command `!listen`."
+          );
       }
     }
 
@@ -78,34 +85,47 @@ class ListenCommand extends Command {
     // url: "https://<path>.mp3"
     // length: "<milliseconds>"
     // type: "audio/mpeg"
-    const mediaData = mainFeed.items[0].enclosure;
+    let ep = mainFeed.items[0];
+    if (episode > 0) {
+      const mainArray = mainFeed.items[0].title.split(":");
+      const latestEpNum = Number(mainArray[0].trim().split(" ")[1]);
+      if (episode > latestEpNum) {
+        ep = null;
+      }
+      const item = mainFeed.items.find((ep, idx) => {
+        return ep.title.includes(` ${episode}:`);
+      });
+      if (item) {
+        ep = item;
+      } else {
+        ep = null;
+      }
+    }
+    if (!ep) {
+      return message.channel.send("Couldn't find that episode.");
+    }
+    console.log(ep);
     // Hard coded for now
     const voiceChannel = message.member.voice.channel
       ? message.member.voice.channel
-      : this.client.util.resolveChannel(
-          "789205633202782301",
-          message.guild.channels.cache
-        );
+      : null;
 
     const connection = voiceChannel ? await voiceChannel.join() : null;
-    if (!connection) return;
+    if (!connection)
+      return message.channel.send("Please join a voice channel first.");
     this.client.listen = {
       voiceChannel,
       connection,
-      dispatcher: connection.play(mediaData.url),
+      dispatcher: connection.play(ep.enclosure.url),
     };
 
-    const epNum = mainFeed.items[0].title.match(/Episode [0-9]+/i);
+    const epNum = ep.title.match(/Episode [0-9]+/i);
     let epTitle =
-      mainFeed.items[0].title.substring(0, epNum.index) +
-      mainFeed.items[0].title
+      ep.title.substring(0, epNum.index) +
+      ep.title
         .substring(epNum.index + epNum[0].length)
         .split(":")
         .join(" ");
-    const epLink = mainFeed.items[0].link;
-    const overCastLink = "https://overcast.fm/itunes1204911385";
-    const appleLink =
-      "https://podcasts.apple.com/us/podcast/your-kickstarter-sucks/id1204911385";
 
     const mainEmbed = {
       color: 0x83c133,
