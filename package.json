@@ -5,6 +5,7 @@
   "main": "buzzer.js",
   "author": "Jack Knight",
   "dependencies": {
+    "@discordjs/opus": "^0.3.3",
     "canvas": "^2.6.1",
     "cors": "^2.8.5",
     "date-fns": "^2.16.1",
@@ -14,6 +15,7 @@
     "dotenv": "^8.2.0",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
+    "ffmpeg-static": "^4.2.7",
     "fg-select-css": "^3.2.0",
     "http": "^0.0.1-security",
     "mongoose": "^5.11.8",

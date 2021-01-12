@@ -85,7 +85,6 @@ class LatestCommand extends Command {
       const bonusEpNum = bonusFeed.items[itemNum].title.match(
         /(YKS Premium S[0-9]+E[0-9]+|Episode [0-9]+)/i
       );
-      console.log(bonusFeed.items[itemNum].title, bonusEpNum);
       const bonusEpTitle =
         bonusFeed.items[itemNum].title.substring(0, bonusEpNum.index) +
         bonusFeed.items[itemNum].title
