@@ -59,7 +59,7 @@ class LatestCommand extends Command {
         },
         fields: [
           {
-            name: epNum,
+            name: epNum[0],
             value: epTitle ? epTitle : ".",
             inline: false,
           },
@@ -83,8 +83,9 @@ class LatestCommand extends Command {
         itemNum++;
       }
       const bonusEpNum = bonusFeed.items[itemNum].title.match(
-        /Episode [0-9]+/i
+        /(YKS Premium S[0-9]+E[0-9]+|Episode [0-9]+)/i
       );
+      console.log(bonusFeed.items[itemNum].title, bonusEpNum);
       const bonusEpTitle =
         bonusFeed.items[itemNum].title.substring(0, bonusEpNum.index) +
         bonusFeed.items[itemNum].title
@@ -104,7 +105,7 @@ class LatestCommand extends Command {
         },
         fields: [
           {
-            name: bonusEpNum,
+            name: bonusEpNum[0],
             value: bonusEpTitle ? bonusEpTitle : ".",
             inline: false,
           },
