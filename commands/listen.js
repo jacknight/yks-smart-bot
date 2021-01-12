@@ -119,6 +119,7 @@ class ListenCommand extends Command {
         bitrate: voiceChannel.bitrate,
       }),
     };
+    console.log(voiceChannel.bitrate);
 
     const epNum = ep.title.match(/Episode [0-9]+/i);
     let epTitle =
