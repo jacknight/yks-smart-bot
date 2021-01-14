@@ -17,12 +17,14 @@ A combination of my existing [Buzzerd](https://github.com/jacknight/buzzer) bot 
 | !heep         |             | Buzz in!                                           | No                              |
 
 ### Listen Together
-| Command       | Argument       | Description                |
-|---------------|----------------|----------------------------|
-| !listen play  |                | Play latest episode/resume |
-| !listen play  | episode number | Play given episode number  |
-| !listen pause |                | Pause                      |
-| !listen stop  |                | Stop                       |
+| Command        | Argument       | Description                |
+|----------------|----------------|----------------------------|
+| !listen play   |                | Play latest episode/resume |
+| !listen play   | episode number | Play given episode number  |
+| !listen random |                | Play a random episode      |
+| !listen pause  |                | Pause                      |
+| !listen stop   |                | Stop                       |
+
 
 ### Miscellaneous
 | Command | Argument       | Description                                                                       |
