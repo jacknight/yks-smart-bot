@@ -23,7 +23,7 @@ class ListenCommand extends Command {
   }
 
   async exec(message, { action, episode }) {
-    if (action !== "play" && !this.client.listen) {
+    if (action !== "play" && action !== "random" && !this.client.listen) {
       return message.channel.send("I'm not playing anything right now.");
     }
 
@@ -44,17 +44,27 @@ class ListenCommand extends Command {
     };
     if (this.client.listen) {
       switch (action) {
+        case "random":
+          return message.channel.send("Stop the current episode first.");
+
         case "play":
-          if (this.client.listen.dispatcher.paused && episode === 0) {
-            await this.client.listen.dispatcher.resume();
-            return message.channel.send(
-              `Resuming from ${parseStreamTime(
-                this.client.listen.dispatcher.streamTime
-              )}`
-            );
-          } else {
-            return message.channel.send("Already playing.");
+          if (this.client.listen.dispatcher.paused) {
+            if (episode === 0) {
+              // No arg passed
+              await this.client.listen.dispatcher.resume();
+              return message.channel.send(
+                `Resuming from ${parseStreamTime(
+                  this.client.listen.dispatcher.streamTime
+                )}`
+              );
+            } else {
+              return message.channel.send(
+                "Stop the current (paused) episode first."
+              );
+            }
           }
+          return message.channel.send("Stop the current episode first.");
+
         case "pause":
           if (!this.client.listen.dispatcher.paused) {
             await this.client.listen.dispatcher.pause(true);
@@ -63,9 +73,9 @@ class ListenCommand extends Command {
                 this.client.listen.dispatcher.streamTime
               )}`
             );
-          } else {
-            return message.channel.send("Already paused.");
           }
+          return message.channel.send("Already paused.");
+
         case "stop":
           await this.client.listen.dispatcher.destroy();
           await this.client.listen.voiceChannel.leave();
@@ -85,6 +95,10 @@ class ListenCommand extends Command {
     // url: "https://<path>.mp3"
     // length: "<milliseconds>"
     // type: "audio/mpeg"
+    if (action === "random") {
+      episode = Math.floor(Math.random() * mainFeed.items.length);
+    }
+
     let ep = mainFeed.items[0];
     if (episode > 0) {
       const mainArray = mainFeed.items[0].title.split(":");
@@ -102,7 +116,7 @@ class ListenCommand extends Command {
       }
     }
     if (!ep) {
-      return message.channel.send("Couldn't find that episode.");
+      return message.channel.send(`Couldn't find episode ${episode}.`);
     }
     // Hard coded for now
     const voiceChannel = message.member.voice.channel
