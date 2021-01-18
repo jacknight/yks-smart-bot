@@ -20,6 +20,7 @@ class LatestCommand extends Command {
   }
 
   async exec(message, { feed }) {
+    console.log(message, feed);
     if (!this.client.globalRates.get(message.guild.id)) {
       this.client.globalRates.set(message.guild.id, new Set());
     }
@@ -29,7 +30,7 @@ class LatestCommand extends Command {
       const self = this;
       setTimeout(function () {
         self.client.globalRates.get(message.guild.id).delete("latest");
-      }, 3600000);
+      }, 1000 * 60 * 10); // 10 min cooldown
 
       // Main feed
       const mainFeed = await parser.parseURL(MAIN_FEED_RSS);

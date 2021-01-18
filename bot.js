@@ -101,7 +101,10 @@ mongoose
 
     client.on("ready", () => {
       // Set bot status
-      setPresence();
+      setTimeout(() => {
+        pollRss();
+      }, 5 * 1000); // every 30 sec (too often?)
+
       // 5pm Friday Pacific time... do something to celebrate.
       createWeekendTimeout();
     });
@@ -631,6 +634,18 @@ mongoose
       return client.util.resolveChannel(channel.id, guildObj.channels.cache);
     }
 
+    async function getRssChannel(guildObj) {
+      const channel = JSON.parse(
+        // Get the configured rss channel from the db.
+        // If none set, return null
+        await client.settings.get(guildObj.id, "rssChannel", null)
+      );
+
+      return channel
+        ? client.util.resolveChannel(channel.id, guildObj.channels.cache)
+        : null;
+    }
+
     // Actions coming in from the frontend need to be
     // checked for permission.
     function userHasBuzzerRole(guildObj, userId) {
@@ -651,9 +666,10 @@ mongoose
     // Currently setting to "Listening to" the latest
     // main feed YKS episode. Wanted to spoof rich
     // presence spotify but bots don't have that option.
-    async function setPresence() {
+    async function pollRss() {
       const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
       if (mainFeed && mainFeed.items) {
+        // Set bot status
         client.user.setPresence({
           status: "online",
           activity: {
@@ -662,6 +678,39 @@ mongoose
             url: null,
           },
         });
+
+        // See what's stored in the DB for the latest ep...
+        const latestMainEpTitle = await client.settings.get(
+          client.user.id,
+          "latestMainEpTitle",
+          ""
+        );
+
+        // ...and compare to the RSS feed.
+        if (latestMainEpTitle != mainFeed.items[0].title) {
+          // Store newest ep title in DB
+          client.settings.set(
+            client.user.id,
+            "latestMainEpTitle",
+            mainFeed.items[0].title
+          );
+          // For each guild the bot is a member, check if there
+          // is an RSS channel and if so, send a message regarding
+          // the new ep.
+          client.guilds.cache.forEach(async (guild) => {
+            const rssChannel = await getRssChannel(guild);
+            if (rssChannel) {
+              const command = client.commandHandler.findCommand("latest");
+              if (command) {
+                client.commandHandler.runCommand(
+                  { guild, channel: rssChannel },
+                  command,
+                  { feed: "main" }
+                );
+              }
+            }
+          });
+        }
       }
     }
 
