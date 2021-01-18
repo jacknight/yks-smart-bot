@@ -15,12 +15,16 @@ class LatestCommand extends Command {
           type: ["main", "premium", "bonus", "patreon", "both"],
           default: "both",
         },
+        {
+          id: "newEp",
+          type: "string",
+          default: "",
+        },
       ],
     });
   }
 
-  async exec(message, { feed }) {
-    console.log(message, feed);
+  async exec(message, { feed, newEp }) {
     if (!this.client.globalRates.get(message.guild.id)) {
       this.client.globalRates.set(message.guild.id, new Set());
     }
@@ -118,7 +122,41 @@ class LatestCommand extends Command {
       };
 
       if (feed === "main" || feed === "both") {
-        message.channel.send({ embed: mainEmbed });
+        message.channel.send({ embed: mainEmbed }).then(async (message) => {
+          if (newEp === "yes") {
+            try {
+              await message.react(
+                this.client.util.resolveEmoji(
+                  "1ohno",
+                  message.guild.emojis.cache
+                )
+              );
+              await message.react(
+                this.client.util.resolveEmoji(
+                  "2they",
+                  message.guild.emojis.cache
+                )
+              );
+              await message.react(
+                this.client.util.resolveEmoji(
+                  "3did",
+                  message.guild.emojis.cache
+                )
+              );
+              await message.react(
+                this.client.util.resolveEmoji(
+                  "4another",
+                  message.guild.emojis.cache
+                )
+              );
+              await message.react(
+                this.client.util.resolveEmoji("yks", message.guild.emojis.cache)
+              );
+            } catch {
+              console.log;
+            }
+          }
+        });
       }
 
       if (
@@ -127,7 +165,41 @@ class LatestCommand extends Command {
         feed === "patreon" ||
         feed === "both"
       ) {
-        message.channel.send({ embed: bonusEmbed });
+        message.channel.send({ embed: bonusEmbed }).then(async (message) => {
+          if (newEp === "yes") {
+            try {
+              await message.react(
+                this.client.util.resolveEmoji(
+                  "1ohno",
+                  message.guild.emojis.cache
+                )
+              );
+              await message.react(
+                this.client.util.resolveEmoji(
+                  "2they",
+                  message.guild.emojis.cache
+                )
+              );
+              await message.react(
+                this.client.util.resolveEmoji(
+                  "3did",
+                  message.guild.emojis.cache
+                )
+              );
+              await message.react(
+                this.client.util.resolveEmoji(
+                  "4another",
+                  message.guild.emojis.cache
+                )
+              );
+              await message.react(
+                this.client.util.resolveEmoji("yks", message.guild.emojis.cache)
+              );
+            } catch {
+              console.log;
+            }
+          }
+        });
       }
     }
   }

@@ -102,9 +102,9 @@ mongoose
 
     client.on("ready", () => {
       // Set bot status
-      setTimeout(() => {
+      setInterval(() => {
         pollRss();
-      }, 30 * 1000); // every 30 sec (too often?)
+      }, 10 * 1000); // every 10 sec (too often?)
 
       // 5pm Friday Pacific time... do something to celebrate.
       createWeekendTimeout();
@@ -697,20 +697,27 @@ mongoose
 
         // ...and compare to the RSS feed.
         const newMain = latestMainEpTitle != mainFeed.items[0].title;
-        const newBonus = latestBonusEpTitle != bonusFeed.items[0].title;
+        const newBonus =
+          latestBonusEpTitle != bonusFeed.items[0].title &&
+          // main feed eps are posted on the bonus feed as well
+          mainFeed.items[0].title != bonusFeed.items[0].title;
         if (newMain || newBonus) {
           const feed = newMain ? "main" : "bonus";
-          // Store newest ep title in DB (just set them both, it's cleaner)
-          client.settings.set(
-            client.user.id,
-            "latestMainEpTitle",
-            mainFeed.items[0].title
-          );
-          client.settings.set(
-            client.user.id,
-            "latestBonusEpTitle",
-            bonusFeed.items[0].title
-          );
+          // Store newest ep title in DB
+          if (newMain) {
+            await client.settings.set(
+              client.user.id,
+              "latestMainEpTitle",
+              mainFeed.items[0].title
+            );
+          }
+          if (newBonus) {
+            await client.settings.set(
+              client.user.id,
+              "latestBonusEpTitle",
+              bonusFeed.items[0].title
+            );
+          }
           // For each guild the bot is a member, check if there
           // is an RSS channel and if so, send a message regarding
           // the new ep.
@@ -721,6 +728,7 @@ mongoose
               if (command) {
                 client.commandHandler.runCommand({ guild, channel }, command, {
                   feed,
+                  newEp: "yes",
                 });
               }
             }
