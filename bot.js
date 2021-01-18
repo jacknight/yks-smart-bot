@@ -14,6 +14,7 @@ const SessionModel = require("./db/sessions");
 const Parser = require("rss-parser");
 const parser = new Parser();
 const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
+const BONUS_FEED_RSS = process.env.BONUS_FEED_RSS;
 const Canvas = require("canvas");
 
 class BuzzerClient extends AkairoClient {
@@ -103,7 +104,7 @@ mongoose
       // Set bot status
       setTimeout(() => {
         pollRss();
-      }, 5 * 1000); // every 30 sec (too often?)
+      }, 30 * 1000); // every 30 sec (too often?)
 
       // 5pm Friday Pacific time... do something to celebrate.
       createWeekendTimeout();
@@ -668,7 +669,9 @@ mongoose
     // presence spotify but bots don't have that option.
     async function pollRss() {
       const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
-      if (mainFeed && mainFeed.items) {
+      const bonusFeed = await parser.parseURL(BONUS_FEED_RSS);
+
+      if (mainFeed && mainFeed.items && bonusFeed && bonusFeed.items) {
         // Set bot status
         client.user.setPresence({
           status: "online",
@@ -686,27 +689,39 @@ mongoose
           ""
         );
 
+        const latestBonusEpTitle = await client.settings.get(
+          client.user.id,
+          "latestBonusEpTitle",
+          ""
+        );
+
         // ...and compare to the RSS feed.
-        if (latestMainEpTitle != mainFeed.items[0].title) {
-          // Store newest ep title in DB
+        const newMain = latestMainEpTitle != mainFeed.items[0].title;
+        const newBonus = latestBonusEpTitle != bonusFeed.items[0].title;
+        if (newMain || newBonus) {
+          const feed = newMain ? "main" : "bonus";
+          // Store newest ep title in DB (just set them both, it's cleaner)
           client.settings.set(
             client.user.id,
             "latestMainEpTitle",
             mainFeed.items[0].title
           );
+          client.settings.set(
+            client.user.id,
+            "latestBonusEpTitle",
+            bonusFeed.items[0].title
+          );
           // For each guild the bot is a member, check if there
           // is an RSS channel and if so, send a message regarding
           // the new ep.
           client.guilds.cache.forEach(async (guild) => {
-            const rssChannel = await getRssChannel(guild);
-            if (rssChannel) {
+            const channel = await getRssChannel(guild);
+            if (channel) {
               const command = client.commandHandler.findCommand("latest");
               if (command) {
-                client.commandHandler.runCommand(
-                  { guild, channel: rssChannel },
-                  command,
-                  { feed: "main" }
-                );
+                client.commandHandler.runCommand({ guild, channel }, command, {
+                  feed,
+                });
               }
             }
           });
