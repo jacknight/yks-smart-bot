@@ -101,7 +101,8 @@ mongoose
     });
 
     client.on("ready", () => {
-      // Set bot status
+      // Set bot status and check for new episodes
+      pollRss();
       setInterval(() => {
         pollRss();
       }, 10 * 1000); // every 10 sec (too often?)
@@ -672,23 +673,14 @@ mongoose
       const bonusFeed = await parser.parseURL(BONUS_FEED_RSS);
 
       if (mainFeed && mainFeed.items && bonusFeed && bonusFeed.items) {
-        // Set bot status
-        client.user.setPresence({
-          status: "online",
-          activity: {
-            name: mainFeed.items[0].title,
-            type: "LISTENING",
-            url: null,
-          },
-        });
-
-        // See what's stored in the DB for the latest ep...
+        // See what's stored in the DB for the latest main ep...
         const latestMainEpTitle = await client.settings.get(
           client.user.id,
           "latestMainEpTitle",
           ""
         );
 
+        // ...and the latest boonus ep...
         const latestBonusEpTitle = await client.settings.get(
           client.user.id,
           "latestBonusEpTitle",
@@ -697,10 +689,29 @@ mongoose
 
         // ...and compare to the RSS feed.
         const newMain = latestMainEpTitle != mainFeed.items[0].title;
+        // Bonus feed is trickier because it has both the bonus episodes
+        // and the main feed episodes. We don't know which will go up first
+        // for certain, so we have to do a bit of regex to make sure it's
+        // a "true" premium episode. If they change this title format, it
+        // will at least default to not working instead of over-working.
+        //
+        // We'll also do a sanity check to make sure the bonus ep title
+        // and main feed title aren't the same thing.
         const newBonus =
+          bonusFeed.items[0].title.match(/YKS Premium S[0-9]+E[0-9]+/i) &&
           latestBonusEpTitle != bonusFeed.items[0].title &&
-          // main feed eps are posted on the bonus feed as well
           mainFeed.items[0].title != bonusFeed.items[0].title;
+
+        // Set bot status
+        client.user.setPresence({
+          status: "online",
+          activity: {
+            name: bonusFeed.items[0].title, // this is always the most recent ep
+            type: "LISTENING",
+            url: null,
+          },
+        });
+
         if (newMain || newBonus) {
           const feed = newMain ? "main" : "bonus";
           // Store newest ep title in DB
@@ -718,19 +729,16 @@ mongoose
               bonusFeed.items[0].title
             );
           }
-          // For each guild the bot is a member, check if there
-          // is an RSS channel and if so, send a message regarding
-          // the new ep.
+          // For each guild the bot is a member, check if there is an RSS channel
+          // channel configured and if so, send a message regarding the new ep.
           client.guilds.cache.forEach(async (guild) => {
             const channel = await getRssChannel(guild);
-            if (channel) {
-              const command = client.commandHandler.findCommand("latest");
-              if (command) {
-                client.commandHandler.runCommand({ guild, channel }, command, {
-                  feed,
-                  newEp: "yes",
-                });
-              }
+            const command = await client.commandHandler.findCommand("latest");
+            if (channel && command) {
+              client.commandHandler.runCommand({ guild, channel }, command, {
+                feed,
+                newEp: "yes",
+              });
             }
           });
         }
@@ -746,7 +754,7 @@ mongoose
       let nowUtc = new Date();
       // Make "last day of the week" a friday (week starts on saturday - 6)
       let friday5pmPacificInUTC = lastDayOfWeek(nowUtc, { weekStartsOn: 6 });
-      // Get the server timezone offset to UTC (given in minutes -> convert to hours)
+      // Get the server timezone offset in UTC (given in minutes -> convert to hours)
       let utcServerOffset = friday5pmPacificInUTC.getTimezoneOffset() / 60;
       // California is UTC-8. 5pm is 17 hours into the day.
       // (17 + 8 - utcServerOffset) to get 5pm Pacific time from UTC midnight.
