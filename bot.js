@@ -698,7 +698,7 @@ mongoose
         // We'll also do a sanity check to make sure the bonus ep title
         // and main feed title aren't the same thing.
         const newBonus =
-          bonusFeed.items[0].title.match(/YKS Premium S[0-9]+E[0-9]+/i) &&
+          bonusFeed.items[0].title.match(/S[0-9]+E[0-9]+/i) &&
           latestBonusEpTitle != bonusFeed.items[0].title &&
           mainFeed.items[0].title != bonusFeed.items[0].title;
 
