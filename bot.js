@@ -113,6 +113,8 @@ mongoose
 
     // New member greetings
     client.on("guildMemberAdd", async (member) => {
+      if (member.id === client.ownerID) return;
+
       // Build a dynamic composite image that welcomes the user with
       // their own display name and avatar.
 
