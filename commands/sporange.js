@@ -11,6 +11,10 @@ class SporangeCommand extends Command {
   }
 
   exec(message) {
+    if (!this.client.globalRates.get(message.guild.id)) {
+      this.client.globalRates.set(message.guild.id, new Set());
+    }
+
     if (!this.client.globalRates.get(message.guild.id).has("sporange")) {
       this.client.globalRates.get(message.guild.id).add("sporange");
       const self = this;
