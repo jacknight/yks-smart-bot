@@ -114,6 +114,8 @@ mongoose
     // New member greetings
     client.on("guildMemberAdd", async (member) => {
       if (member.id === client.ownerID) return;
+      if (client.settings.get(member.guild.id, "welcomeMsgDisabled", false))
+        return;
 
       // Build a dynamic composite image that welcomes the user with
       // their own display name and avatar.
@@ -599,6 +601,8 @@ mongoose
     });
 
     // Emit list of servers of which the bot is a member
+    // FIXME: Client doesn't need this. Filtering should
+    // be done server side, potential privacy issue.
     function emitServers() {
       const servers = client.guilds.cache;
       let ids = [];
