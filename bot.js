@@ -686,7 +686,7 @@ mongoose
           ""
         );
 
-        // ...and the latest boonus ep...
+        // ...and the latest bonus ep...
         const latestBonusEpTitle = await client.settings.get(
           client.user.id,
           "latestBonusEpTitle",
@@ -796,3 +796,7 @@ mongoose
     }
   })
   .catch((err) => console.log(err));
+
+process.on("unhandledRejection", (reason, promise) => {
+  console.log("Unhandled rejection. Reason: '", reason, "'\n", promise);
+});

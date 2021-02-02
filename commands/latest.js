@@ -38,13 +38,24 @@ class LatestCommand extends Command {
 
       // Main feed
       const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
-      const epNum = mainFeed.items[0].title.match(/Episode [0-9]+/i);
-      let epTitle =
-        mainFeed.items[0].title.substring(0, epNum.index) +
-        mainFeed.items[0].title
-          .substring(epNum.index + epNum[0].length)
-          .split(":")
-          .join(" ");
+      let epNum = mainFeed.items[0].title.match(/Episode [0-9]+/i);
+
+      let epTitle = !epNum
+        ? mainFeed.items[0].title
+        : mainFeed.items[0].title.substring(0, epNum.index) +
+          mainFeed.items[0].title
+            .substring(epNum.index + epNum[0].length)
+            .split(":")
+            .join(" ");
+
+      if (!epNum) {
+        console.log(
+          "Couldn't parse main episode title: ",
+          mainFeed.items[0].title
+        );
+        epNum = ["New Episode"];
+      }
+
       const epLink = mainFeed.items[0].link;
       const overCastLink = "https://overcast.fm/itunes1204911385";
       const appleLink =
@@ -87,15 +98,27 @@ class LatestCommand extends Command {
       ) {
         itemNum++;
       }
-      const bonusEpNum = bonusFeed.items[itemNum].title.match(
-        /(YKS Premium S[0-9]+E[0-9]+|Episode [0-9]+)/i
+
+      let bonusEpNum = bonusFeed.items[itemNum].title.match(
+        /(YKS Premium S[0-9]+E[0-9]+|Episode [0-9]+|Mailbag S[0-9]+E[0-9]+)/i
       );
-      const bonusEpTitle =
-        bonusFeed.items[itemNum].title.substring(0, bonusEpNum.index) +
-        bonusFeed.items[itemNum].title
-          .substring(bonusEpNum.index + bonusEpNum[0].length)
-          .split(":")
-          .join(" ");
+
+      const bonusEpTitle = !bonusEpNum
+        ? bonusFeed.items[itemNum].title
+        : bonusFeed.items[itemNum].title.substring(0, bonusEpNum.index) +
+          bonusFeed.items[itemNum].title
+            .substring(bonusEpNum.index + bonusEpNum[0].length)
+            .split(":")
+            .join(" ");
+
+      if (!bonusEpNum) {
+        console.log(
+          "Couldn't parse bonus episode title: ",
+          bonusFeed.items[itemNum].title
+        );
+        bonusEpNum = ["New Episode"];
+      }
+
       const bonusEpLink = bonusFeed.items[itemNum].link;
       const bonusEmbed = {
         color: 0xddaf74,
