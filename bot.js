@@ -172,12 +172,12 @@ mongoose
       } else {
         const responses = [
           "You don't have to be insane to post here, but it's a \"good to have.\"",
-          "You may have heard that insanity is a requirement in this server. That's not entirely true. But it doesn't hurt.",
-          "Being insane and posting here go hand-in-hand for a lot of folks. But that's not to say it's a prerequisite for you to be insane.",
-          "Insane and posting here? Yeah, it's true. That's quite common. But by no means required.",
-          "You don't have to be insane to post here, but it helps.",
           "I give it a month.",
           "Make yourself at home.\nOh ok, you're going straight for the nasty channel. Ah! Well. Nevertheless,",
+          "It's not too late to just turn around and walk away. No one would blame you.",
+          "Grab an empty chair in the circle. We're just about to start sharing how YKS ruined our lives.",
+          "If you need to know what episode something happened in, ask vinny.",
+          "If you see JF or DB in here, avert your eyes from their posts as a sign of respect.",
         ];
         member.guild.systemChannel.send(
           `Welcome, ${member}! ${
