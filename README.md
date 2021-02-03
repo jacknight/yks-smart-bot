@@ -27,7 +27,8 @@ A combination of my existing [Buzzerd](https://github.com/jacknight/buzzer) bot 
 
 
 ### Miscellaneous
-| Command | Argument       | Description                                                                       |
-|---------|----------------|-----------------------------------------------------------------------------------|
-| !best   | episode number | Vote on your favorite ever episode. One vote per member, but it can be changed    |
-| !latest |                | Get titles and links to the latest episodes from both the main and patreon feeds. |
+| Command  | Argument       | Description                                                                       |
+|----------|----------------|-----------------------------------------------------------------------------------|
+| !best    | episode number | Vote on your favorite ever episode. One vote per member, but it can be changed    |
+| !latest  |                | Get titles and links to the latest episodes from both the main and patreon feeds. |
+| !welcome |                | Toggle guild member welcome message.
