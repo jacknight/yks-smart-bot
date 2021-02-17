@@ -80,9 +80,7 @@ class ListenCommand extends Command {
           await this.client.listen.dispatcher.destroy();
           await this.client.listen.voiceChannel.leave();
           this.client.listen = null;
-          return message.channel.send(
-            "You shoulda let it finish it was gonna get good."
-          );
+          return message.channel.send("Fine.");
 
         default:
           return message.channel.send(
@@ -118,7 +116,7 @@ class ListenCommand extends Command {
     if (!ep) {
       return message.channel.send(`Couldn't find episode ${episode}.`);
     }
-    // Hard coded for now
+
     const voiceChannel = message.member.voice.channel
       ? message.member.voice.channel
       : null;
@@ -132,6 +130,13 @@ class ListenCommand extends Command {
       dispatcher: connection.play(ep.enclosure.url),
     };
     this.client.listen.dispatcher.setBitrate(voiceChannel.bitrate);
+
+    this.client.listen.dispatcher.on("error", console.log);
+
+    this.client.listen.dispatcher.on("finish", () => {
+      this.client.listen.voiceChannel.leave();
+      this.client.listen = null;
+    });
 
     const epNum = ep.title.match(/Episode [0-9]+/i);
     let epTitle =
