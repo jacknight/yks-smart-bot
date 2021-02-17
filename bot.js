@@ -117,6 +117,23 @@ mongoose
       if (client.settings.get(member.guild.id, "welcomeMsgDisabled", false))
         return;
 
+      // Check if they've already been welcomed
+      const welcomedMembers = await client.settings.get(
+        member.guild.id,
+        "welcomedMembers",
+        []
+      );
+      if (welcomedMembers.some((id) => id === member.id)) return;
+
+      // Add to welcomed members for guild so we don't do this again.
+      welcomedMembers.push(member.id);
+      // TODO: This is temporary! Remove this after a first run. Easier for me than writing a separate migration script...
+      member.guild.members.cache.forEach((mem) => {
+        if (!welcomedMembers.some((id) => id === mem.id))
+          welcomedMembers.push(mem.id);
+      });
+      client.settings.set(member.guild.id, "welcomedMembers", welcomedMembers);
+
       // Build a dynamic composite image that welcomes the user with
       // their own display name and avatar.
 
