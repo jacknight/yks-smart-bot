@@ -100,7 +100,7 @@ mongoose
       },
     });
 
-    client.on("ready", () => {
+    client.on("ready", async () => {
       // Set bot status and check for new episodes
       pollRss();
       setInterval(() => {
@@ -109,6 +109,11 @@ mongoose
 
       // 5pm Friday Pacific time... do something to celebrate.
       createWeekendTimeout();
+
+      // Delete expired tokens
+      await SessionModel.deleteMany({
+        "session.expirationDate": { $lt: new Date(Date.now()) },
+      });
     });
 
     // New member greetings
