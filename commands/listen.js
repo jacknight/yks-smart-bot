@@ -42,6 +42,7 @@ class ListenCommand extends Command {
       }
       return `${hours}:${minutes}:${seconds}`;
     };
+
     if (this.client.listen) {
       switch (action) {
         case "random":
@@ -146,7 +147,8 @@ class ListenCommand extends Command {
         .split(":")
         .join(" ");
 
-    const mainEmbed = {
+    let progressStr = "|--------------------|";
+    let mainEmbed = {
       color: 0x83c133,
       title: `Now playing in ${voiceChannel.name}`,
       author: {
@@ -164,10 +166,44 @@ class ListenCommand extends Command {
           value: epTitle ? epTitle : ".",
           inline: false,
         },
+        {
+          name: "Progress",
+          value:
+            progressStr.substring(0, 1) +
+            ":microphone2:" +
+            progressStr.substring(2),
+          inline: false,
+        },
       ],
     };
 
-    message.channel.send({ embed: mainEmbed });
+    let prevProgress = 0;
+    message.channel
+      .send({ embed: mainEmbed })
+      .then((msg) => {
+        const duration =
+          1000 *
+          ep.itunes.duration.split(":").reduce((totalMs, curr) => {
+            return Number(totalMs) * 60 + Number(curr);
+          });
+        const self = this;
+        setInterval(() => {
+          const progress = Math.ceil(
+            (100 * self.client.listen.dispatcher.streamTime) / duration / 5
+          );
+
+          // Only edit if it's actually gonna change.
+          if (progress > prevProgress) {
+            prevProgress = progress;
+            mainEmbed.fields[1].value =
+              progressStr.substring(0, progress) +
+              ":microphone2:" +
+              progressStr.substring(progress + 1);
+            msg.edit({ embed: mainEmbed });
+          }
+        }, 3 * 60 * 1000); // every 3 min
+      })
+      .catch((err) => console.log);
   }
 }
 
