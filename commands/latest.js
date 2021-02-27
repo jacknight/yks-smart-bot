@@ -25,16 +25,20 @@ class LatestCommand extends Command {
   }
 
   async exec(message, { feed, newEp }) {
-    if (!this.client.globalRates.get(message.guild.id)) {
-      this.client.globalRates.set(message.guild.id, new Set());
-    }
+    // If this is a new ep, it means the bot itself called this
+    // after polling the RSS feed. We don't want rate limits to apply here.
+    if (newEp !== "yes") {
+      if (!this.client.globalRates.get(message.guild.id)) {
+        this.client.globalRates.set(message.guild.id, new Set());
+      }
 
-    if (!this.client.globalRates.get(message.guild.id).has("latest")) {
-      this.client.globalRates.get(message.guild.id).add("latest");
-      const self = this;
-      setTimeout(function () {
-        self.client.globalRates.get(message.guild.id).delete("latest");
-      }, 1000 * 60 * 10); // 10 min cooldown
+      if (!this.client.globalRates.get(message.guild.id).has("latest")) {
+        this.client.globalRates.get(message.guild.id).add("latest");
+        const self = this;
+        setTimeout(function () {
+          self.client.globalRates.get(message.guild.id).delete("latest");
+        }, 1000 * 60 * 10); // 10 min cooldown
+      }
 
       // Main feed
       const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
