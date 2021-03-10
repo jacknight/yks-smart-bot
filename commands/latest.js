@@ -1,24 +1,24 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
-const Parser = require("rss-parser");
+const Parser = require('rss-parser');
 const parser = new Parser();
 const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
 const BONUS_FEED_RSS = process.env.BONUS_FEED_RSS;
 
 class LatestCommand extends Command {
   constructor() {
-    super("latest", {
-      aliases: ["latest", "eps", "recent"],
+    super('latest', {
+      aliases: ['latest', 'eps', 'recent'],
       args: [
         {
-          id: "feed",
-          type: ["main", "premium", "bonus", "patreon", "both"],
-          default: "both",
+          id: 'feed',
+          type: ['main', 'premium', 'bonus', 'patreon', 'both'],
+          default: 'both',
         },
         {
-          id: "newEp",
-          type: "string",
-          default: "",
+          id: 'newEp',
+          type: 'string',
+          default: '',
         },
       ],
     });
@@ -34,42 +34,42 @@ class LatestCommand extends Command {
       : mainFeed.items[0].title.substring(0, epNum.index) +
         mainFeed.items[0].title
           .substring(epNum.index + epNum[0].length)
-          .split(":")
-          .join(" ");
+          .split(':')
+          .join(' ');
 
     if (!epNum) {
       console.log(
         "Couldn't parse main episode title: ",
         mainFeed.items[0].title
       );
-      epNum = ["New Episode"];
+      epNum = ['New Episode'];
     }
 
     const epLink = mainFeed.items[0].link;
-    const overCastLink = "https://overcast.fm/itunes1204911385";
+    const overCastLink = 'https://overcast.fm/itunes1204911385';
     const appleLink =
-      "https://podcasts.apple.com/us/podcast/your-kickstarter-sucks/id1204911385";
+      'https://podcasts.apple.com/us/podcast/your-kickstarter-sucks/id1204911385';
 
     const mainEmbed = {
       color: 0x83c133,
       title: mainFeed.title,
       author: {
         icon_url:
-          "https://res.cloudinary.com/pippa/image/fetch/h_500,w_500,f_auto/https://assets.pippa.io/shows/5d137ece8b774eb816199f63/1562125598000-ef38e8a9cd086f609f806209d1341102.jpeg",
-        url: "https://shows.acast.com/yourkickstartersucks",
+          'https://res.cloudinary.com/pippa/image/fetch/h_500,w_500,f_auto/https://assets.pippa.io/shows/5d137ece8b774eb816199f63/1562125598000-ef38e8a9cd086f609f806209d1341102.jpeg',
+        url: 'https://shows.acast.com/yourkickstartersucks',
       },
       thumbnail: {
         url:
-          "https://res.cloudinary.com/pippa/image/fetch/h_500,w_500,f_auto/https://assets.pippa.io/shows/5d137ece8b774eb816199f63/1562125598000-ef38e8a9cd086f609f806209d1341102.jpeg",
+          'https://res.cloudinary.com/pippa/image/fetch/h_500,w_500,f_auto/https://assets.pippa.io/shows/5d137ece8b774eb816199f63/1562125598000-ef38e8a9cd086f609f806209d1341102.jpeg',
       },
       fields: [
         {
           name: epNum[0],
-          value: epTitle ? epTitle : ".",
+          value: epTitle ? epTitle : '.',
           inline: false,
         },
         {
-          name: "Links",
+          name: 'Links',
           value: `[Acast](${epLink})
 [Overcast](${overCastLink})
 [Apple](${appleLink})`,
@@ -89,7 +89,7 @@ class LatestCommand extends Command {
     }
 
     let bonusEpNum = bonusFeed.items[itemNum].title.match(
-      /(YKS Premium S[0-9]+E[0-9]+|Episode [0-9]+|Mailbag S[0-9]+E[0-9]+)/i
+      /(YKS S[0-9]+E[0-9]+|YKS Premium S[0-9]+E[0-9]+|Episode [0-9]+|Mailbag S[0-9]+E[0-9]+)/i
     );
 
     const bonusEpTitle = !bonusEpNum
@@ -97,15 +97,15 @@ class LatestCommand extends Command {
       : bonusFeed.items[itemNum].title.substring(0, bonusEpNum.index) +
         bonusFeed.items[itemNum].title
           .substring(bonusEpNum.index + bonusEpNum[0].length)
-          .split(":")
-          .join(" ");
+          .split(':')
+          .join(' ');
 
     if (!bonusEpNum) {
       console.log(
         "Couldn't parse bonus episode title: ",
         bonusFeed.items[itemNum].title
       );
-      bonusEpNum = ["New Episode"];
+      bonusEpNum = ['New Episode'];
     }
 
     const bonusEpLink = bonusFeed.items[itemNum].link;
@@ -113,47 +113,47 @@ class LatestCommand extends Command {
       color: 0xddaf74,
       title: bonusFeed.title,
       author: {
-        icon_url: "https://i.imgur.com/5sHYjAX.jpeg",
-        url: "https://www.patreon.com/yourkickstartersucks",
+        icon_url: 'https://i.imgur.com/5sHYjAX.jpeg',
+        url: 'https://www.patreon.com/yourkickstartersucks',
       },
       thumbnail: {
-        url: "https://i.imgur.com/5sHYjAX.jpeg",
+        url: 'https://i.imgur.com/5sHYjAX.jpeg',
       },
       fields: [
         {
           name: bonusEpNum[0],
-          value: bonusEpTitle ? bonusEpTitle : ".",
+          value: bonusEpTitle ? bonusEpTitle : '.',
           inline: false,
         },
         {
-          name: "Link",
+          name: 'Link',
           value: `[Patreon](${bonusEpLink})`,
           inline: false,
         },
       ],
     };
 
-    if (feed === "main" || feed === "both") {
+    if (feed === 'main' || feed === 'both') {
       message.channel.send({ embed: mainEmbed }).then(async (message) => {
-        if (newEp === "yes") {
+        if (newEp === 'yes') {
           try {
             await message.react(
-              this.client.util.resolveEmoji("1ohno", message.guild.emojis.cache)
+              this.client.util.resolveEmoji('1ohno', message.guild.emojis.cache)
             );
             await message.react(
-              this.client.util.resolveEmoji("2they", message.guild.emojis.cache)
+              this.client.util.resolveEmoji('2they', message.guild.emojis.cache)
             );
             await message.react(
-              this.client.util.resolveEmoji("3did", message.guild.emojis.cache)
+              this.client.util.resolveEmoji('3did', message.guild.emojis.cache)
             );
             await message.react(
               this.client.util.resolveEmoji(
-                "4another",
+                '4another',
                 message.guild.emojis.cache
               )
             );
             await message.react(
-              this.client.util.resolveEmoji("yks", message.guild.emojis.cache)
+              this.client.util.resolveEmoji('yks', message.guild.emojis.cache)
             );
           } catch {
             console.log;
@@ -163,31 +163,31 @@ class LatestCommand extends Command {
     }
 
     if (
-      feed === "bonus" ||
-      feed === "premium" ||
-      feed === "patreon" ||
-      feed === "both"
+      feed === 'bonus' ||
+      feed === 'premium' ||
+      feed === 'patreon' ||
+      feed === 'both'
     ) {
       message.channel.send({ embed: bonusEmbed }).then(async (message) => {
-        if (newEp === "yes") {
+        if (newEp === 'yes') {
           try {
             await message.react(
-              this.client.util.resolveEmoji("1ohno", message.guild.emojis.cache)
+              this.client.util.resolveEmoji('1ohno', message.guild.emojis.cache)
             );
             await message.react(
-              this.client.util.resolveEmoji("2they", message.guild.emojis.cache)
+              this.client.util.resolveEmoji('2they', message.guild.emojis.cache)
             );
             await message.react(
-              this.client.util.resolveEmoji("3did", message.guild.emojis.cache)
+              this.client.util.resolveEmoji('3did', message.guild.emojis.cache)
             );
             await message.react(
               this.client.util.resolveEmoji(
-                "4another",
+                '4another',
                 message.guild.emojis.cache
               )
             );
             await message.react(
-              this.client.util.resolveEmoji("yks", message.guild.emojis.cache)
+              this.client.util.resolveEmoji('yks', message.guild.emojis.cache)
             );
           } catch {
             console.log;
