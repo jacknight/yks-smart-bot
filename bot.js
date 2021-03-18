@@ -181,11 +181,6 @@ mongoose
       } else if (member.id === "251217007045902348") {
         // tay
         member.guild.systemChannel.send("Tay is back!", attachment);
-      } else if (member.id === client.ownerID) {
-        member.guild.systemChannel.send(
-          "My master! My master has returned! I kept telling them you would!",
-          attachment
-        );
       } else {
         const responses = [
           "You don't have to be insane to post here, but it's a \"good to have.\"",
@@ -195,6 +190,7 @@ mongoose
           "Grab an empty chair in the circle. We're just about to start sharing how YKS ruined our lives.",
           "If you need to know what episode something happened in, ask vinny.",
           "If you see JF or DB in here, avert your eyes from their posts as a sign of respect.",
+          "Vote for your favorite episode # using the command `!best <episode number>`",
         ];
         member.guild.systemChannel.send(
           `Welcome, ${member}! ${
