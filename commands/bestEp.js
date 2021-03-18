@@ -95,8 +95,8 @@ class BestCommand extends Command {
     const sortedTotals = new Map(
       [...bestEpTotals.entries()].sort((a, b) => {
         if (b[1] === a[1]) {
-          // recency bias.
-          return b[0] - a[0];
+          // no bias for ties!
+          return Math.floor(Math.random() * 2) === 0 ? -1 : 1;
         }
         return b[1] - a[1];
       })
