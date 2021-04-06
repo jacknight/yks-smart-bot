@@ -356,7 +356,9 @@ mongoose
         if (!client.sockets.has(guild.id)) {
           client.sockets.set(guild.id, [socket]);
         } else {
-          client.sockets.get(guild.id).push(socket);
+          const guildSockets = client.sockets.get(guild.id);
+          guildSockets.push(socket);
+          client.sockets.set(guild.id, guildSockets);
         }
       });
 
@@ -366,7 +368,9 @@ mongoose
         if (client.sockets.has(guild.id)) {
           const idx = client.sockets.get(guild.id).indexOf(socket);
           if (idx >= 0) {
-            client.sockets.get(guild.id).splice(idx, 1);
+            const guildSockets = client.sockets.get(guild.id);
+            guildSockets.splice(idx, 1);
+            client.sockets.set(guild.id, guildSockets);
           }
         }
       });
