@@ -21,13 +21,7 @@ class EveCommand extends Command {
         self.client.globalRates.get(message.guild.id).delete("eve");
       }, 1000 * 60); // once per min
 
-      const responses = [
-        this.client.util.resolveEmoji("partyblob", message.guild.emojis.cache),
-      ];
-      const response = responses[Math.floor(Math.random() * responses.length)];
-      if (response) {
-        message.channel.send(response.toString());
-      }
+      message.channel.send("Who?");
     }
   }
 }
