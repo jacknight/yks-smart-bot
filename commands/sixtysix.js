@@ -10,7 +10,9 @@ class GorbCommand extends Command {
   }
 
   exec(message) {
-    message.channel.send("66");
+    if (message.channel.name === "yks-shit") {
+      message.channel.send("66");
+    }
   }
 }
 
