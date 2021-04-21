@@ -21,11 +21,8 @@ class BarnesCommand extends Command {
         self.client.globalRates.get(message.guild.id).delete("barnes");
       }, 1000 * 60); // once per min
 
-      const responses = [":thumbsup:"];
-      const response = responses[Math.floor(Math.random() * responses.length)];
-      if (response) {
-        message.channel.send(response.toString());
-      }
+      const attachment = this.client.util.attachment("./assets/barmes.jpg");
+      message.channel.send(attachment);
     }
   }
 }
