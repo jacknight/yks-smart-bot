@@ -118,7 +118,6 @@ mongoose
 
     // New member greetings
     client.on("guildMemberAdd", async (member) => {
-      if (member.id === client.ownerID) return;
       if (client.settings.get(member.guild.id, "welcomeMsgDisabled", false))
         return;
 
