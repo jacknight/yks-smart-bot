@@ -122,7 +122,8 @@ mongoose
     client.on("message", (message) => {
       if (
         (message.channel.id === "672146741986066458" ||
-          message.channel.id === "844943398842007583") &&
+          message.channel.id === "844943398842007583" ||
+          message.channel.id === "844945022222860359") &&
         message.attachments.size > 0
       ) {
         message.attachments.forEach((attachment) => {
