@@ -16,6 +16,7 @@ const parser = new Parser();
 const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
 const BONUS_FEED_RSS = process.env.BONUS_FEED_RSS;
 const Canvas = require("canvas");
+const { MessageFlags } = require("discord.js");
 
 class BuzzerClient extends AkairoClient {
   constructor() {
@@ -114,6 +115,36 @@ mongoose
       await SessionModel.deleteMany({
         "session.expirationDate": { $lt: new Date(Date.now()) },
       });
+    });
+
+    // Check if it's a clip posted to the clips channel, and if so, store
+    // the link in the database.
+    client.on("message", (message) => {
+      if (
+        (message.channel.id === "672146741986066458" ||
+          message.channel.id === "844943398842007583") &&
+        message.attachments.size > 0
+      ) {
+        message.attachments.forEach((attachment) => {
+          const filetype = attachment.url.substring(
+            attachment.url.lastIndexOf(".") + 1
+          );
+          if (
+            filetype === "mov" ||
+            filetype === "mp4" ||
+            filetype === "webm" ||
+            filetype === "wav" ||
+            filetype === "mp3" ||
+            filetype === "ogg"
+          ) {
+            const clips = client.settings.get(message.guild.id, "clips", []);
+            if (!clips.find((clip) => clip === attachment.url)) {
+              clips.push(attachment.url);
+              client.settings.set(message.guild.id, "clips", clips);
+            }
+          }
+        });
+      }
     });
 
     // New member greetings
