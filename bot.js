@@ -108,9 +108,6 @@ mongoose
         pollRss();
       }, 10 * 1000); // every 10 sec (too often?)
 
-      // 5pm Friday Pacific time... do something to celebrate.
-      createWeekendTimeout();
-
       // Delete expired tokens
       await SessionModel.deleteMany({
         "session.expirationDate": { $lt: new Date(Date.now()) },
@@ -797,33 +794,6 @@ mongoose
           });
         }
       }
-    }
-
-    // On Friday 5pm Pacific time, drop a little celebratory
-    // gif or video that it's finally the weekend.
-    function createWeekendTimeout() {
-      const lastDayOfWeek = require("date-fns/lastDayOfWeek");
-      const add = require("date-fns/add");
-
-      let nowUtc = new Date();
-      // Make "last day of the week" a friday (week starts on saturday - 6)
-      let friday5pmPacificInUTC = lastDayOfWeek(nowUtc, { weekStartsOn: 6 });
-      // Get the server timezone offset in UTC (given in minutes -> convert to hours)
-      let utcServerOffset = friday5pmPacificInUTC.getTimezoneOffset() / 60;
-      // California is UTC-8. 5pm is 17 hours into the day.
-      // (17 + 8 - utcServerOffset) to get 5pm Pacific time from UTC midnight.
-      friday5pmPacificInUTC = add(friday5pmPacificInUTC, {
-        hours: 17 + 8 - utcServerOffset,
-      });
-
-      // Set a timeout for as much time between now and friday 5pm pacific.
-      setTimeout(() => {
-        client.guilds.cache.forEach((guild) => {
-          guild.systemChannel.send("It's Friday 5pm Pacific.", {
-            files: ["./assets/weekend.mp4"],
-          });
-        });
-      }, friday5pmPacificInUTC.getTime() - nowUtc.getTime());
     }
 
     // New member greeting helper to reduce size of text as necessary.
