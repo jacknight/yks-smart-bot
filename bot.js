@@ -112,10 +112,6 @@ mongoose
       await SessionModel.deleteMany({
         "session.expirationDate": { $lt: new Date(Date.now()) },
       });
-
-      // Wish happy birthday to vinny.
-      const vinny = client.users.cache.get("357008919228448769");
-      vinny.send("Happy birthday, Vinny! From your friend burgy.");
     });
 
     // Check if it's a clip posted to the clips channel, and if so, store
