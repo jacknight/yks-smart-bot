@@ -115,7 +115,7 @@ mongoose
 
       // Wish happy birthday to vinny.
       const vinny = client.users.cache.get("357008919228448769");
-      user.send("Happy birthday, Vinny! From your friend burgy.");
+      vinny.send("Happy birthday, Vinny! From your friend burgy.");
     });
 
     // Check if it's a clip posted to the clips channel, and if so, store
