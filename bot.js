@@ -101,17 +101,21 @@ mongoose
       },
     });
 
-    client.on("ready", async () => {
+    client.once("ready", async () => {
       // Set bot status and check for new episodes
       pollRss();
       setInterval(() => {
         pollRss();
-      }, 10 * 1000); // every 10 sec (too often?)
+      }, 60 * 1000); // every 60 sec
 
       // Delete expired tokens
       await SessionModel.deleteMany({
         "session.expirationDate": { $lt: new Date(Date.now()) },
       });
+
+      // Wish happy birthday to vinny.
+      const vinny = client.users.cache.get("357008919228448769");
+      user.send("Happy birthday, Vinny! From your friend burgy.");
     });
 
     // Check if it's a clip posted to the clips channel, and if so, store
