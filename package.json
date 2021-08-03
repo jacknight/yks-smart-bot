@@ -20,6 +20,7 @@
     "http": "^0.0.1-security",
     "mongoose": "^5.11.8",
     "node-fetch": "^2.6.1",
+    "openai-api": "^1.2.3",
     "rss-parser": "^3.10.0",
     "socket.io": "^3.0.5"
   },
