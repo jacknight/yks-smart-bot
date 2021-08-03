@@ -6,7 +6,7 @@ class KickstarterCommand extends Command {
   constructor() {
     super("kickstarter", {
       aliases: ["kickstarter"],
-      cooldown: 1000 * 60 * 60, // once per hour
+      cooldown: 1000 * 60 * 60 * 24, // once per day
       ratelimit: 1,
       args: [{ id: "name", match: "content" }],
     });
@@ -121,7 +121,6 @@ ${name}`;
       stop: ["###"],
     });
 
-    console.log(response, response.data.choices);
     return message.channel.send(`${name}${response.data.choices[0].text}`);
   }
 }
