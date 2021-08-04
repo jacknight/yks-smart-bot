@@ -1,7 +1,27 @@
-const OpenAI = require("openai-api");
-const fs = require("fs");
 const { Command } = require("discord-akairo");
-const { MessageEmbed } = require("discord.js");
+const axios = require("axios");
+
+const _send_request = function (url, method, opts = {}) {
+  let camelToUnderscore = (key) => {
+    let result = key.replace(/([A-Z])/g, " $1");
+    return result.split(" ").join("_").toLowerCase();
+  };
+
+  const data = {};
+  for (const key in opts) {
+    data[camelToUnderscore(key)] = opts[key];
+  }
+
+  return axios({
+    url,
+    headers: {
+      Authorization: `Bearer ${process.env.OPENAI_KEY}`,
+      "Content-Type": "application/json",
+    },
+    data: Object.keys(data).length ? data : "",
+    method,
+  });
+};
 
 class KickstarterCommand extends Command {
   constructor() {
@@ -15,57 +35,24 @@ class KickstarterCommand extends Command {
 
   async exec(message, { name }) {
     if (name.length > 80) return message.channel.send("Shorten it up, please.");
-    const openai = new OpenAI(process.env.OPENAI_KEY);
-    const prompt = `This a generator for product campaigns run on Kickstarter.com.
-A product campaign is considered successful only if the pledged amount is equal to or greater than the goal.
-The description should be around 2 sentences long.
-
-**Name**: Smart Clothing - Upgrade Your Clothing
-**Category**: technology/wearables
-**Status**: failed
-**Backers**: 10
-**Pledged**: 505
-**Goal**: 15000
-**Creator**: Canyon Tober
-**Description**: Smart Clothing is the platform that connects fashion with technology. The reason you will want to buy all of your clothes online.
-###
-
-**Name**: FlipbooKit - Mechanical Marvels & Flip-Hat
-**Category**: design/product design
-**Status**: successful
-**Backers**: 133
-**Pledged**: 23000
-**Goal**: 17500
-**Creator**: shinymind
-**Description**: Mr. and Mrs. FlipBooKit bring you rare and unique creations -- that you can personalize!
-###
-
-**Name**: Flying to Seth MacFarlane
-**Category**: film & video/documentary
-**Status**: failed
-**Backers**: 27
-**Pledged**: 3268
-**Goal**: 40000
-**Creator**: Michael Patrick Christopher Ireland
-**Description**: I need flying lessons to fly and make a unique documentary cross country trek in search of Seth MacFarlane and to conquer Hollywood
-###
-
-**Name**: ${name}`;
-
-    const response = await openai.complete({
-      engine: "davinci",
-      prompt: prompt,
-      maxTokens: 200,
-      temperature: 0.7,
-      topP: 1,
-      presencePenalty: 0,
-      frequencyPenalty: 0,
-      bestOf: 1,
-      n: 1,
-      stream: false,
-      stop: ["###"],
-      echo: false,
-    });
+    const response = await _send_request(
+      "https://api.openai.com/v1/completions",
+      "post",
+      {
+        prompt: name,
+        model: "curie:ft-yks-smart-bot-2021-08-04-13-59-00",
+        maxTokens: 200,
+        temperature: 0.7,
+        topP: 1,
+        presencePenalty: 0,
+        frequencyPenalty: 0,
+        bestOf: 1,
+        n: 1,
+        stream: false,
+        stop: ["###"],
+        echo: false,
+      }
+    );
 
     const completion = response.data.choices[0].text;
     const split = completion.split("\n");
@@ -88,11 +75,19 @@ The description should be around 2 sentences long.
       description
     ) {
       const embed = {
-        color: 0x83c133,
+        color:
+          status[1] === "successful"
+            ? 0x83c133
+            : status[1] === "failed" || status[1] === "canceled"
+            ? 0xff0000
+            : 0x0000ff,
         title,
-        author: author[1],
         description: description[1],
         fields: [
+          {
+            name: "Creator",
+            value: author[1],
+          },
           {
             name: "Category",
             value: category[1],
