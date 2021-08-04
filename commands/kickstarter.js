@@ -39,7 +39,7 @@ class KickstarterCommand extends Command {
       "https://api.openai.com/v1/completions",
       "post",
       {
-        prompt: name,
+        prompt: `**Name**: ${name}`,
         model: "curie:ft-yks-smart-bot-2021-08-04-13-59-00",
         maxTokens: 200,
         temperature: 0.7,
