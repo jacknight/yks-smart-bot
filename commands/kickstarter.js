@@ -87,26 +87,31 @@ class KickstarterCommand extends Command {
           {
             name: "Creator",
             value: author[1],
+            inline: false,
           },
           {
             name: "Category",
             value: category[1],
-          },
-          {
-            name: "Status",
-            value: status[1],
+            inline: false,
           },
           {
             name: "Backers",
             value: backers[1],
+            inline: true,
           },
           {
             name: "Pledged",
             value: pledged[1],
+            inline: true,
           },
           {
             name: "Goal",
             value: goal[1],
+            inline: true,
+          },
+          {
+            name: "Status",
+            value: status[1],
           },
         ],
         footer: {
