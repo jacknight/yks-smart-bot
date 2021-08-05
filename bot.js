@@ -755,7 +755,7 @@ mongoose
 
         // Set bot status
         client.user.setPresence({
-          status: "online",
+          status: "dnd",
           activity: {
             name: bonusFeed.items[0].title, // this is always the most recent ep
             type: "LISTENING",
