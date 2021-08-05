@@ -11,7 +11,6 @@ class KickstarterCommand extends Command {
       ratelimit: 1,
       args: [{ id: "name", match: "content" }],
       ignoreCooldown: (message, command) => {
-        console.log(message);
         return (
           message.member.id === "329288617564569602" ||
           this.allowRetry.has(message.member.id)
