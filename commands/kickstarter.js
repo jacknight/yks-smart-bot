@@ -6,7 +6,7 @@ class KickstarterCommand extends Command {
 
   constructor() {
     super("kickstarter", {
-      aliases: ["kickstarter"],
+      aliases: ["kickstarter", "ks"],
       cooldown: 1000 * 60 * 60 * 24, // once per day
       ratelimit: 1,
       args: [{ id: "name", match: "content" }],
@@ -27,7 +27,7 @@ class KickstarterCommand extends Command {
     // First, we run it through the content filter to be responsible users of AI
     const contentFilterResult = await contentFilter(name);
     if (contentFilterResult === "2") {
-      this.allowRetry.add(message.member.id, true);
+      this.allowRetry.add(message.member.id);
       return message.channel.send("Sorry, the response was too offensive.");
     }
 
