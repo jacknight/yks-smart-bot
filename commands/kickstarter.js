@@ -8,7 +8,7 @@ class KickstarterCommand extends Command {
     super("kickstarter", {
       aliases: ["kickstarter", "ks"],
       cooldown: 1000 * 60 * 60 * 24, // once per day
-      ratelimit: 1,
+      ratelimit: 10,
       args: [{ id: "name", match: "content" }],
       ignoreCooldown: (message, command) => {
         return (
@@ -20,6 +20,15 @@ class KickstarterCommand extends Command {
   }
 
   async exec(message, { name }) {
+    // Only allow in the #kickstarter-bot channel
+    if (message.channel.id !== "873238126187917363") {
+      const channel = this.client.util.resolveChannel(
+        "873238126187917363",
+        message.guild.channels.cache
+      );
+      return message.channel.send(`Please use ${channel} for this command`);
+    }
+
     if (name.length > 80) {
       this.allowRetry.add(message.member.id);
       return message.channel.send("Shorten it up, please.");
