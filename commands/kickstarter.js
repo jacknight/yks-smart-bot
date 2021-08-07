@@ -48,7 +48,7 @@ class KickstarterCommand extends Command {
       "post",
       {
         prompt: `**Name**: ${name}`,
-        model: "curie:ft-yks-smart-bot-2021-08-04-13-59-00",
+        model: "curie:ft-yks-smart-bot-2021-08-07-18-00-06",
         maxTokens: 200,
         temperature: 0.7,
         topP: 1,
