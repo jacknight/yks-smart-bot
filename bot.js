@@ -5,6 +5,7 @@ const {
   ListenerHandler,
   MongooseProvider,
 } = require("discord-akairo");
+const { CommandHandlerEvents } = require("discord-akairo/src/util/Constants");
 const model = require("./db/model");
 require("dotenv").config();
 const express = require("express");
@@ -16,7 +17,7 @@ const parser = new Parser();
 const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
 const BONUS_FEED_RSS = process.env.BONUS_FEED_RSS;
 const Canvas = require("canvas");
-const { MessageFlags } = require("discord.js");
+const prettyMilliseconds = require("pretty-ms");
 
 class BuzzerClient extends AkairoClient {
   constructor() {
@@ -229,6 +230,18 @@ mongoose
       }
     });
 
+    client.commandHandler.on(
+      CommandHandlerEvents.COOLDOWN,
+      (message, command, diff) => {
+        if (command.id === "kickstarter") {
+          message.channel.send(
+            `You're in cooldown for the next ${prettyMilliseconds(diff, {
+              verbose: true,
+            })}`
+          );
+        }
+      }
+    );
     // We need a collection of sockets that we emit to
     // when the guild they are viewing on the control panel
     // updates in any way. The map is:
