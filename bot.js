@@ -233,7 +233,7 @@ mongoose
     client.commandHandler.on(
       CommandHandlerEvents.COOLDOWN,
       (message, command, diff) => {
-        if (command.id === "kickstarter") {
+        if (command.id === "kickstarter" || command.id === "realorfake") {
           message.channel.send(
             `You're in cooldown for the next ${prettyMilliseconds(diff, {
               verbose: true,
