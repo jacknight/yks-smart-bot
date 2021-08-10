@@ -27,6 +27,12 @@ const getRealKickstarters = async () => {
   return responses;
 };
 
+const sleep = (ms) => {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+};
+
 class RealOrFakeCommand extends Command {
   allowRetry = new Set();
 
@@ -60,6 +66,8 @@ class RealOrFakeCommand extends Command {
     if (real) {
       const responses = await getRealKickstarters();
       response = responses[Math.floor(Math.random() * responses.length)];
+      // Gives away that it's real. Need to sleep for a couple seconds
+      await sleep(2000);
     } else {
       // Grab a completion from the AI.
       response = await sendRequest(
