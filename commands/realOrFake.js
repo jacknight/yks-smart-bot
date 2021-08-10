@@ -147,7 +147,7 @@ class RealOrFakeCommand extends Command {
         },
       };
       const msg = await message.channel.send(
-        `Real or Fake? || ${real ? "Real" : "Fake"} ||`,
+        `Real or Fake? Mike, this one is ||${real ? "`Real`" : "`Fake`"}||!`,
         { embed }
       );
       await msg.react("🇷");
