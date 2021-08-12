@@ -6,7 +6,7 @@ const {
   getAIResponse,
 } = require("../util");
 
-var msPerKickstarter = 10000;
+var msPerKickstarter = 30000;
 var numRounds = 10;
 class RealOrFakeGameCommand extends Command {
   constructor() {
@@ -94,13 +94,11 @@ const roundOfRealOrFake = async (
     winnersString += ` win(s) with **${topScore}** point(s)!`;
     prevMsg.channel.send(winnersString);
 
-    // Re-enable discabled commands
+    // Re-enable disabled commands
     commandHandler.load(`${process.env.PWD}/commands/kickstarter.js`);
     commandHandler.load(`${process.env.PWD}/commands/realOrFake.js`);
 
-    return prevMsg.channel.send(
-      "**Now back to your regularly scheduled programming**"
-    );
+    return prevMsg.channel.send("**Alright, now buzz off**");
   }
 
   roundNumber++;
