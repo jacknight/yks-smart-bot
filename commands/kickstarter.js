@@ -51,6 +51,7 @@ class KickstarterCommand extends Command {
       return message.channel.send({ embed });
     } else {
       undoRateLimit(this.client, message.member.id, this.id);
+      console.log(completion);
       return message.channel.send("Something went wrong");
     }
   }
