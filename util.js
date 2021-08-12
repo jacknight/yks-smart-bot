@@ -164,5 +164,5 @@ exports.getKickstarterEmbed = (completion, realOrFake) => {
 exports.undoRateLimit = (client, userID, commandID) => {
   const cooldown = client.commandHandler.cooldowns.get(userID)[commandID];
   cooldown.uses--;
-  this.client.commandHandler.cooldowns.get(userID)[commandID] = cooldown;
+  client.commandHandler.cooldowns.get(userID)[commandID] = cooldown;
 };
