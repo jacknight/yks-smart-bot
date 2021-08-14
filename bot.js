@@ -104,8 +104,9 @@ mongoose
     });
 
     client.once("ready", async () => {
-      // Real or fake every Friday at 9pm EST.
+      // Real or fake every day
       scheduleRealOrFakeGame();
+      setInterval(scheduleRealOrFakeGame, 1000 * 60 * 60 * 24);
 
       // Set bot status and check for new episodes
       pollRss();
@@ -834,30 +835,23 @@ mongoose
         }
       };
 
-      const lastDayOfWeek = require("date-fns/lastDayOfWeek");
+      const startOfDay = require("date-fns/startOfDay");
       const add = require("date-fns/add");
 
       let nowUtc = new Date();
       // Make "last day of the week" a friday (week starts on saturday - 6)
-      let friday9pmEastern = lastDayOfWeek(nowUtc, { weekStartsOn: 6 });
+      let todayEastern = startOfDay(nowUtc);
       // Get the server timezone offset in UTC (given in minutes -> convert to hours)
-      let utcServerOffset = friday9pmEastern.getTimezoneOffset() / 60;
+      let utcServerOffset = todayEastern.getTimezoneOffset() / 60;
 
-      // New York is UTC-5. 9pm is 21 hours into the day.
-      // (21 + easternOffset - utcServerOffset) to get 9pm Eastern time from UTC midnight.
-      friday9pmEastern = add(friday9pmEastern, {
-        hours: 21 + getEstOffset() - utcServerOffset,
+      // New York is GMT-(4 or 5). 7pm is 19 hours into the day.
+      // (19 + (easternOffset - utcServerOffset)) to get 7pm Eastern time from UTC midnight.
+      todayEastern = add(todayEastern, {
+        hours: 19 + (getEstOffset() - utcServerOffset),
       });
 
-      let oneDayWarning = add(friday9pmEastern, {
-        hours: -24,
-      });
-
-      let oneHourWarning = add(friday9pmEastern, {
-        hours: -1,
-      });
-
-      let twoMinuteWarning = add(friday9pmEastern, {
+      console.log(todayEastern, getEstOffset(), utcServerOffset);
+      let twoMinuteWarning = add(todayEastern, {
         minutes: -2,
       });
 
@@ -868,7 +862,7 @@ mongoose
         (channel) => channel.id === kickstarterBotChannelID
       );
       // Set a timeout for as much time between now and friday 9pm eastern.
-      if (friday9pmEastern.getTime() - nowUtc.getTime() > 0) {
+      if (todayEastern.getTime() - nowUtc.getTime() > 0) {
         setTimeout(
           async () => {
             const command = await client.commandHandler.findCommand(
@@ -882,41 +876,9 @@ mongoose
               );
             }
           },
-          friday9pmEastern.getTime() - nowUtc.getTime(),
+          todayEastern.getTime() - nowUtc.getTime(),
           kickstarterBotChannel,
           pisscord
-        );
-      }
-
-      if (oneDayWarning.getTime() - nowUtc.getTime() > 0) {
-        setTimeout(
-          () => {
-            kickstarterBotChannel.send(`
-**GET READY**
-
-**AT __THIS TIME__ TOMORROW**
-
-**IT'S TIME TO PLAY**
-
-**10 ROUNDS OF...**
-
-**REAL -OR- FAKE**`);
-          },
-          oneDayWarning.getTime() - nowUtc.getTime(),
-          kickstarterBotChannel
-        );
-      }
-
-      if (oneHourWarning.getTime() - nowUtc.getTime() > 0) {
-        setTimeout(
-          () => {
-            kickstarterBotChannel.send(`
-**10 ROUNDS OF REAL OR FAKE**
-
-**ONE HOUR WARNING**`);
-          },
-          oneHourWarning.getTime() - nowUtc.getTime(),
-          kickstarterBotChannel
         );
       }
 
