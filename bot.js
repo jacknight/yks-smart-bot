@@ -850,7 +850,6 @@ mongoose
         hours: 19 + (getEstOffset() - utcServerOffset),
       });
 
-      console.log(todayEastern, getEstOffset(), utcServerOffset);
       let twoMinuteWarning = add(todayEastern, {
         minutes: -2,
       });
