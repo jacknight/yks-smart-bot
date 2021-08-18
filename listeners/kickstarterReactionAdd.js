@@ -9,7 +9,6 @@ class KickstarterReactionAddListener extends Listener {
   }
 
   async exec(reaction) {
-    console.log("Reaction add.");
     if (reaction.partial) {
       // try to fetch the message, which may or may not work with a partial
       try {

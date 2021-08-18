@@ -15,7 +15,6 @@ class ClipListener extends Listener {
       message.channel.id === process.env.YKS_CLIP_CHANNEL_ID &&
       message.attachments.size > 0
     ) {
-      console.log("Mailbag attachment.");
       message.attachments.forEach(async (attachment) => {
         const filetype = attachment.url.substring(
           attachment.url.lastIndexOf(".") + 1

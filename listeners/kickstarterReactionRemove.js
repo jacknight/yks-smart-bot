@@ -9,7 +9,6 @@ class KickstarterReactionRemoveListener extends Listener {
   }
 
   async exec(reaction, user) {
-    console.log("Reaction removed.");
     if (reaction.partial) {
       // try to fetch the message, which may or may not work with a partial
       try {
