@@ -21,11 +21,11 @@ class KickstarterCommand extends Command {
 
     // Only allow in the #kickstarter-bot channel
     if (
-      message.channel.id !== "873238126187917363" &&
-      message.guild.id !== "789205632762642493"
+      message.channel.id !== process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID &&
+      message.guild.id !== process.env.YKS_GUILD_ID
     ) {
       const channel = this.client.util.resolveChannel(
-        "873238126187917363",
+        process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID,
         message.guild.channels.cache
       );
       return message.channel.send(`Please use ${channel} for this command`);

@@ -18,11 +18,20 @@ const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
 const BONUS_FEED_RSS = process.env.BONUS_FEED_RSS;
 const Canvas = require("canvas");
 const prettyMilliseconds = require("pretty-ms");
-const pisscordID = "641743927799447553";
-const kickstarterBotChannelID = "873238126187917363";
+const { Constants } = require("discord.js");
 class YKSSmartBot extends AkairoClient {
   constructor() {
-    super({ ownerID: "329288617564569602" }, { disableMentions: "everyone" });
+    super(
+      { ownerID: "329288617564569602" },
+      {
+        partials: [
+          Constants.PartialTypes.REACTION,
+          Constants.PartialTypes.USER,
+          Constants.PartialTypes.MESSAGE,
+          Constants.PartialTypes.CHANNEL,
+        ],
+      }
+    );
 
     // Database provider stored on the client.
     this.settings = new MongooseProvider(model);
@@ -118,37 +127,6 @@ mongoose
       await SessionModel.deleteMany({
         "session.expirationDate": { $lt: new Date(Date.now()) },
       });
-    });
-
-    // Check if it's a clip posted to the clips channel, and if so, store
-    // the link in the database.
-    client.on("message", (message) => {
-      if (
-        (message.channel.id === "672146741986066458" ||
-          message.channel.id === "844943398842007583" ||
-          message.channel.id === "844945022222860359") &&
-        message.attachments.size > 0
-      ) {
-        message.attachments.forEach((attachment) => {
-          const filetype = attachment.url.substring(
-            attachment.url.lastIndexOf(".") + 1
-          );
-          if (
-            filetype === "mov" ||
-            filetype === "mp4" ||
-            filetype === "webm" ||
-            filetype === "wav" ||
-            filetype === "mp3" ||
-            filetype === "ogg"
-          ) {
-            const clips = client.settings.get(message.guild.id, "clips", []);
-            if (!clips.find((clip) => clip === attachment.url)) {
-              clips.push(attachment.url);
-              client.settings.set(message.guild.id, "clips", clips);
-            }
-          }
-        });
-      }
     });
 
     // New member greetings
@@ -855,10 +833,10 @@ mongoose
       });
 
       const pisscord = client.guilds.cache.find(
-        (guild) => guild.id === pisscordID
+        (guild) => guild.id === process.env.YKS_GUILD_ID
       );
       const kickstarterBotChannel = pisscord.channels.cache.find(
-        (channel) => channel.id === kickstarterBotChannelID
+        (channel) => channel.id === process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID
       );
       // Set a timeout for as much time between now and friday 9pm eastern.
       if (todayEastern.getTime() - nowUtc.getTime() > 0) {
