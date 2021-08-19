@@ -20,13 +20,13 @@ class TopMailbagCommand extends Command {
       // Sort descending
       mailbagMessages.sort((a, b) => JSON.parse(b).count - JSON.parse(a).count);
       const count = mailbagMessages.length < 10 ? mailbagMessages.length : 10;
-      mailbagMessages = mailbagMessages.slice(0, count);
       const embed = {
         color: 0x83c133,
         title: `__Top ${count} Mailbag Messages__\n`,
         fields: [],
       };
-      for (let i = 1; i <= count; i++) {
+      let skip = 0;
+      for (let i = 1; i <= count + skip && i <= mailbagMessages.length; i++) {
         const msgId = JSON.parse(mailbagMessages[i - 1]).id;
         const path = `${process.env.YKS_GUILD_ID}/${process.env.YKS_MAILBAG_CHANNEL_ID}/${msgId}`;
 
@@ -36,10 +36,16 @@ class TopMailbagCommand extends Command {
         );
         if (mailbagChannel) {
           const msg = await mailbagChannel.messages.fetch(msgId);
+          const url = `https://discord.com/channels/${path}`;
           if (msg) {
+            if (msg.author.id === this.client.user.id) {
+              skip++;
+              continue;
+            }
+
             embed.fields.push({
-              name: `${i}. From ${msg.author.username}`,
-              value: `[${msg.content}](https://discord.com/channels/${path})`,
+              name: `${i - skip}. From ${msg.author.username}`,
+              value: `[${msg.content ? msg.content : url}](${url})`,
             });
           }
         }
