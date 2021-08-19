@@ -45,7 +45,7 @@ class TopMailbagCommand extends Command {
 
             embed.fields.push({
               name: `${i - skip}. From ${msg.author.username}`,
-              value: `[${msg.content ? msg.content : url}](${url})`,
+              value: `[Jump to message](${url})\n${msg.content}`,
             });
           }
         }
