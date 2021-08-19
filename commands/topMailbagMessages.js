@@ -35,7 +35,6 @@ class TopMailbagCommand extends Command {
         if (mailbagChannel) {
           const msg = await mailbagChannel.messages.fetch(msgId);
           if (msg) {
-            console.log(msg.author);
             embed.fields.push({
               name: `${i}. From ${msg.author.username}`,
               value: `[${msg.content}](https://discord.com/channels/${path})`,
