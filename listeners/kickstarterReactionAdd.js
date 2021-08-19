@@ -22,14 +22,15 @@ class KickstarterReactionAddListener extends Listener {
     // if the reaction was a ":this:" reaction, and to:
     // 1. a bot message; and
     // 2. in the kickstarter-bot channel; and
-    // 3. the message has an embed
+    // 3. the message has an embed w/ a footer
     // then update the tally for the message ID in the database
     if (
       reaction._emoji.name === "this" &&
       reaction.message.author.id === this.client.user.id &&
       reaction.message.channel.id ===
         process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID &&
-      reaction.message.embeds
+      reaction.message.embeds &&
+      reaction.message.embeds[0].footer
     ) {
       // Get array of existing kickstarters that have been reacted to
       const kickstarters = await this.client.settings.get(
@@ -56,9 +57,6 @@ class KickstarterReactionAddListener extends Listener {
         ksObject.count++;
         kickstarters[index] = JSON.stringify(ksObject);
       }
-
-      // Sort, descending.
-      kickstarters.sort((a, b) => JSON.parse(a).count - JSON.parse(b).count);
 
       // Update database.
       this.client.settings.set(

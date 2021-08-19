@@ -17,6 +17,8 @@ class TopMailbagCommand extends Command {
     );
 
     if (mailbagMessages.length > 0) {
+      // Sort descending
+      mailbagMessages.sort((a, b) => JSON.parse(b).count - JSON.parse(a).count);
       const count = mailbagMessages.length < 10 ? mailbagMessages.length : 10;
       mailbagMessages = mailbagMessages.slice(0, count);
       const embed = {

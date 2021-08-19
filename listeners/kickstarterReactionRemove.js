@@ -58,9 +58,6 @@ class KickstarterReactionRemoveListener extends Listener {
         }
       }
 
-      // Sort, descending.
-      kickstarters.sort((a, b) => JSON.parse(a).count - JSON.parse(b).count);
-
       // Update database.
       this.client.settings.set(
         reaction.message.guild.id,

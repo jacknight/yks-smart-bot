@@ -17,6 +17,8 @@ class TopKickstartersCommand extends Command {
     );
 
     if (kickstarters.length > 0) {
+      // Sort, descending
+      kickstarters.sort((a, b) => JSON.parse(b).count - JSON.parse(a).count);
       const count = kickstarters.length < 10 ? kickstarters.length : 10;
       // Array should already be sorted descending by count.
       kickstarters = kickstarters.slice(0, count);

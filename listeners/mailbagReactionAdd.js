@@ -55,9 +55,6 @@ class MailbagReactionAddListener extends Listener {
         mailbagMessages[index] = JSON.stringify(msgObject);
       }
 
-      // Sort, descending.
-      mailbagMessages.sort((a, b) => JSON.parse(a).count - JSON.parse(b).count);
-
       // Update database.
       this.client.settings.set(
         reaction.message.guild.id,
