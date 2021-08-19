@@ -5,19 +5,12 @@ const {
   ListenerHandler,
   MongooseProvider,
 } = require("discord-akairo");
-const { CommandHandlerEvents } = require("discord-akairo/src/util/Constants");
 const model = require("./db/model");
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const { default: fetch } = require("node-fetch");
 const SessionModel = require("./db/sessions");
-const Parser = require("rss-parser");
-const parser = new Parser();
-const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
-const BONUS_FEED_RSS = process.env.BONUS_FEED_RSS;
-const Canvas = require("canvas");
-const prettyMilliseconds = require("pretty-ms");
 const { Constants } = require("discord.js");
 class YKSSmartBot extends AkairoClient {
   constructor() {
@@ -61,6 +54,7 @@ class YKSSmartBot extends AkairoClient {
       commandHandler: this.commandHandler,
       inhibitorHandler: this.inhibitorHandler,
       listenerHandler: this.listenerHandler,
+      process: process,
     });
 
     const app = express();
@@ -112,119 +106,6 @@ mongoose
       },
     });
 
-    client.once("ready", async () => {
-      // Real or fake every day
-      scheduleRealOrFakeGame();
-      setInterval(scheduleRealOrFakeGame, 1000 * 60 * 60 * 24);
-
-      // Set bot status and check for new episodes
-      pollRss();
-      setInterval(() => {
-        pollRss();
-      }, 60 * 1000); // every 60 sec
-
-      // Delete expired tokens
-      await SessionModel.deleteMany({
-        "session.expirationDate": { $lt: new Date(Date.now()) },
-      });
-    });
-
-    // New member greetings
-    client.on("guildMemberAdd", async (member) => {
-      if (client.settings.get(member.guild.id, "welcomeMsgDisabled", false))
-        return;
-
-      // Check if they've already been welcomed
-      const welcomedMembers = await client.settings.get(
-        member.guild.id,
-        "welcomedMembers",
-        []
-      );
-      if (welcomedMembers.some((id) => id === member.id)) return;
-
-      // Add to welcomed members for guild so we don't do this again.
-      welcomedMembers.push(member.id);
-      client.settings.set(member.guild.id, "welcomedMembers", welcomedMembers);
-
-      // Build a dynamic composite image that welcomes the user with
-      // their own display name and avatar.
-
-      const canvas = Canvas.createCanvas(1000, 1000);
-      const ctx = canvas.getContext("2d");
-      const background = await Canvas.loadImage("./assets/jf-blessing.png");
-      ctx.drawImage(background, 0, 0, 423, canvas.height);
-
-      ctx.font = applyText(
-        canvas,
-        `${member.displayName},\nJF has blessed\nyour timeline.\nsay "thank you\nmr. jf" for\ngood fortune\nin the new year`
-      );
-      ctx.fillStyle = "#83c133";
-      ctx.fillText(
-        `${member.displayName},\nJF has blessed\nyour timeline.\nsay "thank you\nmr. jf" for\ngood fortune\nin the new year`,
-        450,
-        300,
-        550
-      );
-
-      ctx.beginPath();
-      // X-Coordinate (550) - center of the circle is to the right of the bg image
-      // Y-Coordinate (120) - 20px padding from the top for the 100px radius circle.
-      // Radius (100) - circle has 200px diameter.
-      // Start Angle, End Angle - Go from 0º to 360º
-      // Counterclockwise - true
-      ctx.arc(550, 120, 100, 0, Math.PI * 2, true);
-      ctx.closePath();
-      ctx.clip();
-
-      // Load avatar into that clipped off circle
-      const avatar = await Canvas.loadImage(
-        member.user.displayAvatarURL({ format: "jpg" })
-      );
-      ctx.drawImage(avatar, 450, 20, 200, 200);
-
-      const attachment = client.util.attachment(
-        canvas.toBuffer(),
-        "welcome-image.png"
-      );
-
-      if (member.id === "141822351321989120") {
-        // gorb
-        member.guild.systemChannel.send("gorb", attachment);
-      } else if (member.id === "251217007045902348") {
-        // tay
-        member.guild.systemChannel.send("Tay is back!", attachment);
-      } else {
-        const responses = [
-          "You don't have to be insane to post here, but it's a \"good to have.\"",
-          "I give it a month.",
-          "Make yourself at home.\nOh ok, you're going straight for the nasty channel. Ah! Well. Nevertheless,",
-          "It's not too late to just turn around and walk away. No one would blame you.",
-          "Grab an empty chair in the circle. We're just about to start sharing how YKS ruined our lives.",
-          "If you need to know what episode something happened in, ask vinny.",
-          "If you see JF or DB in here, avert your eyes from their posts as a sign of respect.",
-          "Vote for your favorite episode # using the command `!best <episode number>`",
-        ];
-        member.guild.systemChannel.send(
-          `Welcome, ${member}! ${
-            responses[Math.floor(Math.random() * responses.length)]
-          }`,
-          attachment
-        );
-      }
-    });
-
-    client.commandHandler.on(
-      CommandHandlerEvents.COOLDOWN,
-      (message, command, diff) => {
-        if (command.id === "kickstarter" || command.id === "realorfake") {
-          message.channel.send(
-            `You're in cooldown for the next ${prettyMilliseconds(diff, {
-              verbose: true,
-            })}`
-          );
-        }
-      }
-    );
     // We need a collection of sockets that we emit to
     // when the guild they are viewing on the control panel
     // updates in any way. The map is:
@@ -683,18 +564,6 @@ mongoose
       return client.util.resolveChannel(channel.id, guildObj.channels.cache);
     }
 
-    async function getRssChannel(guildObj) {
-      const channel = JSON.parse(
-        // Get the configured rss channel from the db.
-        // If none set, return null
-        await client.settings.get(guildObj.id, "rssChannel", null)
-      );
-
-      return channel
-        ? client.util.resolveChannel(channel.id, guildObj.channels.cache)
-        : null;
-    }
-
     // Actions coming in from the frontend need to be
     // checked for permission.
     function userHasBuzzerRole(guildObj, userId) {
@@ -710,188 +579,5 @@ mongoose
         }) || member.id === client.ownerID
       );
     }
-
-    // Set the bot's presence.
-    // Currently setting to "Listening to" the latest
-    // main feed YKS episode. Wanted to spoof rich
-    // presence spotify but bots don't have that option.
-    async function pollRss() {
-      const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
-      const bonusFeed = await parser.parseURL(BONUS_FEED_RSS);
-
-      if (mainFeed && mainFeed.items && bonusFeed && bonusFeed.items) {
-        // See what's stored in the DB for the latest main ep...
-        const latestMainEpTitle = await client.settings.get(
-          client.user.id,
-          "latestMainEpTitle",
-          ""
-        );
-
-        // ...and the latest bonus ep...
-        const latestBonusEpTitle = await client.settings.get(
-          client.user.id,
-          "latestBonusEpTitle",
-          ""
-        );
-
-        // ...and compare to the RSS feed.
-        const newMain = latestMainEpTitle != mainFeed.items[0].title;
-        // Bonus feed is trickier because it has both the bonus episodes
-        // and the main feed episodes. We don't know which will go up first
-        // for certain, so we have to do a bit of regex to make sure it's
-        // a "true" premium episode. If they change this title format, it
-        // will at least default to not working instead of over-working.
-        //
-        // We'll also do a sanity check to make sure the bonus ep title
-        // and main feed title aren't the same thing.
-        const newBonus =
-          bonusFeed.items[0].title.match(/S[0-9]+E[0-9]+/i) &&
-          latestBonusEpTitle != bonusFeed.items[0].title &&
-          mainFeed.items[0].title != bonusFeed.items[0].title;
-
-        // Set bot status
-        client.user.setPresence({
-          status: "dnd",
-          activity: {
-            name: bonusFeed.items[0].title, // this is always the most recent ep
-            type: "LISTENING",
-            url: null,
-          },
-        });
-
-        if (newMain || newBonus) {
-          const feed = newMain ? "main" : "bonus";
-          // Store newest ep title in DB
-          if (newMain) {
-            await client.settings.set(
-              client.user.id,
-              "latestMainEpTitle",
-              mainFeed.items[0].title
-            );
-          }
-          if (newBonus) {
-            await client.settings.set(
-              client.user.id,
-              "latestBonusEpTitle",
-              bonusFeed.items[0].title
-            );
-          }
-          // For each guild the bot is a member, check if there is an RSS channel
-          // channel configured and if so, send a message regarding the new ep.
-          client.guilds.cache.forEach(async (guild) => {
-            const channel = await getRssChannel(guild);
-            const command = await client.commandHandler.findCommand("latest");
-            if (channel && command) {
-              client.commandHandler.runCommand({ guild, channel }, command, {
-                feed,
-                newEp: "yes",
-              });
-            }
-          });
-        }
-      }
-    }
-
-    async function scheduleRealOrFakeGame() {
-      const getEstOffset = () => {
-        const stdTimezoneOffset = () => {
-          var jan = new Date(0, 1);
-          var jul = new Date(6, 1);
-          return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
-        };
-
-        var today = new Date();
-
-        const isDstObserved = (today) => {
-          return today.getTimezoneOffset() < stdTimezoneOffset();
-        };
-
-        if (isDstObserved(today)) {
-          return 4;
-        } else {
-          return 5;
-        }
-      };
-
-      const startOfDay = require("date-fns/startOfDay");
-      const add = require("date-fns/add");
-
-      let nowUtc = new Date();
-      // Make "last day of the week" a friday (week starts on saturday - 6)
-      let todayEastern = startOfDay(nowUtc);
-      // Get the server timezone offset in UTC (given in minutes -> convert to hours)
-      let utcServerOffset = todayEastern.getTimezoneOffset() / 60;
-
-      // New York is GMT-(4 or 5). 7pm is 19 hours into the day.
-      // (19 + (easternOffset - utcServerOffset)) to get 7pm Eastern time from UTC midnight.
-      todayEastern = add(todayEastern, {
-        hours: 19 + (getEstOffset() - utcServerOffset),
-      });
-
-      let twoMinuteWarning = add(todayEastern, {
-        minutes: -2,
-      });
-
-      const pisscord = client.guilds.cache.find(
-        (guild) => guild.id === process.env.YKS_GUILD_ID
-      );
-      const kickstarterBotChannel = pisscord.channels.cache.find(
-        (channel) => channel.id === process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID
-      );
-      // Set a timeout for as much time between now and friday 9pm eastern.
-      if (todayEastern.getTime() - nowUtc.getTime() > 0) {
-        setTimeout(
-          async () => {
-            const command = await client.commandHandler.findCommand(
-              "realorfakegame"
-            );
-            if (kickstarterBotChannel && command) {
-              client.commandHandler.runCommand(
-                { guild: pisscord, channel: kickstarterBotChannel },
-                command,
-                {}
-              );
-            }
-          },
-          todayEastern.getTime() - nowUtc.getTime(),
-          kickstarterBotChannel,
-          pisscord
-        );
-      }
-
-      if (twoMinuteWarning.getTime() - nowUtc.getTime() > 0) {
-        setTimeout(
-          () => {
-            kickstarterBotChannel.send(`
-**10 ROUNDS OF REAL OR FAKE**
-
-**TWO MINUTE WARNING**`);
-          },
-          twoMinuteWarning.getTime() - nowUtc.getTime(),
-          kickstarterBotChannel
-        );
-      }
-    }
-
-    // New member greeting helper to reduce size of text as necessary.
-    function applyText(canvas, text) {
-      const ctx = canvas.getContext("2d");
-
-      // Declare a base size of the font
-      let fontSize = 70;
-
-      do {
-        // Assign the font to the context and decrement it so it can be measured again
-        ctx.font = `${(fontSize -= 10)}px sans-serif`;
-        // Compare pixel width of the text to the canvas minus the approximate avatar size
-      } while (ctx.measureText(text).width > canvas.width - 400);
-
-      // Return the result to use in the actual canvas
-      return ctx.font;
-    }
   })
   .catch((err) => console.log(err));
-
-process.on("unhandledRejection", (reason, promise) => {
-  console.log("Unhandled rejection. Reason: '", reason, "'\n", promise);
-});
