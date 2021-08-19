@@ -58,7 +58,7 @@ class KickstarterReactionAddListener extends Listener {
       }
 
       // Sort, descending.
-      kickstarters.sort((a, b) => a.count - b.count);
+      kickstarters.sort((a, b) => JSON.parse(a).count - JSON.parse(b).count);
 
       // Update database.
       this.client.settings.set(

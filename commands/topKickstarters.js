@@ -20,15 +20,30 @@ class TopKickstartersCommand extends Command {
       const count = kickstarters.length < 10 ? kickstarters.length : 10;
       // Array should already be sorted descending by count.
       kickstarters = kickstarters.slice(0, count);
-      let totalString = `__Top ${count} Kickstarters__\n`;
+      const embed = {
+        color: 0x83c133,
+        title: `__Top ${count} Kickstarters__\n`,
+        fields: [],
+      };
       for (let i = 1; i <= count; i++) {
-        const path = `${process.env.YKS_GUILD_ID}/${
-          process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID
-        }/${JSON.parse(kickstarters[i - 1]).id}`;
+        const msgId = JSON.parse(kickstarters[i - 1]).id;
+        const path = `${process.env.YKS_GUILD_ID}/${process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID}/${msgId}`;
 
-        totalString += `${i}. https://discord.com/channels/${path}\n`;
+        const kickstarterChannel = await this.client.util.resolveChannel(
+          process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID,
+          message.guild.channels.cache
+        );
+        if (kickstarterChannel) {
+          const msg = await kickstarterChannel.messages.fetch(msgId);
+          if (msg) {
+            embed.fields.push({
+              name: `${i}: ${msg.embeds[0].title}`,
+              value: `[${msg.embeds[0].description}](https://discord.com/channels/${path})`,
+            });
+          }
+        }
       }
-      message.channel.send(totalString);
+      message.channel.send({ embed });
     }
   }
 }
