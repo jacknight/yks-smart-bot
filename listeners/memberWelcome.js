@@ -1,5 +1,5 @@
 const { Listener } = require("discord-akairo");
-
+const Canvas = require("canvas");
 class MemberWelcomeListener extends Listener {
   constructor() {
     super("memberwelcome", {
