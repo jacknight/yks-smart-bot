@@ -39,7 +39,7 @@ class TopKickstartersCommand extends Command {
           if (msg) {
             embed.fields.push({
               name: `${i}: ${msg.embeds[0].title}`,
-              value: `[${msg.embeds[0].description}](https://discord.com/channels/${path})`,
+              value: `[Jump to message](https://discord.com/channels/${path})\n${msg.embeds[0].description}`,
             });
           }
         }
