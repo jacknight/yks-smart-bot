@@ -22,7 +22,7 @@ class TopMailbagCommand extends Command {
       const count = mailbagMessages.length < 10 ? mailbagMessages.length : 10;
       const embed = {
         color: 0x83c133,
-        title: `__Top ${count} Mailbag Messages__\n`,
+        title: "__Top Mailbag Messages (Last 30 Days)__\n",
         fields: [],
       };
       let skip = 0;

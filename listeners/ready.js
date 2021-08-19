@@ -24,6 +24,10 @@ class ReadyListener extends Listener {
     pollRss(this.client);
     setInterval(pollRss, 60 * 1000, this.client); // every 60 sec
 
+    // Remove old mailbag messages (older than a month)
+    removeOldMailbagMessages(this.client);
+    setInterval(removeOldMailbagMessages, 1000 * 60 * 60 * 24, this.client);
+
     // Delete expired tokens
     await SessionModel.deleteMany({
       "session.expirationDate": { $lt: new Date(Date.now()) },
@@ -110,6 +114,8 @@ async function scheduleRealOrFakeGame(client) {
       kickstarterBotChannel
     );
   }
+
+  console.log("Scheduled real or fake game for:", todayEastern.toString());
 }
 
 // Set the bot's presence.
@@ -203,6 +209,51 @@ async function getRssChannel(client, guildObj) {
   return channel
     ? client.util.resolveChannel(channel.id, guildObj.channels.cache)
     : null;
+}
+
+async function removeOldMailbagMessages(client) {
+  // Get all mailbag messages from the database
+  let mailbagMessages = await client.settings.get(
+    process.env.YKS_GUILD_ID,
+    "mailbagMessages",
+    []
+  );
+
+  // Fetch each message and check the date. If older than 30 days, remove it.
+  var guildObj = client.util.resolveGuild(
+    process.env.YKS_GUILD_ID,
+    client.guilds.cache
+  );
+  if (!guildObj) return;
+
+  var mailbagChannel = client.util.resolveChannel(
+    process.env.YKS_MAILBAG_CHANNEL_ID,
+    guildObj.channels.cache
+  );
+  if (!mailbagChannel) return;
+
+  mailbagMessages = await mailbagMessages.reduce(
+    async (arrPromise, rawMessage) => {
+      const arr = await arrPromise;
+      const message = await mailbagChannel.messages.fetch(
+        JSON.parse(rawMessage).id
+      );
+      if (!message) return arr;
+
+      const diff = Date.now() - message.createdTimestamp;
+      const thirtyDays = 1000 * 60 * 60 * 24 * 30;
+      if (diff < thirtyDays) arr.push(rawMessage);
+      return arr;
+    },
+    []
+  );
+
+  console.log("Cleared old mailbag messages.");
+  return client.settings.set(
+    process.env.YKS_GUILD_ID,
+    "mailbagMessages",
+    mailbagMessages
+  );
 }
 
 module.exports = ReadyListener;
