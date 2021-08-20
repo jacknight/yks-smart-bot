@@ -108,7 +108,7 @@ const roundOfRealOrFake = async (
 
   roundNumber++;
   // Grab a response from the AI or from the file of real kickstarters
-  const real = true; //Math.random() < 0.5;
+  const real = Math.random() < 0.5;
   let response = "";
   const t0 = Date.now();
   if (real) {
