@@ -33,34 +33,39 @@ class RealOrFakeGameCommand extends Command {
     // Disable kickstarter and real or fake commands temporarily.
     this.client.commandHandler.remove("kickstarter");
     this.client.commandHandler.remove("realorfake");
-    roundOfRealOrFake(
-      this.client.commandHandler,
-      this.client.user.id,
-      message,
-      0,
-      scoreBoard,
-      0,
-      false
-    );
+    roundOfRealOrFake(this.client, message, 0, scoreBoard, 0, false);
   }
 }
 
 const roundOfRealOrFake = async (
-  commandHandler,
-  botID,
+  client,
   prevMsg,
   roundNumber,
   scoreBoard,
   apiCalls,
   isRetry
 ) => {
+  const commandHandler = client.commandHandler;
+  const botID = client.user.id;
+  const realEmoji = client.util.resolveEmoji(
+    "real",
+    prevMsg.guild.emojis.cache
+  );
+  const fakeEmoji = client.util.resolveEmoji(
+    "fake",
+    prevMsg.guild.emojis.cache
+  );
+
   if (!isRetry && roundNumber > 0) {
     // Update scores.
     prevMsg.channel.send(
-      `That one was **${prevMsg.real ? "real!" : "fake!"}**`
+      `That one was ${prevMsg.real ? realEmoji : fakeEmoji}`
     );
-    const realReactUsers = prevMsg.reactions.cache.get("🇷")?.users.cache;
-    const fakeReactUsers = prevMsg.reactions.cache.get("🇫")?.users.cache;
+
+    const realReactUsers = prevMsg.reactions.cache.get(realEmoji.id)?.users
+      .cache;
+    const fakeReactUsers = prevMsg.reactions.cache.get(fakeEmoji.id)?.users
+      .cache;
     const correctUsers = prevMsg.real
       ? realReactUsers?.filter(
           (user) => !fakeReactUsers?.has(user.id) && user.id != botID
@@ -103,7 +108,7 @@ const roundOfRealOrFake = async (
 
   roundNumber++;
   // Grab a response from the AI or from the file of real kickstarters
-  const real = Math.random() < 0.5;
+  const real = true; //Math.random() < 0.5;
   let response = "";
   const t0 = Date.now();
   if (real) {
@@ -135,13 +140,13 @@ const roundOfRealOrFake = async (
       } seconds to use _one_ of the reacts below...`
     );
     msg.real = real;
-    await msg.react("🇷");
-    await msg.react("🇫");
+
+    await msg.react(realEmoji);
+    await msg.react(fakeEmoji);
     setTimeout(
       roundOfRealOrFake,
       msPerKickstarter,
-      commandHandler,
-      botID,
+      client,
       msg,
       roundNumber,
       scoreBoard,
@@ -152,15 +157,7 @@ const roundOfRealOrFake = async (
     // Try again
     console.log(completion, "\nSomething went wrong, trying again...");
     roundNumber--;
-    roundOfRealOrFake(
-      commandHandler,
-      botID,
-      prevMsg,
-      roundNumber,
-      scoreBoard,
-      apiCalls,
-      true
-    );
+    roundOfRealOrFake(client, prevMsg, roundNumber, scoreBoard, apiCalls, true);
   }
 };
 

@@ -52,12 +52,22 @@ class RealOrFakeCommand extends Command {
     const completion = response.data.choices[0].text;
     const embed = getKickstarterEmbed(completion, true);
     if (embed) {
+      let realEmoji = this.client.util.resolveEmoji(
+        "real",
+        message.guild.emojis.cache
+      );
+      let fakeEmoji = this.client.util.resolveEmoji(
+        "fake",
+        message.guild.emojis.cache
+      );
+
       const msg = await message.channel.send(
-        `Real or Fake? Mike, this one is ||${real ? "`Real`" : "`Fake`"}||!`,
+        `Real or Fake? Mike, this one is ||${real ? realEmoji : fakeEmoji}||!`,
         { embed }
       );
-      await msg.react("🇷");
-      return msg.react("🇫");
+
+      await msg.react(realEmoji);
+      return msg.react(fakeEmoji);
     } else {
       console.log(completion);
       return message.channel.send("Something went wrong");
