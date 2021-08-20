@@ -20,6 +20,7 @@
     "fg-select-css": "^3.2.0",
     "http": "^0.0.1-security",
     "mongoose": "^5.11.8",
+    "node": "^16.6.1",
     "node-fetch": "^2.6.1",
     "openai-api": "^1.2.3",
     "pretty-ms": "^7.0.1",
