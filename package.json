@@ -10,9 +10,9 @@
     "canvas": "^2.6.1",
     "cors": "^2.8.5",
     "date-fns": "^2.16.1",
-    "discord-akairo": "^8.1.0",
+    "discord-akairo": "github:discord-akairo/discord-akairo",
     "discord-oauth2": "^2.6.0",
-    "discord.js": "^12.5.1",
+    "discord.js": "^13.1.0",
     "dotenv": "^8.2.0",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
@@ -28,7 +28,7 @@
   },
   "scripts": {
     "start": "node ./bot.js",
-    "dev": "nodemon ./bot.js"
+    "dev": "nodemon --trace-deprecation ./bot.js"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"

@@ -22,7 +22,7 @@ class BarnesCommand extends Command {
       }, 1000 * 60); // once per min
 
       const attachment = this.client.util.attachment("./assets/barmes.jpg");
-      message.channel.send(attachment);
+      message.channel.send({ files: [attachment] });
     }
   }
 }

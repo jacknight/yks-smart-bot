@@ -7,7 +7,7 @@ class BuzzerNickCommand extends Command {
       category: "buzzer",
       channel: "guild",
       prefix: "!buzz.",
-      args: [{ id: "nick", type: "phrase" }],
+      args: [{ id: "nick", match: "content" }],
       cooldown: 60000,
       ratelimit: 1,
     });

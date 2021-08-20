@@ -9,7 +9,7 @@ class ToggleWelcomeMsgCommand extends Command {
   }
 
   async userPermissions(message) {
-    if (!message.member.hasPermission("MANAGE_ROLES")) {
+    if (!message.member.permissions.has("MANAGE_ROLES")) {
       return "You don't have permission.";
     }
     return null;

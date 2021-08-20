@@ -12,7 +12,7 @@ class RssChannelCommand extends Command {
   async userPermissions(message) {
     if (
       message.member.id !== "329288617564569602" &&
-      !message.member.hasPermission("ADMINISTRATOR")
+      !message.member.permissions.has("ADMINISTRATOR")
     ) {
       return "You don't have permission!";
     }
@@ -24,9 +24,12 @@ class RssChannelCommand extends Command {
       return message.channel.send(`That channel does not exist.`);
     }
 
-    if (channel.type !== "text") {
+    if (channel.type !== "GUILD_TEXT") {
       try {
-        return message.reply(`${channel} is not a text channel. No change.`);
+        return message.reply({
+          content: `${channel} is not a text channel. No change.`,
+          allowedMentions: { repliedUser: true },
+        });
       } catch (err) {
         console.log(err);
       }

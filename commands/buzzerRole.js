@@ -15,7 +15,7 @@ class BuzzerRoleCommand extends Command {
 
   async userPermissions(message) {
     if (
-      !message.member.hasPermission("MANAGE_ROLES") &&
+      !message.member.permissions.has("MANAGE_ROLES") &&
       !message.member.roles.cache.some(async (role) => {
         role.name ===
           (await this.client.settings.set(

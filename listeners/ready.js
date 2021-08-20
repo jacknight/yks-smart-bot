@@ -159,11 +159,13 @@ async function pollRss(client) {
     // Set bot status
     client.user.setPresence({
       status: "dnd",
-      activity: {
-        name: bonusFeed.items[0].title, // this is always the most recent ep
-        type: "LISTENING",
-        url: null,
-      },
+      activities: [
+        {
+          name: bonusFeed.items[0].title, // this is always the most recent ep
+          type: "LISTENING",
+          url: null,
+        },
+      ],
     });
 
     if (newMain || newBonus) {

@@ -32,22 +32,12 @@ class BuzzerChannelCommand extends Command {
       return message.channel.send(`That channel does not exist.`);
     }
 
-    // There must be a better way to do this...
-    if (
-      JSON.parse(
-        await this.client.settings.get(
-          message.guild.id,
-          "buzzerChannel",
-          JSON.stringify(message.channel)
-        )
-      ).id !== message.channel.id
-    ) {
-      return;
-    }
-
-    if (channel.type !== "text") {
+    if (channel.type !== "GUILD_TEXT") {
       try {
-        return message.reply(`${channel} is not a text channel. No change.`);
+        return message.reply({
+          content: `${channel} is not a text channel. No change.`,
+          allowedMentions: { repliedUser: true },
+        });
       } catch (err) {
         console.log(err);
       }

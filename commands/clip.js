@@ -19,7 +19,9 @@ class ClipCommand extends Command {
   exec(message) {
     const clips = this.client.settings.get(message.guild.id, "clips", []);
     if (clips.length > 0) {
-      message.channel.send(clips[Math.floor(Math.random() * clips.length)]);
+      message.channel.send({
+        files: [clips[Math.floor(Math.random() * clips.length)]],
+      });
     }
   }
 }

@@ -48,7 +48,7 @@ class KickstarterCommand extends Command {
     const completion = response.data.choices[0].text;
     const embed = getKickstarterEmbed(completion, false);
     if (embed) {
-      return message.channel.send({ embed });
+      return message.channel.send({ embeds: [embed] });
     } else {
       undoRateLimit(this.client, message.member.id, this.id);
       console.log(completion);

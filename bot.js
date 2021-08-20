@@ -11,7 +11,7 @@ const express = require("express");
 const mongoose = require("mongoose");
 const { default: fetch } = require("node-fetch");
 const SessionModel = require("./db/sessions");
-const { Constants } = require("discord.js");
+const { Constants, Intents } = require("discord.js");
 class YKSSmartBot extends AkairoClient {
   constructor() {
     super(
@@ -22,6 +22,12 @@ class YKSSmartBot extends AkairoClient {
           Constants.PartialTypes.USER,
           Constants.PartialTypes.MESSAGE,
           Constants.PartialTypes.CHANNEL,
+        ],
+        intents: [
+          Intents.FLAGS.GUILDS,
+          Intents.FLAGS.GUILD_MEMBERS,
+          Intents.FLAGS.GUILD_MESSAGES,
+          Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
         ],
       }
     );
@@ -540,9 +546,9 @@ mongoose
       const ids = [];
       channels.forEach((channel) => {
         // Bot currently only active on text channels.
-        if (channel.type === "voice") return;
-        if (channel.type === "category") return;
-        if (channel.type === "text") {
+        if (channel.type === "GUILD_VOICE") return;
+        if (channel.type === "GUILD_CATEGORY") return;
+        if (channel.type === "GUILD_TEXT") {
           ids.push({ guild: id, topic: channel.name, id: channel.id });
         }
       });

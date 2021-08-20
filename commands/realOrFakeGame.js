@@ -6,8 +6,8 @@ const {
   getAIResponse,
 } = require("../util");
 
-var msPerKickstarter = 30000;
-var numRounds = 10;
+var msPerKickstarter = 5000;
+var numRounds = 2;
 class RealOrFakeGameCommand extends Command {
   constructor() {
     super("realorfakegame", {
@@ -108,7 +108,7 @@ const roundOfRealOrFake = async (
 
   roundNumber++;
   // Grab a response from the AI or from the file of real kickstarters
-  const real = Math.random() < 0.5;
+  const real = true; // Math.random() < 0.5;
   let response = "";
   const t0 = Date.now();
   if (real) {
@@ -133,7 +133,7 @@ const roundOfRealOrFake = async (
   const embed = getKickstarterEmbed(completion, true);
   if (embed) {
     await prevMsg.channel.send(`**__ROUND ${roundNumber}__**`);
-    await prevMsg.channel.send({ embed });
+    await prevMsg.channel.send({ embeds: [embed] });
     const msg = await prevMsg.channel.send(
       `Real or Fake? You have ${
         msPerKickstarter / 1000

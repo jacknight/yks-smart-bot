@@ -86,12 +86,12 @@ class MemberWelcomeListener extends Listener {
         "If you see JF or DB in here, avert your eyes from their posts as a sign of respect.",
         "Vote for your favorite episode # using the command `!best <episode number>`",
       ];
-      member.guild.systemChannel.send(
-        `Welcome, ${member}! ${
+      member.guild.systemChannel.send({
+        content: `Welcome, ${member}! ${
           responses[Math.floor(Math.random() * responses.length)]
         }`,
-        attachment
-      );
+        files: [attachment],
+      });
     }
   }
 }

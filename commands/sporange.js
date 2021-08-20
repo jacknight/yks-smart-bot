@@ -21,7 +21,7 @@ class SporangeCommand extends Command {
       setTimeout(function () {
         self.client.globalRates.get(message.guild.id).delete("sporange");
       }, 1000 * 60 * 60 * 24 * 7); // once a week.
-      return message.channel.send("it's a new kind of orange");
+      return message.reply("it's a new kind of orange");
     }
   }
 }

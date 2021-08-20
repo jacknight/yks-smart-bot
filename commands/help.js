@@ -50,8 +50,7 @@ class HelpCommand extends Command {
         url: "https://buzzerd.herokuapp.com",
       },
       thumbnail: {
-        url:
-          "https://raw.githubusercontent.com/jacknight/buzzer/main/assets/bolt.png?token=AAEN3TXSCUCW6TQNMO3JAOS75R4G2",
+        url: "https://raw.githubusercontent.com/jacknight/buzzer/main/assets/bolt.png?token=AAEN3TXSCUCW6TQNMO3JAOS75R4G2",
       },
       fields: [
         {
@@ -101,7 +100,7 @@ class HelpCommand extends Command {
         },
         {
           name: `Change buzzer channel`,
-          value: `\`!buzz.channel #${buzzerChannel.name}\` (${buzzerRole} only)`,
+          value: `\`!buzz.channel #${buzzerChannel?.name}\` (${buzzerRole} only)`,
           inline: false,
         },
         {
@@ -117,7 +116,7 @@ class HelpCommand extends Command {
           "https://cdn.discordapp.com/avatars/329288617564569602/ef0db6f6c0f10ff08c125c77acab390d.png",
       },
     };
-    return message.channel.send({ embed: helpEmbed });
+    return message.channel.send({ embeds: [helpEmbed] });
   }
 }
 

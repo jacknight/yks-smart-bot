@@ -157,8 +157,7 @@ class ListenCommand extends Command {
         url: "https://shows.acast.com/yourkickstartersucks",
       },
       thumbnail: {
-        url:
-          "https://res.cloudinary.com/pippa/image/fetch/h_500,w_500,f_auto/https://assets.pippa.io/shows/5d137ece8b774eb816199f63/1562125598000-ef38e8a9cd086f609f806209d1341102.jpeg",
+        url: "https://res.cloudinary.com/pippa/image/fetch/h_500,w_500,f_auto/https://assets.pippa.io/shows/5d137ece8b774eb816199f63/1562125598000-ef38e8a9cd086f609f806209d1341102.jpeg",
       },
       fields: [
         {
@@ -179,7 +178,7 @@ class ListenCommand extends Command {
 
     let prevProgress = 0;
     message.channel
-      .send({ embed: mainEmbed })
+      .send({ embeds: [mainEmbed] })
       .then((msg) => {
         const duration =
           1000 *
@@ -199,7 +198,7 @@ class ListenCommand extends Command {
               progressStr.substring(0, progress) +
               ":microphone2:" +
               progressStr.substring(progress + 1);
-            msg.edit({ embed: mainEmbed });
+            msg.edit({ embeds: [mainEmbed] });
           }
         }, 3 * 60 * 1000); // every 3 min
       })

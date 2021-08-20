@@ -61,10 +61,12 @@ class RealOrFakeCommand extends Command {
         message.guild.emojis.cache
       );
 
-      const msg = await message.channel.send(
-        `Real or Fake? Mike, this one is ||${real ? realEmoji : fakeEmoji}||!`,
-        { embed }
-      );
+      const msg = await message.channel.send({
+        content: `Real or Fake? Mike, this one is ||${
+          real ? realEmoji : fakeEmoji
+        }||!`,
+        embeds: [embed],
+      });
 
       await msg.react(realEmoji);
       return msg.react(fakeEmoji);

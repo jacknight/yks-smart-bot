@@ -4,7 +4,7 @@ class ClipListener extends Listener {
   constructor() {
     super("clip", {
       emitter: "client",
-      event: "message",
+      event: "messageCreate",
     });
   }
 
@@ -12,6 +12,7 @@ class ClipListener extends Listener {
     // Check if it's a clip posted to the clips channel, and if so, store
     // the link in the database.
     if (
+      message.author.id !== this.client.user.id &&
       message.channel.id === process.env.YKS_CLIP_CHANNEL_ID &&
       message.attachments.size > 0
     ) {

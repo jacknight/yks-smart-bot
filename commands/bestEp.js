@@ -59,6 +59,7 @@ class BestCommand extends Command {
       ? new Map()
       : new Map(tempBestEpTotals);
 
+    var messagePrefix = "";
     if (!listOnly) {
       const prevUserVote = bestEpByUser.get(message.author.id);
       if (prevUserVote === num) {
@@ -70,9 +71,8 @@ class BestCommand extends Command {
         } else {
           bestEpTotals.set(prevUserVote, newTotal);
         }
-        message.channel.send(
-          `${message.author} thought Episode ${prevUserVote} was the best. Now...`
-        );
+
+        messagePrefix = `You thought Episode ${prevUserVote} was the best. Now...`;
       }
 
       bestEpByUser.set(message.author.id, num);
@@ -88,9 +88,7 @@ class BestCommand extends Command {
         JSON.stringify(Array.from(bestEpTotals.entries()))
       );
 
-      message.channel.send(
-        `${message.author} thinks Episode ${num} is the best.`
-      );
+      message.reply(`${messagePrefix}\nYou think Episode ${num} is the best.`);
     }
     const sortedTotals = new Map(
       [...bestEpTotals.entries()].sort((a, b) => {
