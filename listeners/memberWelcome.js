@@ -17,7 +17,7 @@ class MemberWelcomeListener extends Listener {
       "welcomedMembers",
       []
     );
-    // if (welcomedMembers.some((id) => id === member.id)) return;
+    if (welcomedMembers.some((id) => id === member.id)) return;
 
     // Add to welcomed members for guild so we don't do this again.
     welcomedMembers.push(member.id);
