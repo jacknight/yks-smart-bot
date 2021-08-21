@@ -17,11 +17,11 @@ class KickstarterCommand extends Command {
   }
 
   async exec(message, { name }) {
-    if (!name) return;
+    if (!name) name = "";
 
-    // Only allow in the #kickstarter-bot channel
+    // Only allow in the #kickstarter-bot channel on the YKS server
     if (
-      message.channel.id !== process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID &&
+      message.channel.id !== process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID ||
       message.guild.id !== process.env.YKS_GUILD_ID
     ) {
       const channel = this.client.util.resolveChannel(
