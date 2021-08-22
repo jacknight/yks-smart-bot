@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 import Paginator from "./Paginator";
 
 const fetchClipUrls = () => {
-  return fetch(`http://localhost:3000/api/clips`, {
+  return fetch(`${process.env.REACT_APP_HOST}/api/clips`, {
     method: "GET",
     headers: {
       "Content-Type": "application/json",

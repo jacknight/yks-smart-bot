@@ -3,7 +3,7 @@ import queryString from "query-string";
 import fetch from "node-fetch";
 
 const createSession = (code, fetchSignal) => {
-  return fetch(`http://localhost:3000/api/login`, {
+  return fetch(`${process.env.REACT_APP_HOST}/api/login`, {
     method: "POST",
     signal: fetchSignal,
     headers: {
