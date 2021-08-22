@@ -86,7 +86,7 @@ class YKSSmartBot extends AkairoClient {
               client_secret: process.env.DISCORD_BOT_CLIENT_SECRET,
               code,
               grant_type: "authorization_code",
-              redirect_uri: `http://localhost:3001`,
+              redirect_uri: `${process.env.REACT_APP_HOST}`,
               scope: "identify guilds",
             }),
             headers: {
