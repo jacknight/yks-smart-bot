@@ -1,11 +1,11 @@
 {
-  "name": "buzzer",
-  "version": "1.0.0",
-  "description": "Buzzer",
-  "main": "buzzer.js",
+  "name": "yks-smart-bot",
+  "version": "2.0.0",
+  "description": "YKS Smart Bot",
+  "private": true,
   "author": "Jack Knight",
   "engines": {
-    "node": "16.6.1"
+    "node": "^16.6.1"
   },
   "dependencies": {
     "@discordjs/opus": "^0.3.3",
@@ -21,18 +21,39 @@
     "ffmpeg-static": "^4.2.7",
     "fg-select-css": "^3.2.0",
     "http": "^0.0.1-security",
+    "lodash": "^4.17.21",
     "mongoose": "^5.11.8",
     "node-fetch": "^2.6.1",
     "openai-api": "^1.2.3",
     "pretty-ms": "^7.0.1",
+    "query-string": "^7.0.1",
+    "react": "^17.0.2",
+    "react-dom": "^17.0.2",
+    "react-paginate": "^7.1.3",
+    "react-router-dom": "^5.2.0",
+    "react-scripts": "^4.0.3",
     "rss-parser": "^3.10.0",
     "socket.io": "^3.0.5"
   },
   "scripts": {
     "start": "node ./bot.js",
-    "dev": "nodemon --trace-deprecation ./bot.js"
+    "react-start": "react-scripts start",
+    "build": "react-scripts build",
+    "dev": "nodemon ./bot.js"
   },
   "devDependencies": {
     "nodemon": "^2.0.6"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

@@ -7,11 +7,15 @@ const {
 } = require("discord-akairo");
 const model = require("./db/model");
 require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const { default: fetch } = require("node-fetch");
 const SessionModel = require("./db/sessions");
 const { Constants, Intents } = require("discord.js");
+const { response } = require("express");
+const cors = require("cors");
+
 class YKSSmartBot extends AkairoClient {
   constructor() {
     super(
@@ -64,10 +68,66 @@ class YKSSmartBot extends AkairoClient {
     });
 
     const app = express();
-    app.set("view engine", "ejs");
-    app.use(express.static(__dirname));
-    app.get("/", (req, res) => {
-      res.render("index");
+
+    app.use(cors());
+    app.use(express.static(path.resolve(__dirname, "./build")));
+    app.use(express.json());
+
+    // Handle discord authorization
+    app.post("/api/login", (req, res) => {
+      const code = req.body.code;
+      if (code) {
+        // get token
+        try {
+          fetch("https://discord.com/api/oauth2/token", {
+            method: "POST",
+            body: new URLSearchParams({
+              client_id: process.env.DISCORD_BOT_CLIENT_ID,
+              client_secret: process.env.DISCORD_BOT_CLIENT_SECRET,
+              code,
+              grant_type: "authorization_code",
+              redirect_uri: `http://localhost:3001`,
+              scope: "identify guilds",
+            }),
+            headers: {
+              "Content-type": "application/x-www-form-urlencoded",
+            },
+          })
+            .then((oauthResult) => oauthResult.json())
+            .then((oauthData) => {
+              // Get user from discord
+              fetch("https://discord.com/api/users/@me", {
+                headers: {
+                  authorization: `${oauthData.token_type} ${oauthData.access_token}`,
+                },
+              })
+                .then((userResponse) => userResponse.json())
+                .then((user) =>
+                  res.send({ user, sessionId: oauthData.access_token })
+                )
+                .catch((error) => console.log(error));
+            });
+        } catch (error) {
+          console.log(error);
+          res.sendFile(path.resolve(__dirname, "./build", "index.html"));
+        }
+      }
+    });
+
+    app.get("/api/clips", (req, res) => {
+      // Grab array of clip URLs from the database
+      var clips = [];
+      if (this.settings) {
+        clips = this.settings.get(process.env.YKS_GUILD_ID, "clips", []);
+      }
+      res.send({
+        clips,
+      });
+    });
+
+    // All other GET requests not handled before will return our React app
+    app.get("*", (req, res) => {
+      res.sendFile(path.resolve(__dirname, "./build", "index.html"));
     });
 
     this.server = app.listen(process.env.PORT || 3000, () => {
