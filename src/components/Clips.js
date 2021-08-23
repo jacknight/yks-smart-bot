@@ -3,9 +3,9 @@ import React, { useEffect, useState } from "react";
 import Paginator from "./Paginator";
 import { useParams, useHistory } from "react-router-dom";
 
-const fetchClipUrls = (pageNumber, clipsPerPage) => {
+const fetchClipUrls = (pageNumber, clipsPerPage, sessionId) => {
   return fetch(
-    `${process.env.REACT_APP_HOST}/api/clips/${pageNumber}?=${clipsPerPage}`,
+    `${process.env.REACT_APP_HOST}/api/clips/${pageNumber}?clipsPerPage=${clipsPerPage}&session=${sessionId}`,
     {
       method: "GET",
       headers: {
@@ -17,7 +17,7 @@ const fetchClipUrls = (pageNumber, clipsPerPage) => {
     .catch((err) => console.error(err));
 };
 
-const Clips = (props) => {
+const Clips = ({ sessionId }) => {
   const params = useParams();
   const history = useHistory();
   const [pageCount, setPageCount] = useState(0);
@@ -26,7 +26,7 @@ const Clips = (props) => {
   const clipsPerPage = 1;
 
   const requestClips = (pageNumber) => {
-    fetchClipUrls(pageNumber, clipsPerPage).then((data) => {
+    fetchClipUrls(pageNumber, clipsPerPage, sessionId).then((data) => {
       if (data && data.clips && data.totalClips && data.page) {
         setPageCount(Math.ceil(data.totalClips / clipsPerPage));
         setCurrClips(data.clips);
@@ -47,6 +47,7 @@ const Clips = (props) => {
   return (
     <>
       <button
+        className={"randomClipButton"}
         onClick={() => {
           const randomPage = Math.ceil(Math.random() * pageCount);
           history.push(`/clips/${randomPage}`);

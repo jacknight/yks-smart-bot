@@ -1,7 +1,7 @@
 import React from "react";
 
 const Episodes = (props) => {
-  return <h1>Episodes</h1>;
+  return <h2>Under construction...</h2>;
 };
 
 export default Episodes;

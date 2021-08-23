@@ -3,6 +3,7 @@
   --yksblack: rgba(10, 10, 10, 1);
   --ykswhite: rgba(255, 255, 255, 1);
   --ykspremium: rgba(221, 175, 116, 1);
+  --font-family: monospace;
 }
 
 body {
@@ -12,8 +13,7 @@ body {
   margin-bottom: 50px;
   padding: 0;
   background: var(--yksblack);
-  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-    "Lucida Sans", Arial, sans-serif;
+  font-family: var(--font-family);
   color: var(--ykswhite);
   display: flex;
   justify-content: stretch;
@@ -34,7 +34,7 @@ a {
   transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
   padding: 10px;
   text-decoration: none;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   text-align: center;
   white-space: nowrap;
 }
@@ -46,12 +46,11 @@ a:hover {
 
 button {
   text-transform: uppercase;
-  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-    "Lucida Sans", Arial, sans-serif;
+  font-family: var(--font-family);
   background: var(--ykswhite);
   border: var(--yksgreen) solid 1px;
   color: var(--yksgreen);
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 
 button:hover {
@@ -121,6 +120,19 @@ main {
   max-width: 400px;
 }
 
+.randomClipButton {
+  cursor: pointer;
+  background: var(--ykspremium);
+  color: var(--ykswhite);
+  border: none;
+}
+
+.randomClipButton:hover {
+  background: var(--ykswhite);
+  color: var(--yksblack);
+  border: none;
+}
+
 .paginator {
   display: flex;
   flex-flow: row nowrap;
@@ -128,6 +140,21 @@ main {
   gap: 2px;
   margin-left: -40px;
 }
+
+.paginatorLink {
+  cursor: pointer;
+  background: var(--ykspremium);
+}
+
+.paginatorLink:hover {
+  color: var(--yksblack);
+}
+
+.paginatorActiveLink {
+  color: var(--yksblack);
+  background: var(--ykspremium);
+}
+
 /*
 .layout {
   display: grid;

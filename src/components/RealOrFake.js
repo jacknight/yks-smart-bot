@@ -1,7 +1,7 @@
 import React from "react";
 
 const RealOrFake = (props) => {
-  return <h1>RealOrFake</h1>;
+  return <h2>Under construction...</h2>;
 };
 
 export default RealOrFake;

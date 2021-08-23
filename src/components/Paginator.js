@@ -12,6 +12,11 @@ const Paginator = ({ pageCount, onPageChange, initialPage }) => {
       marginPagesDisplayed={1}
       pageRangeDisplayed={2}
       containerClassName={"paginator"}
+      pageLinkClassName={"paginatorLink"}
+      previousLinkClassName={"paginatorLink"}
+      nextLinkClassName={"paginatorLink"}
+      breakLinkClassName={"paginatorLink"}
+      activeLinkClassName={"paginatorActiveLink"}
       pageCount={pageCount}
       onPageChange={onPageChange}
     />
