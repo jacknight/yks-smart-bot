@@ -7,11 +7,15 @@ const {
 } = require("discord-akairo");
 const model = require("./db/model");
 require("dotenv").config();
+const path = require("path");
 const express = require("express");
 const mongoose = require("mongoose");
 const { default: fetch } = require("node-fetch");
 const SessionModel = require("./db/sessions");
 const { Constants, Intents } = require("discord.js");
+const cors = require("cors");
+const crypto = require("crypto");
+
 class YKSSmartBot extends AkairoClient {
   constructor() {
     super(
@@ -64,10 +68,113 @@ class YKSSmartBot extends AkairoClient {
     });
 
     const app = express();
-    app.set("view engine", "ejs");
-    app.use(express.static(__dirname));
-    app.get("/", (req, res) => {
-      res.render("index");
+
+    app.use(cors());
+    app.use(express.static(path.resolve(__dirname, "./build")));
+    app.use(express.json());
+
+    // Handle discord authorization
+    app.post("/api/login", async (req, res) => {
+      const code = req.body.code;
+      if (code) {
+        // get token
+        try {
+          const oauthFetch = await fetch(
+            "https://discord.com/api/oauth2/token",
+            {
+              method: "POST",
+              body: new URLSearchParams({
+                client_id: process.env.DISCORD_BOT_CLIENT_ID,
+                client_secret: process.env.DISCORD_BOT_CLIENT_SECRET,
+                code,
+                grant_type: "authorization_code",
+                redirect_uri: `${process.env.REACT_APP_HOST}`,
+                scope: "identify guilds",
+              }),
+              headers: {
+                "Content-type": "application/x-www-form-urlencoded",
+              },
+            }
+          );
+          const oauthData = await oauthFetch.json();
+          // Get user from discord
+          const userFetch = await fetch("https://discord.com/api/users/@me", {
+            headers: {
+              authorization: `${oauthData.token_type} ${oauthData.access_token}`,
+            },
+          });
+          const user = await userFetch.json();
+          // Before we do anything, confirm user is a member of the
+          // pisscord.
+          const guildsFetch = await fetch(
+            "https://discord.com/api/users/@me/guilds",
+            {
+              headers: {
+                authorization: `${oauthData.token_type} ${oauthData.access_token}`,
+              },
+            }
+          );
+          const guilds = await guildsFetch.json();
+          if (!guilds.some((guild) => guild.id === process.env.YKS_GUILD_ID)) {
+            return res.sendFile(
+              path.resolve(__dirname, "./build", "index.html")
+            );
+          }
+
+          // From this point on, if we find the provided sessionId we'll just
+          // assume they're still members of the pisscord. If they aren't, some
+          // interactive stuff won't work.
+          const expireDate = new Date(oauthData.expires_in * 1000 + Date.now());
+          const sessionId = crypto.randomBytes(16).toString("base64");
+          const session = new SessionModel({
+            id: sessionId,
+            session: {
+              user: user.id,
+              accessToken: oauthData.access_token,
+              tokenType: oauthData.token_type,
+              expirationDate: expireDate,
+              refreshToken: oauthData.refresh_token,
+              scope: oauthData.scope,
+            },
+          });
+
+          session.save().catch((err) => console.log(err));
+
+          return res.send({ user, sessionId });
+        } catch (error) {
+          console.log(error);
+          res.sendFile(path.resolve(__dirname, "./build", "index.html"));
+        }
+      }
+    });
+
+    app.get("/api/clips/:page", async (req, res) => {
+      // Verify session
+      const session = await SessionModel.findOne({ id: req.query.session });
+      if (!session) {
+        return res.sendFile(path.resolve(__dirname, "./build", "index.html"));
+      }
+
+      // Grab array of clip URLs from the database
+      var clips = [];
+      clips = this.settings.get(process.env.YKS_GUILD_ID, "clips", []);
+      // Get clips requested based on 1) page number 2) clips per page
+      // In this case, page number is 1 since none was provided
+      const clipsPerPage = req.query.clips || 1;
+      const totalClips = clips.length;
+      const page = req.params.page;
+      const offset = clipsPerPage * (page - 1);
+      clips = clips.slice(offset, offset + clipsPerPage);
+      res.send({
+        clips,
+        totalClips,
+        page,
+      });
+    });
+
+    // All other GET requests not handled before will return our React app
+    app.get("*", (req, res) => {
+      res.sendFile(path.resolve(__dirname, "./build", "index.html"));
     });
 
     this.server = app.listen(process.env.PORT || 3000, () => {

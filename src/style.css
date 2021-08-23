@@ -2,13 +2,30 @@
   --yksgreen: rgba(131, 193, 51, 1);
   --yksblack: rgba(10, 10, 10, 1);
   --ykswhite: rgba(255, 255, 255, 1);
+  --ykspremium: rgba(221, 175, 116, 1);
+  --font-family: monospace;
 }
+
 body {
+  margin-top: 5px;
+  margin-left: 20px;
+  margin-right: 20px;
+  margin-bottom: 50px;
+  padding: 0;
   background: var(--yksblack);
-  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-    "Lucida Sans", Arial, sans-serif;
-  /* text-transform: uppercase; */
+  font-family: var(--font-family);
   color: var(--ykswhite);
+  display: flex;
+  justify-content: stretch;
+  justify-items: center;
+}
+
+#root {
+  width: 100%;
+}
+
+.App {
+  width: 100%;
 }
 
 a {
@@ -17,7 +34,7 @@ a {
   transition: transform 0.1s ease-out, box-shadow 0.1s ease-out;
   padding: 10px;
   text-decoration: none;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   text-align: center;
   white-space: nowrap;
 }
@@ -26,15 +43,14 @@ a:hover {
   color: var(--yksgreen);
   background: var(--ykswhite);
 }
-/*
+
 button {
   text-transform: uppercase;
-  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-    "Lucida Sans", Arial, sans-serif;
+  font-family: var(--font-family);
   background: var(--ykswhite);
   border: var(--yksgreen) solid 1px;
   color: var(--yksgreen);
-  font-size: 1.5rem;
+  font-size: 1.2rem;
 }
 
 button:hover {
@@ -47,7 +63,7 @@ button:active {
   background: var(--yksblack);
   color: var(--yksgreen);
   border: var(--ykswhite) solid 1px;
-} */
+}
 
 header {
   display: grid;
@@ -57,6 +73,7 @@ header {
   justify-content: space-between;
   gap: 10px;
   white-space: nowrap;
+  width: 100%;
 }
 
 header > h1 {
@@ -64,7 +81,7 @@ header > h1 {
   justify-self: center;
 }
 
-header > login {
+header > .header-logout {
   grid-area: login;
   display: flex;
   align-items: center;
@@ -79,6 +96,66 @@ nav {
   gap: 5px;
 }
 
+main {
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: center;
+  justify-items: center;
+  align-items: center;
+  width: 100%;
+}
+
+.clips {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: center;
+  gap: 10px;
+  max-width: 80%;
+  border: var(--ykspremium) 5px solid;
+  padding: 10px;
+}
+
+.clip {
+  min-width: 200px;
+  max-width: 400px;
+}
+
+.randomClipButton {
+  cursor: pointer;
+  background: var(--ykspremium);
+  color: var(--ykswhite);
+  border: none;
+}
+
+.randomClipButton:hover {
+  background: var(--ykswhite);
+  color: var(--yksblack);
+  border: none;
+}
+
+.paginator {
+  display: flex;
+  flex-flow: row nowrap;
+  list-style: none;
+  gap: 2px;
+  margin-left: -40px;
+}
+
+.paginatorLink {
+  cursor: pointer;
+  background: var(--ykspremium);
+}
+
+.paginatorLink:hover {
+  color: var(--yksblack);
+}
+
+.paginatorActiveLink {
+  color: var(--yksblack);
+  background: var(--ykspremium);
+}
+
+/*
 .layout {
   display: grid;
   justify-content: center;
@@ -171,4 +248,4 @@ button:disabled {
 .buzz-servers {
   display: grid;
   grid-template-columns: 1fr auto;
-}
+} */
