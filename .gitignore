@@ -356,3 +356,5 @@ MigrationBackup/
 .DS_Store
 
 TODO.md
+
+build/

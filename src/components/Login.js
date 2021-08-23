@@ -25,8 +25,8 @@ const Login = ({ setSession, setUser }) => {
       const res = await createSession(code, fetchSignal);
       console.log(res);
       if (res && res.user && res.sessionId) {
-        setSession(res.sessionId);
         setUser(res.user);
+        setSession(res.sessionId);
       }
     }
     return () => fetchController.abort();

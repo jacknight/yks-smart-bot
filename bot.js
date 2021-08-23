@@ -15,6 +15,8 @@ const SessionModel = require("./db/sessions");
 const { Constants, Intents } = require("discord.js");
 const { response } = require("express");
 const cors = require("cors");
+// const forceSSL =
+// process.env.NODE_ENV !== "development" ? require("express-force-ssl") : null;
 
 class YKSSmartBot extends AkairoClient {
   constructor() {
@@ -72,6 +74,9 @@ class YKSSmartBot extends AkairoClient {
     app.use(cors());
     app.use(express.static(path.resolve(__dirname, "./build")));
     app.use(express.json());
+    // if (forceSSL) {
+    //   app.use(forceSSL);
+    // }
 
     // Handle discord authorization
     app.post("/api/login", (req, res) => {
@@ -114,14 +119,23 @@ class YKSSmartBot extends AkairoClient {
       }
     });
 
-    app.get("/api/clips", (req, res) => {
+    app.get("/api/clips/:page", (req, res) => {
       // Grab array of clip URLs from the database
       var clips = [];
       if (this.settings) {
         clips = this.settings.get(process.env.YKS_GUILD_ID, "clips", []);
       }
+      // Get clips requested based on 1) page number 2) clips per page
+      // In this case, page number is 1 since none was provided
+      const clipsPerPage = req.params?.clips || 1;
+      const totalClips = clips.length;
+      const page = req.params.page;
+      const offset = clipsPerPage * (page - 1);
+      clips = clips.slice(offset, offset + clipsPerPage);
       res.send({
         clips,
+        totalClips,
+        page,
       });
     });
 

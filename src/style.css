@@ -111,7 +111,7 @@ main {
   flex-flow: row wrap;
   justify-content: center;
   gap: 10px;
-  width: 80%;
+  max-width: 80%;
   border: var(--ykspremium) 5px solid;
   padding: 10px;
 }
@@ -126,6 +126,7 @@ main {
   flex-flow: row nowrap;
   list-style: none;
   gap: 2px;
+  margin-left: -40px;
 }
 /*
 .layout {

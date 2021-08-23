@@ -18,6 +18,7 @@
     "dotenv": "^8.2.0",
     "ejs": "^3.1.5",
     "express": "^4.17.1",
+    "express-force-ssl": "^0.3.2",
     "ffmpeg-static": "^4.2.7",
     "fg-select-css": "^3.2.0",
     "http": "^0.0.1-security",

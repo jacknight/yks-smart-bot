@@ -1,54 +1,60 @@
 import { uniqueId } from "lodash";
 import React, { useEffect, useState } from "react";
 import Paginator from "./Paginator";
+import { useParams, useHistory } from "react-router-dom";
 
-const fetchClipUrls = () => {
-  return fetch(`${process.env.REACT_APP_HOST}/api/clips`, {
-    method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-  })
+const fetchClipUrls = (pageNumber, clipsPerPage) => {
+  return fetch(
+    `${process.env.REACT_APP_HOST}/api/clips/${pageNumber}?=${clipsPerPage}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  )
     .then((data) => data.json())
     .catch((err) => console.error(err));
 };
 
 const Clips = (props) => {
-  const [clipUrls, setClipUrls] = useState(null);
-  const [currClips, setCurrClips] = useState([]);
+  const params = useParams();
+  const history = useHistory();
   const [pageCount, setPageCount] = useState(0);
-  const [currPage, setCurrPage] = useState(0);
+  const [currPage, setCurrPage] = useState(Number(params.page) || 1);
+  const [currClips, setCurrClips] = useState(null);
   const clipsPerPage = 1;
 
-  const handlePageChange = (data) => {
-    const offset = data.selected * clipsPerPage;
-    let clips = [...clipUrls];
-    clips = clips.slice(offset, offset + clipsPerPage);
-    setCurrPage(data.selected);
-    setCurrClips(clips);
-  };
+  // useEffect(async () => {
+  //   history.push(`/clips/${currPage}`);
+  // }, [currPage]);
 
-  if (!clipUrls) {
-    const res = fetchClipUrls();
-
-    res.then((data) => {
-      if (data) {
-        // data.clips.sort(() => {
-        //   return Math.floor(Math.random() * 3) - 1;
-        // });
-        setPageCount(Math.ceil(data.clips.length / clipsPerPage));
-        setClipUrls(data.clips);
-        const offset = currPage * clipsPerPage;
-        let clips = [...data.clips];
-        clips = clips.slice(offset, offset + clipsPerPage);
-        setCurrClips(clips);
+  const requestClips = (pageNumber) => {
+    fetchClipUrls(pageNumber, clipsPerPage).then((data) => {
+      if (data && data.clips && data.totalClips && data.page) {
+        setPageCount(Math.ceil(data.totalClips / clipsPerPage));
+        setCurrClips(data.clips);
+        setCurrPage(data.page);
       }
     });
+  };
+
+  const handlePageChange = async (data) => {
+    history.push(`/clips/${data.selected + 1}`);
+    requestClips(data.selected + 1);
+  };
+
+  if (!currClips) {
+    requestClips(currPage);
   }
 
   return (
     <>
-      <Paginator pageCount={pageCount} onPageChange={handlePageChange} />
+      <Paginator
+        initialPage={currPage}
+        pageCount={pageCount}
+        onPageChange={handlePageChange}
+      />
       <div className='main clips'>
         {currClips?.map((url, index) => {
           return (
@@ -58,7 +64,6 @@ const Clips = (props) => {
           );
         })}
       </div>
-      <Paginator pageCount={pageCount} onPageChange={handlePageChange} />
     </>
   );
 };
