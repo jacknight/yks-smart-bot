@@ -6,8 +6,8 @@ const {
   getAIResponse,
 } = require("../util");
 
-var msPerKickstarter = 5000;
-var numRounds = 2;
+var msPerKickstarter = 30000;
+var numRounds = 10;
 class RealOrFakeGameCommand extends Command {
   constructor() {
     super("realorfakegame", {

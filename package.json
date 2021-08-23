@@ -10,6 +10,7 @@
   "dependencies": {
     "@discordjs/opus": "^0.3.3",
     "axios": "^0.21.1",
+    "canvas": "^2.8.0",
     "cors": "^2.8.5",
     "date-fns": "^2.16.1",
     "discord-akairo": "github:discord-akairo/discord-akairo",
