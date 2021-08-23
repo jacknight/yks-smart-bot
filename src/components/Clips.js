@@ -25,10 +25,6 @@ const Clips = (props) => {
   const [currClips, setCurrClips] = useState(null);
   const clipsPerPage = 1;
 
-  // useEffect(async () => {
-  //   history.push(`/clips/${currPage}`);
-  // }, [currPage]);
-
   const requestClips = (pageNumber) => {
     fetchClipUrls(pageNumber, clipsPerPage).then((data) => {
       if (data && data.clips && data.totalClips && data.page) {
@@ -50,8 +46,17 @@ const Clips = (props) => {
 
   return (
     <>
+      <button
+        onClick={() => {
+          const randomPage = Math.ceil(Math.random() * pageCount);
+          history.push(`/clips/${randomPage}`);
+          requestClips(randomPage);
+        }}
+      >
+        Random Clip
+      </button>
       <Paginator
-        initialPage={currPage}
+        initialPage={currPage - 1}
         pageCount={pageCount}
         onPageChange={handlePageChange}
       />

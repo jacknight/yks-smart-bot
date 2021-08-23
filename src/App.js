@@ -11,11 +11,12 @@ import Episodes from "./components/Episodes";
 import RealOrFake from "./components/RealOrFake";
 import Mailbag from "./components/Mailbag";
 import Buzzer from "./components/Buzzer";
-import { BrowserRouter, Route, Switch, useLocation } from "react-router-dom";
+import { BrowserRouter, Route, Switch, useHistory } from "react-router-dom";
 import useSession from "./utilities/useSession";
+import NavButton from "./components/NavButton";
 
 const App = () => {
-  const { session, setSession } = useSession();
+  const { session, setSession, clearSession } = useSession();
   const [user, setUser] = useState();
 
   if (!session) {
@@ -27,9 +28,14 @@ const App = () => {
       <div className='App'>
         <Header>
           <Title>YKS Smart Bot Mainframe</Title>
-          <NavLink id='header-logout' href=''>
+          <NavButton
+            id='header-logout'
+            onClick={() => {
+              clearSession();
+            }}
+          >
             Logout
-          </NavLink>
+          </NavButton>
         </Header>
         <Nav>
           <NavLink id='nav-episodes' href='episodes'>

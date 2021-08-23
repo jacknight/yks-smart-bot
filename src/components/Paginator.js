@@ -9,7 +9,7 @@ const Paginator = ({ pageCount, onPageChange, initialPage }) => {
       previousLabel={"<"}
       nextLabel={">"}
       breakLabel={"..."}
-      marginPagesDisplayed={2}
+      marginPagesDisplayed={1}
       pageRangeDisplayed={2}
       containerClassName={"paginator"}
       pageCount={pageCount}

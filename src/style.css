@@ -43,28 +43,28 @@ a:hover {
   color: var(--yksgreen);
   background: var(--ykswhite);
 }
-/*
-  button {
-    text-transform: uppercase;
-    font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
-      "Lucida Sans", Arial, sans-serif;
-    background: var(--ykswhite);
-    border: var(--yksgreen) solid 1px;
-    color: var(--yksgreen);
-    font-size: 1.5rem;
-  }
 
-  button:hover {
-    background: var(--yksgreen);
-    color: var(--ykswhite);
-    border: var(--ykswhite) solid 1px;
-  }
+button {
+  text-transform: uppercase;
+  font-family: "Trebuchet MS", "Lucida Sans Unicode", "Lucida Grande",
+    "Lucida Sans", Arial, sans-serif;
+  background: var(--ykswhite);
+  border: var(--yksgreen) solid 1px;
+  color: var(--yksgreen);
+  font-size: 1.5rem;
+}
 
-  button:active {
-    background: var(--yksblack);
-    color: var(--yksgreen);
-    border: var(--ykswhite) solid 1px;
-  } */
+button:hover {
+  background: var(--yksgreen);
+  color: var(--ykswhite);
+  border: var(--ykswhite) solid 1px;
+}
+
+button:active {
+  background: var(--yksblack);
+  color: var(--yksgreen);
+  border: var(--ykswhite) solid 1px;
+}
 
 header {
   display: grid;
