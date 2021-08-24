@@ -115,7 +115,10 @@ class YKSSmartBot extends AkairoClient {
             }
           );
           const guilds = await guildsFetch.json();
-          if (!guilds.some((guild) => guild.id === process.env.YKS_GUILD_ID)) {
+          if (
+            !guilds ||
+            !guilds.some((guild) => guild.id === process.env.YKS_GUILD_ID)
+          ) {
             return res.sendFile(
               path.resolve(__dirname, "./build", "index.html")
             );
