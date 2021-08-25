@@ -3,21 +3,7 @@ import React, { useEffect, useState } from "react";
 import Paginator from "./Paginator";
 import { useParams, useHistory } from "react-router-dom";
 import queryString from "query-string";
-
-const fetchClipUrls = (pageNumber, data) => {
-  let params = queryString.stringify(data);
-  return fetch(
-    `${process.env.REACT_APP_HOST}/api/clips/${pageNumber}?${params}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    }
-  )
-    .then((data) => data.json())
-    .catch((err) => console.error(err));
-};
+import fetch from "node-fetch";
 
 const Clips = ({ session, clearSession }) => {
   const params = useParams();
@@ -44,8 +30,34 @@ const Clips = ({ session, clearSession }) => {
     });
   };
 
+  const fetchClipUrls = (pageNumber, data) => {
+    let params = queryString.stringify(data);
+    return fetch(`/api/clips/${pageNumber}?${params}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    })
+      .then((data) => data.json())
+      .catch((err) => console.error(err));
+  };
+
   const handlePageChange = async (data) => {
     setCurrPage(data.selected + 1);
+  };
+
+  const shareClip = async () => {
+    let data = {
+      clip: currPage - 1,
+      session,
+    };
+    return fetch(`/api/share-clip`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
   };
 
   if (!currClips) {
@@ -55,7 +67,7 @@ const Clips = ({ session, clearSession }) => {
   return (
     <>
       <button
-        className={"randomClipButton"}
+        className={"clipButton"}
         onClick={() => {
           const randomPage = Math.ceil(Math.random() * pageCount);
           setCurrPage(randomPage);
@@ -78,6 +90,10 @@ const Clips = ({ session, clearSession }) => {
           );
         })}
       </div>
+
+      <button className={"clipButton"} onClick={shareClip}>
+        Share On The Pisscord
+      </button>
     </>
   );
 };

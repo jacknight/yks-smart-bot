@@ -154,7 +154,8 @@ class YKSSmartBot extends AkairoClient {
 
     app.get("/api/clips/:page", async (req, res) => {
       // Verify session
-      const session = await SessionModel.findOne({ id: req.query.session });
+      const doc = await SessionModel.findOne({ id: req.query.session });
+      const session = doc?.session;
       if (!session || session?.expirationDate?.getTime() < Date.now()) {
         // Log them out
         return res.send({ logout: true });
@@ -175,6 +176,41 @@ class YKSSmartBot extends AkairoClient {
         totalClips,
         page,
       });
+    });
+
+    app.post("/api/share-clip", async (req, res) => {
+      const { clip } = req.body;
+
+      // Verify session
+      const doc = await SessionModel.findOne({ id: req.body.session });
+      const session = doc?.session;
+      if (!session || session?.expirationDate?.getTime() < Date.now()) {
+        // Log them out
+        return res.send({ logout: true });
+      }
+
+      const pisscord = this.guilds?.cache?.find(
+        (guild) => guild.id === process.env.YKS_GUILD_ID
+      );
+      const clipChannel = pisscord?.channels?.cache?.find(
+        (channel) => channel.id === process.env.YKS_CLIP_CHANNEL_ID
+      );
+      const command = await this.commandHandler.findCommand("clip");
+      const member = pisscord?.members?.cache?.find((member) => {
+        return member.user.id === session.user;
+      });
+      this.commandHandler.runCommand(
+        {
+          guild: pisscord,
+          channel: clipChannel,
+          member,
+          isViaSite: true,
+          clip,
+        },
+        command,
+        {}
+      );
+      res.send();
     });
 
     // All other GET requests not handled before will return our React app

@@ -120,14 +120,14 @@ main {
   max-width: 400px;
 }
 
-.randomClipButton {
+.clipButton {
   cursor: pointer;
   background: var(--ykspremium);
   color: var(--ykswhite);
   border: none;
 }
 
-.randomClipButton:hover {
+.clipButton:hover {
   background: var(--ykswhite);
   color: var(--yksblack);
   border: none;
