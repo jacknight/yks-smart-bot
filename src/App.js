@@ -20,7 +20,17 @@ const App = () => {
   const [user, setUser] = useState();
 
   if (!session) {
-    return <Login setSession={setSession} setUser={setUser} />;
+    return (
+      <BrowserRouter>
+        <div className='App'>
+          <Login
+            setSession={setSession}
+            setUser={setUser}
+            clearSession={clearSession}
+          />
+        </div>
+      </BrowserRouter>
+    );
   }
 
   return (
@@ -38,13 +48,13 @@ const App = () => {
           </NavButton>
         </Header>
         <Nav>
-          <NavLink id='nav-episodes' href='episodes'>
+          {/* <NavLink id='nav-episodes' href='episodes'>
             Episodes
-          </NavLink>
+          </NavLink> */}
           <NavLink id='nav-clips' href='clips'>
             Clips
           </NavLink>
-          <NavLink id='nav-realorfake' href='real-or-fake'>
+          {/* <NavLink id='nav-realorfake' href='real-or-fake'>
             Real or Fake?
           </NavLink>
           <NavLink id='nav-mailbag' href='mailbag'>
@@ -52,7 +62,7 @@ const App = () => {
           </NavLink>
           <NavLink id='nav-buzzer' href='buzzer'>
             Buzzer
-          </NavLink>
+          </NavLink> */}
         </Nav>
         <Main>
           <Switch>
@@ -62,7 +72,11 @@ const App = () => {
             </Route>
             <Route path='/clips/:page?'>
               <Title>Clips</Title>
-              <Clips user={user} sessionId={session} />
+              <Clips
+                user={user}
+                session={session}
+                clearSession={clearSession}
+              />
             </Route>
             <Route path='/real-or-fake'>
               <Title>Real or Fake</Title>

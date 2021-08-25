@@ -1,10 +1,11 @@
 import React from "react";
 import ReactPaginate from "react-paginate";
 
-const Paginator = ({ pageCount, onPageChange, initialPage }) => {
+const Paginator = ({ pageCount, onPageChange, initialPage, forcePage }) => {
   return (
     <ReactPaginate
       initialPage={initialPage}
+      forcePage={forcePage}
       disableInitialCallback={true}
       previousLabel={"<"}
       nextLabel={">"}

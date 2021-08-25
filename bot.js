@@ -117,6 +117,7 @@ class YKSSmartBot extends AkairoClient {
           const guilds = await guildsFetch.json();
           if (
             !guilds ||
+            !Array.isArray(guilds) ||
             !guilds.some((guild) => guild.id === process.env.YKS_GUILD_ID)
           ) {
             return res.sendFile(
@@ -124,7 +125,7 @@ class YKSSmartBot extends AkairoClient {
             );
           }
 
-          // From this point on, if we find the provided sessionId we'll just
+          // From this point on, if we find the provided session we'll just
           // assume they're still members of the pisscord. If they aren't, some
           // interactive stuff won't work.
           const expireDate = new Date(oauthData.expires_in * 1000 + Date.now());
@@ -143,7 +144,7 @@ class YKSSmartBot extends AkairoClient {
 
           session.save().catch((err) => console.log(err));
 
-          return res.send({ user, sessionId });
+          return res.send({ user, session: sessionId });
         } catch (error) {
           console.log(error);
           res.sendFile(path.resolve(__dirname, "./build", "index.html"));
@@ -154,8 +155,9 @@ class YKSSmartBot extends AkairoClient {
     app.get("/api/clips/:page", async (req, res) => {
       // Verify session
       const session = await SessionModel.findOne({ id: req.query.session });
-      if (!session) {
-        return res.sendFile(path.resolve(__dirname, "./build", "index.html"));
+      if (!session || session?.expirationDate?.getTime() < Date.now()) {
+        // Log them out
+        return res.send({ logout: true });
       }
 
       // Grab array of clip URLs from the database
@@ -253,9 +255,9 @@ mongoose
 
       // The user already had a session ID stored in their
       // browser so they'll try to use it here.
-      socket.on("authorize", ({ sessionId }) => {
+      socket.on("authorize", ({ session }) => {
         // Lookup session, see if it's still valid.
-        SessionModel.findOne({ id: sessionId })
+        SessionModel.findOne({ id: session })
           .then((doc) => {
             const today = new Date();
             if (!doc || !doc.session || doc.session.expirationDate <= today) {
@@ -283,9 +285,9 @@ mongoose
       });
 
       // User logged out, remove the session ID from the database.
-      socket.on("logout", ({ sessionId }) => {
-        // Remove sessionId from the database.
-        SessionModel.deleteOne({ id: sessionId }).catch((err) => {
+      socket.on("logout", ({ session }) => {
+        // Remove session from the database.
+        SessionModel.deleteOne({ id: session }).catch((err) => {
           console.log(err);
         });
       });
@@ -326,7 +328,7 @@ mongoose
               return socket.emit("sessionExpired");
             }
             const crypto = require("crypto");
-            const sessionId = crypto.randomBytes(16).toString("base64");
+            const session = crypto.randomBytes(16).toString("base64");
             const expireDate = new Date(info.expires_in * 1000 + Date.now());
 
             fetch("https://discord.com/api/users/@me", {
@@ -337,7 +339,7 @@ mongoose
               .then((res) => res.json())
               .then((response) => {
                 const session = new SessionModel({
-                  id: sessionId,
+                  id: session,
                   session: {
                     accessToken: info.access_token,
                     tokenType: info.token_type,
@@ -353,7 +355,7 @@ mongoose
                   .catch((err) => console.log(err));
               });
 
-            socket.emit("sessionId", sessionId);
+            socket.emit("session", session);
             fetch("https://discord.com/api/users/@me/guilds", {
               headers: {
                 authorization: `${info.token_type} ${info.access_token}`,
@@ -397,10 +399,10 @@ mongoose
       });
 
       // Toggle buzzer mode (chaos/normal)
-      socket.on("changeMode", ({ guild, mode, sessionId }) => {
+      socket.on("changeMode", ({ guild, mode, session }) => {
         if (guild.id === "") return;
         // Look up user associated with session ID.
-        SessionModel.findOne({ id: sessionId }).then(async (doc) => {
+        SessionModel.findOne({ id: session }).then(async (doc) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(
               guild.id,
@@ -434,10 +436,10 @@ mongoose
       });
 
       // Enable/disabled the buzzer.
-      socket.on("changeReady", ({ guild, ready, sessionId }) => {
+      socket.on("changeReady", ({ guild, ready, session }) => {
         if (guild.id === "") return;
         // Look up user associated with session ID.
-        SessionModel.findOne({ id: sessionId }).then(async (doc) => {
+        SessionModel.findOne({ id: session }).then(async (doc) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(
               guild.id,
@@ -469,10 +471,10 @@ mongoose
         });
       });
 
-      socket.on("changeChannel", ({ guild, id, sessionId }) => {
+      socket.on("changeChannel", ({ guild, id, session }) => {
         if (guild.id === "") return;
         // Look up user associated with session ID.
-        SessionModel.findOne({ id: sessionId }).then(async (doc) => {
+        SessionModel.findOne({ id: session }).then(async (doc) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(
               guild.id,
@@ -507,10 +509,10 @@ mongoose
         });
       });
 
-      socket.on("clearQueue", ({ guild, sessionId }) => {
+      socket.on("clearQueue", ({ guild, session }) => {
         if (guild.id === "") return;
         // Look up user associated with session ID.
-        SessionModel.findOne({ id: sessionId }).then(async (doc) => {
+        SessionModel.findOne({ id: session }).then(async (doc) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(
               guild.id,
@@ -539,10 +541,10 @@ mongoose
         });
       });
 
-      socket.on("randomizeQueue", ({ guild, sessionId }) => {
+      socket.on("randomizeQueue", ({ guild, session }) => {
         if (guild.id === "") return;
         // Look up user associated with session ID.
-        SessionModel.findOne({ id: sessionId }).then(async (doc) => {
+        SessionModel.findOne({ id: session }).then(async (doc) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(
               guild.id,
