@@ -71,26 +71,33 @@ exports.sendRequest = async (url, method, opts = {}) => {
 };
 
 exports.getAIResponse = async (name, userID) => {
-  const response = await exports.sendRequest(
-    "https://api.openai.com/v1/completions",
-    "post",
-    {
-      prompt: `**Name**: ${name}`,
-      model: "curie:ft-yks-smart-bot-2021-08-07-18-00-06",
-      maxTokens: 200,
-      temperature: 0.8,
-      topP: 1,
-      presencePenalty: 0,
-      frequencyPenalty: 0,
-      bestOf: 1,
-      n: 1,
-      stream: false,
-      stop: ["###"],
-      echo: true,
-      user: userID,
+  try {
+    const response = await exports.sendRequest(
+      "https://api.openai.com/v1/completions",
+      "post",
+      {
+        prompt: `**Name**: ${name}`,
+        model: "curie:ft-yks-smart-bot-2021-08-07-18-00-06",
+        maxTokens: 200,
+        temperature: 0.8,
+        topP: 1,
+        presencePenalty: 0,
+        frequencyPenalty: 0,
+        bestOf: 1,
+        n: 1,
+        stream: false,
+        stop: ["###"],
+        echo: true,
+        user: userID,
+      }
+    );
+    return response;
+  } catch (e) {
+    if (e.response) {
+      return `(OpenAI Error) ${e.response.statusText}`;
     }
-  );
-  return response;
+    console.log(e);
+  }
 };
 
 exports.getKickstarterEmbed = (completion, realOrFake) => {
