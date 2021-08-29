@@ -62,10 +62,12 @@ const roundOfRealOrFake = async (
       `That one was ${prevMsg.real ? realEmoji : fakeEmoji}`
     );
 
-    const realReactUsers = prevMsg.reactions.cache.get(realEmoji.id)?.users
-      .cache;
-    const fakeReactUsers = prevMsg.reactions.cache.get(fakeEmoji.id)?.users
-      .cache;
+    const realReactUsers = await prevMsg.reactions.cache
+      .get(realEmoji.id)
+      .users.fetch();
+    const fakeReactUsers = await prevMsg.reactions.cache
+      .get(fakeEmoji.id)
+      .users.fetch();
     const correctUsers = prevMsg.real
       ? realReactUsers?.filter(
           (user) => !fakeReactUsers?.has(user.id) && user.id != botID
@@ -103,7 +105,7 @@ const roundOfRealOrFake = async (
     commandHandler.load(`${process.env.PWD}/commands/kickstarter.js`);
     commandHandler.load(`${process.env.PWD}/commands/realOrFake.js`);
 
-    return prevMsg.channel.send("**Alright, now buzz off**");
+    return;
   }
 
   roundNumber++;
