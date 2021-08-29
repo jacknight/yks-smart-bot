@@ -84,9 +84,18 @@ const Clips = ({ session, clearSession }) => {
       <div className='main clips'>
         {currClips?.map((url) => {
           return (
-            <video className='clip' controls key={uniqueId()}>
-              <source src={url} />
-            </video>
+            <video
+              className='clip'
+              controls
+              key={uniqueId()}
+              src={url}
+              autoPlay
+              onError={(e) => {
+                console.log(e);
+                e.target.onerror = null;
+                e.target.src = `${process.env.PUBLIC_URL}/assets/error.mp3`;
+              }}
+            />
           );
         })}
       </div>
