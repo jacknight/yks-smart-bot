@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.3.3",
+    "@discordjs/voice": "^0.6.0",
     "axios": "^0.21.1",
     "canvas": "^2.8.0",
     "cors": "^2.8.5",
@@ -23,6 +24,7 @@
     "ffmpeg-static": "^4.2.7",
     "fg-select-css": "^3.2.0",
     "http": "^0.0.1-security",
+    "libsodium-wrappers": "^0.7.9",
     "lodash": "^4.17.21",
     "mongoose": "^5.11.8",
     "node-fetch": "^2.6.1",

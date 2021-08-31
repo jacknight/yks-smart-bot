@@ -4,7 +4,7 @@ const Parser = require("rss-parser");
 const parser = new Parser();
 const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
 const BONUS_FEED_RSS = process.env.BONUS_FEED_RSS;
-
+const { createAudioPlayer, NoSubscriberBehavior } = require("@discordjs/voice");
 class ReadyListener extends Listener {
   constructor() {
     super("ready", {
@@ -15,6 +15,18 @@ class ReadyListener extends Listener {
 
   async exec() {
     console.log("I'm ready!");
+
+    // Create an audio player for the !listen command
+    this.client.listen = {
+      connection: null,
+      player: null,
+      resource: null,
+    };
+    this.client.listen.player = createAudioPlayer({
+      behaviors: {
+        noSubscriber: NoSubscriberBehavior.Stop,
+      },
+    });
 
     // Real or fake every day
     scheduleRealOrFakeGame(this.client);

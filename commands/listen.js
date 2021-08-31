@@ -2,6 +2,14 @@ const { Command } = require("discord-akairo");
 const Parser = require("rss-parser");
 const parser = new Parser();
 const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
+const {
+  joinVoiceChannel,
+  AudioPlayerStatus,
+  createAudioResource,
+  VoiceConnectionStatus,
+  entersState,
+  StreamType,
+} = require("@discordjs/voice");
 
 class ListenCommand extends Command {
   constructor() {
@@ -23,65 +31,41 @@ class ListenCommand extends Command {
   }
 
   async exec(message, { action, episode }) {
-    if (action !== "play" && action !== "random" && !this.client.listen) {
-      return message.channel.send("I'm not playing anything right now.");
+    if (
+      action !== "play" &&
+      action !== "random" &&
+      this.client.listen.player.state.status === AudioPlayerStatus.Idle
+    ) {
+      return message.channel.send("Nothing playing.");
     }
 
-    const parseStreamTime = (streamTime) => {
-      let time = streamTime;
-      const hours = Math.floor(time / 1000 / 60 / 60);
-      time -= hours * 1000 * 60 * 60;
-      let minutes = Math.floor(time / 1000 / 60);
-      if (minutes < 10) {
-        minutes = `0${minutes}`;
-      }
-      time -= minutes * 1000 * 60;
-      let seconds = Math.floor(time / 1000);
-      if (seconds < 10) {
-        seconds = `0${seconds}`;
-      }
-      return `${hours}:${minutes}:${seconds}`;
-    };
-
-    if (this.client.listen) {
+    if (this.client.listen.player.state.status !== AudioPlayerStatus.Idle) {
       switch (action) {
         case "random":
           return message.channel.send("Stop the current episode first.");
 
         case "play":
-          if (this.client.listen.dispatcher.paused) {
+          if (
+            this.client.listen.player.state.status ===
+              AudioPlayerStatus.Paused ||
+            this.client.listen.player.state.status ===
+              AudioPlayerStatus.AutoPaused
+          ) {
             if (episode === 0) {
               // No arg passed
-              await this.client.listen.dispatcher.resume();
-              return message.channel.send(
-                `Resuming from ${parseStreamTime(
-                  this.client.listen.dispatcher.streamTime
-                )}`
-              );
-            } else {
-              return message.channel.send(
-                "Stop the current (paused) episode first."
-              );
+              this.client.listen.player.unpause();
+              return;
             }
           }
           return message.channel.send("Stop the current episode first.");
 
         case "pause":
-          if (!this.client.listen.dispatcher.paused) {
-            await this.client.listen.dispatcher.pause(true);
-            return message.channel.send(
-              `Paused at ${parseStreamTime(
-                this.client.listen.dispatcher.streamTime
-              )}`
-            );
-          }
-          return message.channel.send("Already paused.");
+          this.client.listen.player.pause();
+          return;
 
         case "stop":
-          await this.client.listen.dispatcher.destroy();
-          await this.client.listen.voiceChannel.leave();
-          this.client.listen = null;
-          return message.channel.send("Fine.");
+          this.client.listen.player.stop(true);
+          return;
 
         default:
           return message.channel.send(
@@ -118,26 +102,68 @@ class ListenCommand extends Command {
       return message.channel.send(`Couldn't find episode ${episode}.`);
     }
 
-    const voiceChannel = message.member.voice.channel
-      ? message.member.voice.channel
-      : null;
-
-    const connection = voiceChannel ? await voiceChannel.join() : null;
-    if (!connection)
+    if (!message.member.voice.channel)
       return message.channel.send("Please join a voice channel first.");
-    this.client.listen = {
-      voiceChannel,
-      connection,
-      dispatcher: connection.play(ep.enclosure.url),
-    };
-    this.client.listen.dispatcher.setBitrate(voiceChannel.bitrate);
 
-    this.client.listen.dispatcher.on("error", console.log);
-
-    this.client.listen.dispatcher.on("finish", () => {
-      this.client.listen.voiceChannel.leave();
-      this.client.listen = null;
+    // Join the same channel as the member
+    const channel = message.member.voice.channel;
+    const connection = joinVoiceChannel({
+      channelId: channel.id,
+      guildId: channel.guild.id,
+      adapterCreator: channel.guild.voiceAdapterCreator,
     });
+
+    try {
+      await entersState(connection, VoiceConnectionStatus.Ready, 30000);
+      this.client.listen.connection = connection;
+      this.client.listen.connection.subscribe(this.client.listen.player);
+
+      const resource = createAudioResource(ep.enclosure.url, {
+        inputType: StreamType.Arbitrary,
+      });
+      this.client.listen.player.play(resource);
+    } catch (e) {
+      message.channel.send("Failed to join the voice channel");
+      connection?.destroy();
+      this.client.listen.connection = null;
+      console.log(e);
+    }
+
+    this.client.listen.player.on(
+      AudioPlayerStatus.Idle,
+      (oldState, newState) => {
+        if (oldState.status === newState.status) return;
+        message.channel.send("Finished playing episode.");
+        this.client.listen.connection?.destroy();
+        this.client.listen.connection = null;
+        this.client.listen.player.removeAllListeners();
+      }
+    );
+
+    this.client.listen.player.on(
+      AudioPlayerStatus.Paused,
+      (oldState, newState) => {
+        if (oldState.status === newState.status) return;
+        message.channel.send("Paused.");
+      }
+    );
+
+    this.client.listen.player.on(AudioPlayerStatus.Buffering, () => {});
+
+    this.client.listen.player.on(
+      AudioPlayerStatus.Playing,
+      (oldState, newState) => {
+        if (oldState.status === newState.status) return;
+        if (
+          oldState.status === AudioPlayerStatus.Paused ||
+          oldState.status === AudioPlayerStatus.AutoPaused
+        ) {
+          message.channel.send("Resuming.");
+        }
+      }
+    );
+
+    this.client.listen.player.on("error", console.log);
 
     const epNum = ep.title.match(/Episode [0-9]+/i);
     let epTitle =
@@ -147,10 +173,9 @@ class ListenCommand extends Command {
         .split(":")
         .join(" ");
 
-    let progressStr = "|--------------------|";
     let mainEmbed = {
       color: 0x83c133,
-      title: `Now playing in ${voiceChannel.name}`,
+      title: `Now playing in ${message.member.voice.channel.name}`,
       author: {
         icon_url:
           "https://res.cloudinary.com/pippa/image/fetch/h_500,w_500,f_auto/https://assets.pippa.io/shows/5d137ece8b774eb816199f63/1562125598000-ef38e8a9cd086f609f806209d1341102.jpeg",
@@ -165,44 +190,12 @@ class ListenCommand extends Command {
           value: epTitle ? epTitle : ".",
           inline: false,
         },
-        {
-          name: "Progress",
-          value:
-            progressStr.substring(0, 1) +
-            ":microphone2:" +
-            progressStr.substring(2),
-          inline: false,
-        },
       ],
     };
 
-    let prevProgress = 0;
     message.channel
       .send({ embeds: [mainEmbed] })
-      .then((msg) => {
-        const duration =
-          1000 *
-          ep.itunes.duration.split(":").reduce((totalMs, curr) => {
-            return Number(totalMs) * 60 + Number(curr);
-          });
-        const self = this;
-        setInterval(() => {
-          const progress = Math.ceil(
-            (100 * self.client.listen.dispatcher.streamTime) / duration / 5
-          );
-
-          // Only edit if it's actually gonna change.
-          if (progress > prevProgress) {
-            prevProgress = progress;
-            mainEmbed.fields[1].value =
-              progressStr.substring(0, progress) +
-              ":microphone2:" +
-              progressStr.substring(progress + 1);
-            msg.edit({ embeds: [mainEmbed] });
-          }
-        }, 3 * 60 * 1000); // every 3 min
-      })
-      .catch((err) => console.log);
+      .catch((err) => console.log(err));
   }
 }
 
