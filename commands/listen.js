@@ -10,6 +10,7 @@ const {
   entersState,
   StreamType,
 } = require("@discordjs/voice");
+const prettyMilliseconds = require("pretty-ms");
 
 class ListenCommand extends Command {
   constructor() {
@@ -144,7 +145,9 @@ class ListenCommand extends Command {
       AudioPlayerStatus.Paused,
       (oldState, newState) => {
         if (oldState.status === newState.status) return;
-        message.channel.send("Paused.");
+        message.channel.send(
+          `Paused at ${prettyMilliseconds(newState.playbackDuration)}.`
+        );
       }
     );
 
@@ -173,6 +176,12 @@ class ListenCommand extends Command {
         .split(":")
         .join(" ");
 
+    const duration =
+      1000 *
+      ep.itunes.duration.split(":").reduce((totalMs, curr) => {
+        return Number(totalMs) * 60 + Number(curr);
+      });
+    let progressStr = "------------------------";
     let mainEmbed = {
       color: 0x83c133,
       title: `Now playing in ${message.member.voice.channel.name}`,
@@ -190,12 +199,49 @@ class ListenCommand extends Command {
           value: epTitle ? epTitle : ".",
           inline: false,
         },
+        {
+          name: `Progress (${prettyMilliseconds(0, {
+            colonNotation: true,
+          })} / ${prettyMilliseconds(duration, { colonNotation: true })})`,
+          value: "|" + "🟢" + progressStr + "|",
+          inline: false,
+        },
       ],
     };
 
-    message.channel
+    this.client.listen.embed = mainEmbed;
+
+    this.client.listen.message = await message.channel
       .send({ embeds: [mainEmbed] })
       .catch((err) => console.log(err));
+
+    const listen = this.client.listen;
+    setInterval(
+      () => {
+        listen.embed.fields[1].name = `Progress (${prettyMilliseconds(
+          listen.player.state.playbackDuration,
+          { colonNotation: true }
+        )} / ${prettyMilliseconds(duration, { colonNotation: true })})`;
+
+        const progress = Math.ceil(
+          (100 * listen.player.state.playbackDuration) / duration / 4
+        );
+
+        listen.embed.fields[1].value =
+          "\\|" +
+          "||" +
+          progressStr.substring(0, progress) +
+          "||" +
+          "🟢" +
+          progressStr.substring(progress) +
+          "\\|";
+        listen.message.edit({ embeds: [listen.embed] });
+      },
+      10 * 1000, // every 10 sec
+      duration,
+      progressStr,
+      listen
+    );
   }
 }
 

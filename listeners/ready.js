@@ -21,6 +21,8 @@ class ReadyListener extends Listener {
       connection: null,
       player: null,
       resource: null,
+      embed: null,
+      message: null,
     };
     this.client.listen.player = createAudioPlayer({
       behaviors: {
