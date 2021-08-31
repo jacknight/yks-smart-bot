@@ -134,10 +134,13 @@ class ListenCommand extends Command {
       AudioPlayerStatus.Idle,
       (oldState, newState) => {
         if (oldState.status === newState.status) return;
+        clearInterval(this.client.listen.interval);
         message.channel.send("Finished playing episode.");
         this.client.listen.connection?.destroy();
         this.client.listen.connection = null;
         this.client.listen.player.removeAllListeners();
+        this.client.listen.embed = null;
+        this.client.listen.message = null;
       }
     );
 
@@ -215,11 +218,16 @@ class ListenCommand extends Command {
       .send({ embeds: [mainEmbed] })
       .catch((err) => console.log(err));
 
+    await this.client.listen.message.react("⏸");
+    await this.client.listen.message.react("⏹");
+    await this.client.listen.message.react("▶️");
     const listen = this.client.listen;
-    setInterval(
+    this.client.listen.interval = setInterval(
       () => {
         listen.embed.fields[1].name = `Progress (${prettyMilliseconds(
-          listen.player.state.playbackDuration,
+          listen.player.state.playbackDuration
+            ? listen.player.state.playbackDuration
+            : 0,
           { colonNotation: true }
         )} / ${prettyMilliseconds(duration, { colonNotation: true })})`;
 
