@@ -13,18 +13,6 @@ class ClipCommand extends Command {
       ],
       cooldown: 1000 * 60, // once per min
       ratelimit: 1,
-      args: [
-        {
-          id: "index",
-          type: "number",
-          default: -1,
-        },
-        {
-          id: "isViaSite",
-          type: "number",
-          default: 0,
-        },
-      ],
     });
   }
 
