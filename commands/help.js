@@ -1,16 +1,31 @@
 const { Command } = require("discord-akairo");
-
+const { getHelpEmbed } = require("../util");
 class HelpCommand extends Command {
   constructor() {
     super("help", {
       aliases: ["help", "buzz.help"],
       channel: "guild",
-      cooldown: 60000,
-      ratelimit: 1,
+      cooldown: 1000 * 60,
+      ratelimit: 10,
+      args: [
+        {
+          id: "category",
+          type: ["buzzer", "kickstarters", "listen", "other", "none"],
+          default: "none",
+        },
+      ],
     });
   }
 
-  exec(message) {
+  exec(message, { category }) {
+    if (category === "none") {
+      return message.channel.send({
+        content:
+          "Please narrow down what you need help with by using one of the following commands:",
+        embeds: [getHelpEmbed(helpCommands)],
+      });
+    }
+
     const buzzerRoleName = this.client.settings.get(
       message.guild.id,
       "buzzerRole",
@@ -41,83 +56,158 @@ class HelpCommand extends Command {
       ? message.guild.me.nickname
       : message.guild.me.user.username;
 
+    const buzzerCommands = [
+      {
+        name: "`!heep` / `!meep`",
+        value: "Buzz in.",
+      },
+      {
+        name: `\`!buzz.role @${buzzerRoleName}\``,
+        value: `Configure the role required to control the buzzer.
+**Requires**: Admin privileges or the ${buzzerRole} role.`,
+      },
+      {
+        name: `\`!buzz.list\``,
+        value: `List all the current users that have buzzed in.
+**Requires**: The ${buzzerRole} role.`,
+      },
+      {
+        name: `\`!buzz.random\``,
+        value: `Randomize the list of users buzzed in.
+**Requires**: The ${buzzerRole} role.`,
+      },
+      {
+        name: `\`!buzz.clear\``,
+        value: `Clear the buzzer list.
+**Requires**: The ${buzzerRole} role.`,
+      },
+      {
+        name: `\`!buzz.mode\``,
+        value: `Toggle the buzzer mode between **normal** and **chaos** mode. In chaos mode, the list is randomized every time someone new buzzes in.
+**Requires**: The ${buzzerRole} role.`,
+      },
+      {
+        name: `\`!buzz.ready\``,
+        value: `Enable/disable the buzzer.
+**Requires**: The ${buzzerRole} role.`,
+      },
+      {
+        name: `\`!buzz.channel #${
+          buzzerChannel ? buzzerChannel.name : "<not set>"
+        }\``,
+        value: `Change the channel of the buzzer channel. Currently ${
+          buzzerChannel ? `set to ${buzzerChannel}.` : "not set."
+        }
+**Requires**: The ${buzzerRole} role.`,
+      },
+      {
+        name: `\`!buzz.nick "${buzzerNick}"\``,
+        value: `Change the name of ${this.client.user}. Use the command with no nickname to reset.
+**Requires**: The ${buzzerRole} role.`,
+      },
+    ];
+
+    const kickstarterCommands = [
+      {
+        name: "`!kickstarter <name>` / `!ks <name>`",
+        value:
+          "Generate a fake kickstarter using AI trained on 200k real kickstarters (GPT-3).",
+      },
+      {
+        name: "`!realorfake` / `!rof`",
+        value: "Real or fake? You decide.",
+      },
+      {
+        name: "`!topkickstarters` / `!topks`",
+        value: "List the top 10 fake kickstarters the AI has generated.",
+      },
+    ];
+
+    const listenCommands = [
+      {
+        name: "`!listen`",
+        value: "Listen to the latest episode of the main feed.",
+      },
+      {
+        name: "`!listen play <episode number>`",
+        value: "Listen to a specific episode of the main feed.",
+      },
+      {
+        name: "`!listen random`",
+        value: "Listen to a random episode of the main feed.",
+      },
+      {
+        name: "`!listen pause`",
+        value: "Pause the current episode being played.",
+      },
+      {
+        name: "`!listen stop`",
+        value: "Stop the current episode being played.",
+      },
+    ];
+
+    const clipChannel = this.client.util.resolveChannel(
+      process.env.YKS_CLIP_CHANNEL_ID,
+      message.guild.channels.cache
+    );
+
+    const otherCommands = [
+      {
+        name: "`!latest <feed>`",
+        value:
+          "List the latest episodes.\nThe argument `<feed>` is optional and can be `main`, `bonus`, or `both`.",
+      },
+      {
+        name: "`!best <episode number>`",
+        value:
+          "Let everyone know your favorite episode of the main feed.\nYou can change this later.\n_It goes by the episode number listed in the title_.",
+      },
+      {
+        name: "`!clip` / `!climp`",
+        value: `Grab a random clip that has been posted in ${
+          clipChannel ? clipChannel : "the clip channel"
+        }.`,
+      },
+      {
+        name: "`!topmail`",
+        value: `List the top messages posted in the mailbag channel within the last 30 days.`,
+      },
+    ];
+
     const helpEmbed = {
       color: 0x83c133,
-      title: "Help",
-      author: {
-        icon_url:
-          "https://raw.githubusercontent.com/jacknight/buzzer/main/assets/bolt.png?token=AAEN3TXSCUCW6TQNMO3JAOS75R4G2",
-        url: "https://buzzerd.herokuapp.com",
-      },
-      thumbnail: {
-        url: "https://raw.githubusercontent.com/jacknight/buzzer/main/assets/bolt.png?token=AAEN3TXSCUCW6TQNMO3JAOS75R4G2",
-      },
-      fields: [
-        {
-          name: "List latest episodes",
-          value: "`!latest`",
-          inline: false,
-        },
-        {
-          name: "Best episode",
-          value: "`!best <episode number>`",
-          inline: false,
-        },
-        {
-          name: "Buzz in",
-          value: "`!heep`",
-          inline: false,
-        },
-        {
-          name: "Configure buzzer role",
-          value: `\`!buzz.role\` ${buzzerRole} `,
-          inline: false,
-        },
-        {
-          name: `Display the buzzer list`,
-          value: `\`!buzz.list\` (${buzzerRole} only)`,
-          inline: false,
-        },
-        {
-          name: `Randomize the buzzer list`,
-          value: `\`!buzz.random\` (${buzzerRole} only)`,
-          inline: false,
-        },
-        {
-          name: `Clear the buzzer list`,
-          value: `\`!buzz.clear\` (${buzzerRole} only)`,
-          inline: false,
-        },
-        {
-          name: `Toggle buzzer mode (chaos/normal)`,
-          value: `\`!buzz.mode\` (${buzzerRole} only)`,
-          inline: false,
-        },
-        {
-          name: `Enable/disable buzzer`,
-          value: `\`!buzz.ready\` (${buzzerRole} only)`,
-          inline: false,
-        },
-        {
-          name: `Change buzzer channel`,
-          value: `\`!buzz.channel #${buzzerChannel?.name}\` (${buzzerRole} only)`,
-          inline: false,
-        },
-        {
-          name: `Change bot nickname`,
-          value: `\`!buzz.nick "${buzzerNick}"\` (${buzzerRole} only)`,
-          inline: false,
-        },
-      ],
-      timestamp: new Date(),
-      footer: {
-        text: "Created by Jack Knight",
-        icon_url:
-          "https://cdn.discordapp.com/avatars/329288617564569602/ef0db6f6c0f10ff08c125c77acab390d.png",
-      },
+      fields:
+        category === "buzzer"
+          ? buzzerCommands
+          : category === "kickstarters"
+          ? kickstarterCommands
+          : category === "listen"
+          ? listenCommands
+          : otherCommands,
     };
+
     return message.channel.send({ embeds: [helpEmbed] });
   }
 }
+
+const helpCommands = [
+  {
+    name: "`!help buzzer`",
+    value: "List all the buzzer commands",
+  },
+  {
+    name: "`!help kickstarters`",
+    value:
+      "List all commands associated with AI-generated kickstarters, including real or fake",
+  },
+  {
+    name: "`!help listen`",
+    value: "List all commands for listening to the podcast in voice chat",
+  },
+  {
+    name: "`!help other`",
+    value: "List almost all other commands",
+  },
+];
 
 module.exports = HelpCommand;
