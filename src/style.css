@@ -249,3 +249,34 @@ button:disabled {
   display: grid;
   grid-template-columns: 1fr auto;
 } */
+
+@media only screen and (max-width: 800px) {
+  body {
+    margin: 0;
+    font-size: 0.8em;
+  }
+
+  a {
+    font-size: 0.8rem;
+  }
+
+  button {
+    font-size: 0.8rem;
+  }
+
+  header {
+    gap: 4px;
+  }
+
+  header > .header-logout {
+    gap: 2px;
+  }
+
+  nav {
+    gap: 2px;
+  }
+
+  .paginator {
+    gap: 1px;
+  }
+}
