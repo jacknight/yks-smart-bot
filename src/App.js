@@ -71,7 +71,6 @@ const App = () => {
               <Episodes />
             </Route>
             <Route path='/clips/:page?'>
-              <Title>Clips</Title>
               <Clips
                 user={user}
                 session={session}
