@@ -36,11 +36,32 @@ class ListenListener extends Listener {
         }
       } else if (reaction._emoji.name === "⏹") {
         if (this.client.listen.player.state.status !== AudioPlayerStatus.Idle) {
-          action = "stop";
+          const msg = await reaction.message.channel.send(
+            "Are you sure you want to stop?"
+          );
+          await msg.react("✅");
+          await msg.react("❌");
+
+          const filter = (r, u) => {
+            return ["✅", "❌"].includes(r._emoji.name) && u.id === user.id;
+          };
+
+          await msg
+            .awaitReactions({ filter, max: 1, time: 10000, errors: ["time"] })
+            .then((collected) => {
+              const r = collected.first();
+
+              if (r._emoji.name === "✅") {
+                action = "stop";
+              }
+            })
+            .catch((collected) => {});
+          msg.delete();
         }
       }
 
       if (action) {
+        reaction.message.reply(`Stopped by ${user}`);
         const command = await this.client.commandHandler.findCommand("listen");
         this.client.commandHandler.runCommand(
           this.client.listen.message,
