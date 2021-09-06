@@ -61,7 +61,9 @@ class ListenListener extends Listener {
       }
 
       if (action) {
-        reaction.message.reply(`Stopped by ${user}`);
+        if (action === "stop") {
+          reaction.message.reply(`Stopped by ${user}`);
+        }
         const command = await this.client.commandHandler.findCommand("listen");
         this.client.commandHandler.runCommand(
           this.client.listen.message,

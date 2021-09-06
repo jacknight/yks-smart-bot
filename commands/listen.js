@@ -75,22 +75,27 @@ class ListenCommand extends Command {
       }
     }
 
-    const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
+    let mainFeed = await parser.parseURL(MAIN_FEED_RSS);
+    // Sometimes bonus episodes and other things get released into the main feed
+    // We need to filter those out.
+    mainFeed = mainFeed.items.filter((ep) => ep.title.match(/ [0-9]+:/));
     // url: "https://<path>.mp3"
     // length: "<milliseconds>"
     // type: "audio/mpeg"
     if (action === "random") {
-      episode = Math.floor(Math.random() * mainFeed.items.length);
+      episode = Math.floor(Math.random() * mainFeed.length);
+      // Episode 101 doesn't exist.
+      if (episode > 100) episode++;
     }
 
-    let ep = mainFeed.items[0];
+    let ep = mainFeed[0];
     if (episode > 0) {
-      const mainArray = mainFeed.items[0].title.split(":");
+      const mainArray = mainFeed[0].title.split(":");
       const latestEpNum = Number(mainArray[0].trim().split(" ")[1]);
       if (episode > latestEpNum) {
         ep = null;
       }
-      const item = mainFeed.items.find((ep, idx) => {
+      const item = mainFeed.find((ep, idx) => {
         return ep.title.includes(` ${episode}:`);
       });
       if (item) {
