@@ -27,7 +27,7 @@ class LatestCommand extends Command {
   async exec(message, { feed, newEp }) {
     // Main feed
     const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
-    let epNum = mainFeed.items[0].title.match(/Episode [0-9]+/i);
+    let epNum = mainFeed.items[0].title.match(/(Ep [0-9]+|Episode [0-9]+)/i);
 
     let epTitle = !epNum
       ? mainFeed.items[0].title
