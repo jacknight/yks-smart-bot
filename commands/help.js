@@ -18,14 +18,6 @@ class HelpCommand extends Command {
   }
 
   exec(message, { category }) {
-    if (category === "none") {
-      return message.channel.send({
-        content:
-          "Please narrow down what you need help with by using one of the following commands:",
-        embeds: [getHelpEmbed(helpCommands)],
-      });
-    }
-
     const buzzerRoleName = this.client.settings.get(
       message.guild.id,
       "buzzerRole",
@@ -174,6 +166,26 @@ class HelpCommand extends Command {
       },
     ];
 
+    const helpCommands = [
+      {
+        name: "`!help buzzer`",
+        value: "List all the buzzer commands",
+      },
+      {
+        name: "`!help kickstarters`",
+        value:
+          "List all commands associated with AI-generated kickstarters, including real or fake",
+      },
+      {
+        name: "`!help listen`",
+        value: "List all commands for listening to the podcast in voice chat",
+      },
+      {
+        name: "`!help other`",
+        value: "List almost all other commands",
+      },
+    ];
+
     const helpEmbed = {
       color: 0x83c133,
       fields:
@@ -183,7 +195,9 @@ class HelpCommand extends Command {
           ? kickstarterCommands
           : category === "listen"
           ? listenCommands
-          : otherCommands,
+          : category === "other"
+          ? otherCommands
+          : helpCommands,
     };
 
     return message.channel.send({ embeds: [helpEmbed] });
