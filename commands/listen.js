@@ -32,6 +32,16 @@ class ListenCommand extends Command {
   }
 
   async exec(message, { action, episode }) {
+    let respond = async (response) => {
+      if (this.client.listen.response) {
+        this.client.listen.response.edit(response);
+      } else {
+        this.client.listen.response = await this.client.listen.message.reply(
+          response
+        );
+      }
+    };
+
     if (
       action !== "play" &&
       action !== "random" &&
@@ -49,7 +59,7 @@ class ListenCommand extends Command {
       switch (action) {
         case "random":
         case "url":
-          return message.channel.send("Stop the current episode first.");
+          return respond("Stop the current episode first.");
 
         case "play":
           if (
@@ -64,7 +74,7 @@ class ListenCommand extends Command {
               return;
             }
           }
-          return message.channel.send("Stop the current episode first.");
+          return respond("Stop the current episode first.");
 
         case "pause":
           this.client.listen.player.pause();
@@ -75,9 +85,7 @@ class ListenCommand extends Command {
           return;
 
         default:
-          return message.channel.send(
-            "Not a valid option for the command `!listen`."
-          );
+          return respond("Not a valid option for the command `!listen`.");
       }
     }
 
@@ -152,12 +160,13 @@ class ListenCommand extends Command {
       (oldState, newState) => {
         if (oldState.status === newState.status) return;
         clearInterval(this.client.listen.interval);
-        message.channel.send("Finished playing episode.");
+        respond("Finished playing episode.");
         this.client.listen.connection?.destroy();
         this.client.listen.connection = null;
         this.client.listen.player.removeAllListeners();
         this.client.listen.embed = null;
         this.client.listen.message = null;
+        this.client.listen.response = null;
       }
     );
 
@@ -165,9 +174,7 @@ class ListenCommand extends Command {
       AudioPlayerStatus.Paused,
       (oldState, newState) => {
         if (oldState.status === newState.status) return;
-        message.channel.send(
-          `Paused at ${prettyMilliseconds(newState.playbackDuration)}.`
-        );
+        respond(`Paused at ${prettyMilliseconds(newState.playbackDuration)}.`);
       }
     );
 
@@ -181,7 +188,7 @@ class ListenCommand extends Command {
           oldState.status === AudioPlayerStatus.Paused ||
           oldState.status === AudioPlayerStatus.AutoPaused
         ) {
-          message.channel.send("Resuming.");
+          respond("Resuming.");
         }
       }
     );
