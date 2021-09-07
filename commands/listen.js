@@ -24,8 +24,8 @@ class ListenCommand extends Command {
         },
         {
           id: "episode",
-          type: "number",
-          default: 0,
+          type: "content",
+          default: "0",
         },
       ],
     });
@@ -35,14 +35,20 @@ class ListenCommand extends Command {
     if (
       action !== "play" &&
       action !== "random" &&
+      action !== "url" &&
       this.client.listen.player.state.status === AudioPlayerStatus.Idle
     ) {
       return message.channel.send("Nothing playing.");
     }
 
+    if (action !== "url") {
+      episode = parseInt(episode);
+    }
+
     if (this.client.listen.player.state.status !== AudioPlayerStatus.Idle) {
       switch (action) {
         case "random":
+        case "url":
           return message.channel.send("Stop the current episode first.");
 
         case "play":
@@ -82,14 +88,20 @@ class ListenCommand extends Command {
     // url: "https://<path>.mp3"
     // length: "<milliseconds>"
     // type: "audio/mpeg"
+    let ep = mainFeed[0];
     if (action === "random") {
       episode = Math.floor(Math.random() * mainFeed.length);
       // Episode 101 doesn't exist.
       if (episode > 100) episode++;
+    } else if (action === "url") {
+      ep = {
+        enclosure: { url: episode },
+        title: `Episode 1: ${episode}`,
+        itunes: { duration: "1:00" },
+      };
     }
 
-    let ep = mainFeed[0];
-    if (episode > 0) {
+    if (typeof episode === "number" && episode > 0) {
       const mainArray = mainFeed[0].title.split(":");
       const latestEpNum = Number(mainArray[0].trim().split(" ")[1]);
       if (episode > latestEpNum) {
