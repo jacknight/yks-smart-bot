@@ -70,15 +70,17 @@ class BestCommand extends Command {
     var messagePrefix = "";
     if (!listOnly) {
       const prevUserVote = bestEpByUser.get(message.author.id);
-      if (prevUserVote !== num) {
-        const newTotal = bestEpTotals.get(prevUserVote) - 1;
-        if (newTotal === 0) {
-          bestEpTotals.delete(prevUserVote);
-        } else {
-          bestEpTotals.set(prevUserVote, newTotal);
-        }
+      if (prevUserVote) {
+        if (prevUserVote !== num) {
+          const newTotal = bestEpTotals.get(prevUserVote) - 1;
+          if (newTotal === 0) {
+            bestEpTotals.delete(prevUserVote);
+          } else {
+            bestEpTotals.set(prevUserVote, newTotal);
+          }
 
-        messagePrefix = `You thought **Episode ${prevUserVote}** was the best. Now...\n`;
+          messagePrefix = `You thought **Episode ${prevUserVote}** was the best. Now...\n`;
+        }
       }
 
       messagePrefix += `You think **Episode ${num}** is the best.`;
