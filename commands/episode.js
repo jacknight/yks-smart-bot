@@ -4,7 +4,7 @@ const { sendRequest } = require("../util");
 class EpisodeCommand extends Command {
   constructor() {
     super("episode", {
-      aliases: ["episode"],
+      aliases: ["episode", "ep"],
       cooldown: 1000 * 60 * 60 * 24, // once per day
       ratelimit: 2,
       args: [{ id: "title", match: "content" }],
