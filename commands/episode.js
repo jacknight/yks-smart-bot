@@ -51,10 +51,8 @@ class EpisodeCommand extends Command {
         const description = completion[1];
         message.reply({ embeds: [{ color: 0x83c133, title, description }] });
       } else {
-        console.log(
-          "Completion couldn't split in episode command:\n",
-          completion
-        );
+        const description = completion[0];
+        message.reply({ embeds: [{ color: 0x83c133, description }] });
       }
     } catch (e) {
       if (e.response) {
