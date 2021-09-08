@@ -12,6 +12,18 @@ class EpisodeCommand extends Command {
   }
 
   async exec(message, { title }) {
+    // Only allow in the #kickstarter-bot channel on the YKS server
+    if (
+      message.channel.id !== process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID ||
+      message.guild.id !== process.env.YKS_GUILD_ID
+    ) {
+      const channel = this.client.util.resolveChannel(
+        process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID,
+        message.guild.channels.cache
+      );
+      return message.channel.send(`Please use ${channel} for this command`);
+    }
+
     try {
       const response = await sendRequest(
         "https://api.openai.com/v1/completions",
