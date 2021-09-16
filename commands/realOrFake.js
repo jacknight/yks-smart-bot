@@ -11,7 +11,7 @@ class RealOrFakeCommand extends Command {
     super("realorfake", {
       aliases: ["realorfake", "rof"],
       cooldown: 1000 * 60 * 60 * 24, // once per day
-      ratelimit: 5,
+      ratelimit: 4,
     });
   }
 

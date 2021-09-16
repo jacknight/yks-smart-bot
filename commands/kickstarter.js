@@ -11,7 +11,7 @@ class KickstarterCommand extends Command {
     super("kickstarter", {
       aliases: ["kickstarter", "ks"],
       cooldown: 1000 * 60 * 60 * 24, // once per day
-      ratelimit: 10,
+      ratelimit: 4,
       args: [{ id: "name", match: "content" }],
     });
   }

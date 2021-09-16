@@ -31,7 +31,7 @@ class EpisodeCommand extends Command {
         {
           prompt: title,
           model: "curie:ft-yks-smart-bot-2021-09-08-16-54-36",
-          maxTokens: 200,
+          maxTokens: 100,
           temperature: 0.8,
           topP: 1,
           presencePenalty: 0,
