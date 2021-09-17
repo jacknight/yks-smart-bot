@@ -37,7 +37,8 @@
     "react-router-dom": "^5.2.0",
     "react-scripts": "^4.0.3",
     "rss-parser": "^3.10.0",
-    "socket.io": "^3.0.5"
+    "socket.io": "^3.0.5",
+    "text-ellipsis": "^1.0.3"
   },
   "scripts": {
     "start": "node ./bot.js",
