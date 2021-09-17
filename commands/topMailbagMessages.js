@@ -1,4 +1,5 @@
 const { Command } = require("discord-akairo");
+const ellipsis = require("text-ellipsis");
 
 class TopMailbagCommand extends Command {
   constructor() {
@@ -45,7 +46,10 @@ class TopMailbagCommand extends Command {
 
             embed.fields.push({
               name: `${i - skip}. From ${msg.author.username}`,
-              value: `[Jump to message](${url})\n${msg.content}`,
+              value: ellipsis(
+                `[Jump to message](${url})\n${msg.content}`,
+                1024
+              ),
             });
           }
         }
