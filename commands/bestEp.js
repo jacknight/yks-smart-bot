@@ -53,19 +53,24 @@ class BestCommand extends Command {
         // Ok, they just gave an invalid episode. Nice try.
         if (num > latestEpNum) return message.channel.send("Not an episode.");
       }
-      let tempBestEpByUser = JSON.parse(
-        await this.client.settings.get(message.guild.id, "bestEpByUser", '""')
-      );
-      var bestEpByUser = !tempBestEpByUser
-        ? new Map()
-        : new Map(tempBestEpByUser);
     }
-    let tempBestEpTotals = JSON.parse(
-      await this.client.settings.get(message.guild.id, "bestEpTotals", '""')
+
+    let tempBestEpByUser = JSON.parse(
+      await this.client.settings.get(message.guild.id, "bestEpByUser", '""')
     );
-    let bestEpTotals = !tempBestEpTotals
+    var bestEpByUser = !tempBestEpByUser
       ? new Map()
-      : new Map(tempBestEpTotals);
+      : new Map(tempBestEpByUser);
+
+    let bestEpTotals = new Map();
+    bestEpByUser.forEach((ep, user) => {
+      const total = bestEpTotals.get(ep);
+      if (total) {
+        bestEpTotals.set(ep, total + 1);
+      } else {
+        bestEpTotals.set(ep, 1);
+      }
+    });
 
     var messagePrefix = "";
     if (!listOnly) {
@@ -80,6 +85,8 @@ class BestCommand extends Command {
           }
 
           messagePrefix = `You thought **Episode ${prevUserVote}** was the best. Now...\n`;
+        } else {
+          return message.reply("No change.");
         }
       }
 
