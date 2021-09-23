@@ -104,6 +104,7 @@ class BestCommand extends Command {
         JSON.stringify(Array.from(bestEpTotals.entries()))
       );
     }
+
     const sortedTotals = new Map(
       [...bestEpTotals.entries()].sort((a, b) => {
         if (b[1] === a[1]) {
@@ -126,8 +127,8 @@ class BestCommand extends Command {
       count++;
       let title = mainFeed.items.find(
         (item) =>
-          item.title.includes(`Ep ${key}`) ||
-          item.title.includes(`Episode ${key}`)
+          item.title.includes(`Ep ${key}:`) ||
+          item.title.includes(`Episode ${key}:`)
       )?.title;
 
       if (!title) title = "title not found";
