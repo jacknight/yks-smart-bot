@@ -10,6 +10,9 @@ class GabeCommand extends Command {
   }
 
   exec(message) {
+    // Sorry, Ashen. Vinny made me do it.
+    if (message.member.id === "917428535474417736") return;
+
     if (!this.client.globalRates.get(message.guild.id)) {
       this.client.globalRates.set(message.guild.id, new Set());
     }
