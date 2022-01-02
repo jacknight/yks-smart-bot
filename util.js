@@ -78,7 +78,7 @@ exports.getAIResponse = async (name, userID) => {
       {
         prompt: `**Name**: ${name}`,
         model: "curie:ft-yks-smart-bot-2021-08-07-18-00-06",
-        maxTokens: 200,
+        maxTokens: 350,
         temperature: 0.8,
         topP: 1,
         presencePenalty: 0,
