@@ -10,12 +10,18 @@ class MailbagCommand extends Command {
   }
 
   exec(message) {
-    message.channel.send({embeds: [{
-        color: 0x83c133,
-        title: "P.U. Box",
-        description: "544 W Main St #209\nGallatin, TN\n37066\nUSA",
-        footer: "Remember to put an embarrassing name on the package"
-    }]});
+    message.channel.send({
+      embeds: [
+        {
+          color: 0x83c133,
+          title: "P.U. Box",
+          description: "544 W Main St #209\nGallatin, TN\n37066\nUSA",
+          footer: {
+            text: "Remember to put an embarrassing name on the package",
+          },
+        },
+      ],
+    });
   }
 }
 
