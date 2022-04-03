@@ -11,7 +11,7 @@ import Episodes from "./components/Episodes";
 import RealOrFake from "./components/RealOrFake";
 import Mailbag from "./components/Mailbag";
 import Buzzer from "./components/Buzzer";
-import { BrowserRouter, Route, Switch, useHistory } from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 import useSession from "./utilities/useSession";
 import NavButton from "./components/NavButton";
 
@@ -22,7 +22,7 @@ const App = () => {
   if (!session) {
     return (
       <BrowserRouter>
-        <div className='App'>
+        <div className="App">
           <Login
             setSession={setSession}
             setUser={setUser}
@@ -35,11 +35,11 @@ const App = () => {
 
   return (
     <BrowserRouter>
-      <div className='App'>
+      <div className="App">
         <Header>
           <Title>YKS Smart Bot Mainframe</Title>
           <NavButton
-            id='header-logout'
+            id="header-logout"
             onClick={() => {
               clearSession();
             }}
@@ -51,7 +51,7 @@ const App = () => {
           {/* <NavLink id='nav-episodes' href='episodes'>
             Episodes
           </NavLink> */}
-          <NavLink id='nav-clips' href='clips'>
+          <NavLink id="nav-clips" href="clips">
             Clips
           </NavLink>
           {/* <NavLink id='nav-realorfake' href='real-or-fake'>
@@ -65,31 +65,64 @@ const App = () => {
           </NavLink> */}
         </Nav>
         <Main>
-          <Switch>
-            <Route path='/episodes'>
-              <Title>Episodes</Title>
-              <Episodes />
-            </Route>
-            <Route path='/clips/:page?'>
-              <Clips
-                user={user}
-                session={session}
-                clearSession={clearSession}
-              />
-            </Route>
-            <Route path='/real-or-fake'>
-              <Title>Real or Fake</Title>
-              <RealOrFake />
-            </Route>
-            <Route path='/mailbag'>
-              <Title>Mailbag</Title>
-              <Mailbag />
-            </Route>
-            <Route path='/buzzer'>
-              <Title>Buzzer</Title>
-              <Buzzer />
-            </Route>
-          </Switch>
+          <Routes>
+            <Route
+              path="/episodes"
+              element={
+                <>
+                  <Title>Episodes</Title>
+                  <Episodes />
+                </>
+              }
+            ></Route>
+            <Route
+              path={"/clips/:page"}
+              element={
+                <Clips
+                  user={user}
+                  session={session}
+                  clearSession={clearSession}
+                />
+              }
+            ></Route>
+            <Route
+              path="/clips"
+              element={
+                <Clips
+                  user={user}
+                  session={session}
+                  clearSession={clearSession}
+                />
+              }
+            ></Route>
+            <Route
+              path="/real-or-fake"
+              element={
+                <>
+                  <Title>Real or Fake</Title>
+                  <RealOrFake />
+                </>
+              }
+            ></Route>
+            <Route
+              path="/mailbag"
+              element={
+                <>
+                  <Title>Mailbag</Title>
+                  <Mailbag />
+                </>
+              }
+            ></Route>
+            <Route
+              path="/buzzer"
+              element={
+                <>
+                  <Title>Buzzer</Title>
+                  <Buzzer />
+                </>
+              }
+            ></Route>
+          </Routes>
         </Main>
         <Footer></Footer>
       </div>

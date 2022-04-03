@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import queryString from "query-string";
 import fetch from "node-fetch";
-import { useHistory } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 
 const createSession = (code, fetchSignal) => {
   return fetch(`${process.env.REACT_APP_HOST}/api/login`, {
@@ -18,7 +19,8 @@ const createSession = (code, fetchSignal) => {
 
 const Login = ({ setSession, setUser, clearSession }) => {
   const [code, setCode] = useState(null);
-  const history = useHistory();
+  const navigate = useNavigate();
+  const location = useLocation();
   const fetchController = new AbortController();
   const fetchSignal = fetchController.signal;
 
@@ -37,7 +39,7 @@ const Login = ({ setSession, setUser, clearSession }) => {
   }, [code]);
 
   if (!code) {
-    const search = history.location.search;
+    const search = location.search;
     const params = search ? queryString.parse(search) : null;
     if (params?.code) {
       setCode(params.code);
@@ -49,7 +51,9 @@ const Login = ({ setSession, setUser, clearSession }) => {
       </main>
     );
   } else {
-    history.push("/");
+    if (location.pathname !== '/') {
+      navigate("/");
+    }
     return (
       <main>
         <h1>Working......</h1>

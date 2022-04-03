@@ -1,20 +1,20 @@
 import { uniqueId } from "lodash";
 import React, { useEffect, useState } from "react";
 import Paginator from "./Paginator";
-import { useParams, useHistory } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import queryString from "query-string";
 import fetch from "node-fetch";
 
 const Clips = ({ session, clearSession }) => {
   const params = useParams();
-  let history = useHistory();
+  let navigate = useNavigate();
   const [pageCount, setPageCount] = useState(0);
   const [currPage, setCurrPage] = useState(Number(params.page) || 1);
   const [currClips, setCurrClips] = useState(null);
   const clipsPerPage = 1;
 
   useEffect(() => {
-    history.replace(`/clips/${currPage}`);
+    navigate(`/clips/${currPage}`, { replace: true });
     requestClips(currPage);
   }, [currPage]);
 
@@ -24,7 +24,7 @@ const Clips = ({ session, clearSession }) => {
         setCurrClips(data.clips);
         setPageCount(Math.ceil(data.totalClips / clipsPerPage));
       } else {
-        history.push("/");
+        navigate("/");
         clearSession();
       }
     });
@@ -81,11 +81,11 @@ const Clips = ({ session, clearSession }) => {
         pageCount={pageCount}
         onPageChange={handlePageChange}
       />
-      <div className='main clips'>
+      <div className="main clips">
         {currClips?.map((url) => {
           return (
             <video
-              className='clip'
+              className="clip"
               controls
               key={uniqueId()}
               src={url}
