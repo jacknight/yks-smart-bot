@@ -1,5 +1,6 @@
 const { Command } = require("discord-akairo");
 
+const globalToday = new Date();
 class MugCommand extends Command {
   constructor() {
     super("mug", {
