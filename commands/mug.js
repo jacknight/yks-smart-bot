@@ -5,9 +5,10 @@ class MugCommand extends Command {
   constructor() {
     super("mug", {
       aliases: ["mug", "burgymug"],
-      cooldown: 1000 * 60, // once per min
-      ratelimit:
-        (globalToday.getDate() !== 7 || globalToday.getMonth() !== 3) ?? 1,
+      ...((globalToday.getDate() !== 7 || globalToday.getMonth() !== 3) && {
+        cooldown: 1000 * 60,
+        rateLimit: 1,
+      }),
     });
   }
 
