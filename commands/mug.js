@@ -5,7 +5,8 @@ class MugCommand extends Command {
     super("mug", {
       aliases: ["mug", "burgymug"],
       cooldown: 1000 * 60, // once per min
-      ratelimit: 1,
+      ratelimit:
+        (globalToday.getDate() !== 7 || globalToday.getMonth() !== 3) ?? 1,
     });
   }
 

@@ -1,11 +1,13 @@
 const { Command } = require("discord-akairo");
 
+const globalToday = new Date();
 class BurgyCommand extends Command {
   constructor() {
     super("burgy", {
       aliases: ["burgy"],
       cooldown: 1000 * 60, // once per min
-      ratelimit: 1,
+      ratelimit:
+        (globalToday.getDate() !== 7 || globalToday.getMonth() !== 3) ?? 1,
     });
   }
 
