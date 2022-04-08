@@ -14,7 +14,7 @@ class ReadyListener extends Listener {
   }
 
   async exec() {
-    console.log("I'm ready!");
+    console.log("Starting up.");
 
     // Create an audio player for the !listen command
     this.client.listen = {
@@ -30,10 +30,6 @@ class ReadyListener extends Listener {
       },
     });
 
-    // Real or fake every day
-    scheduleRealOrFakeGame(this.client);
-    setInterval(scheduleRealOrFakeGame, 1000 * 60 * 60 * 24, this.client);
-
     // Set bot status and check for new episodes
     pollRss(this.client);
     setInterval(pollRss, 60 * 1000, this.client); // every 60 sec
@@ -47,89 +43,6 @@ class ReadyListener extends Listener {
       "session.expirationDate": { $lt: new Date(Date.now()) },
     });
   }
-}
-
-async function scheduleRealOrFakeGame(client) {
-  const getEstOffset = () => {
-    const stdTimezoneOffset = () => {
-      var jan = new Date(0, 1);
-      var jul = new Date(6, 1);
-      return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset());
-    };
-
-    var today = new Date();
-
-    const isDstObserved = (today) => {
-      return today.getTimezoneOffset() < stdTimezoneOffset();
-    };
-
-    if (isDstObserved(today)) {
-      return 4;
-    } else {
-      return 5;
-    }
-  };
-
-  const startOfDay = require("date-fns/startOfDay");
-  const add = require("date-fns/add");
-
-  let nowUtc = new Date();
-  // Make "last day of the week" a friday (week starts on saturday - 6)
-  let todayEastern = startOfDay(nowUtc);
-  // Get the server timezone offset in UTC (given in minutes -> convert to hours)
-  let utcServerOffset = todayEastern.getTimezoneOffset() / 60;
-
-  // New York is GMT-(4 or 5). 7pm is 19 hours into the day.
-  // (19 + (easternOffset - utcServerOffset)) to get 7pm Eastern time from UTC midnight.
-  todayEastern = add(todayEastern, {
-    hours: 19 + (getEstOffset() - utcServerOffset),
-  });
-
-  let twoMinuteWarning = add(todayEastern, {
-    minutes: -2,
-  });
-
-  const pisscord = client.guilds.cache.find(
-    (guild) => guild.id === process.env.YKS_GUILD_ID
-  );
-  const kickstarterBotChannel = pisscord.channels.cache.find(
-    (channel) => channel.id === process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID
-  );
-  // Set a timeout for as much time between now and friday 9pm eastern.
-  if (todayEastern.getTime() - nowUtc.getTime() > 0) {
-    setTimeout(
-      async () => {
-        const command = await client.commandHandler.findCommand(
-          "realorfakegame"
-        );
-        if (kickstarterBotChannel && command) {
-          client.commandHandler.runCommand(
-            { guild: pisscord, channel: kickstarterBotChannel },
-            command,
-            {}
-          );
-        }
-      },
-      todayEastern.getTime() - nowUtc.getTime(),
-      kickstarterBotChannel,
-      pisscord
-    );
-  }
-
-  if (twoMinuteWarning.getTime() - nowUtc.getTime() > 0) {
-    setTimeout(
-      () => {
-        kickstarterBotChannel.send(`
-**10 ROUNDS OF REAL OR FAKE**
-
-**TWO MINUTE WARNING**`);
-      },
-      twoMinuteWarning.getTime() - nowUtc.getTime(),
-      kickstarterBotChannel
-    );
-  }
-
-  console.log("Scheduled real or fake game for:", todayEastern.toString());
 }
 
 // Set the bot's presence.
