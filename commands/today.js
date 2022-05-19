@@ -6,7 +6,6 @@ const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
 const BONUS_FEED_RSS = process.env.BONUS_FEED_RSS;
 
 const epEmbed = (feedTitle, iconURL, epURL, epTitle, desc) => {
-  console.log(feedTitle, iconURL, epURL, epTitle, desc);
   const isBonus = epURL.includes("patreon.com");
   return {
     color: isBonus ? 0xddaf74 : 0x83c133,
@@ -21,7 +20,7 @@ const epEmbed = (feedTitle, iconURL, epURL, epTitle, desc) => {
     fields: [
       {
         name: epTitle,
-        value: desc,
+        value: desc.length >= 1024 ? `${desc.slice(0, 1020).trim()}...` : desc,
         inline: false,
       },
       {
