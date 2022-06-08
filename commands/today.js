@@ -55,6 +55,10 @@ class TodayCommand extends Command {
     bonusFeed.items = bonusFeed.items.map((item) => {
       return { ...item, feedTitle: bonusFeed.title };
     });
+    bonusFeed.items = bonusFeed.items.filter(
+      (episode) =>
+        !mainFeed.items.some((mainEp) => mainEp.title !== episode.title)
+    );
     const combinedFeed = mainFeed.items.concat(bonusFeed.items);
     const filteredFeed = combinedFeed.filter(
       (episode) =>
