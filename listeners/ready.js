@@ -141,6 +141,7 @@ async function getRssChannel(client, guildObj) {
 }
 
 async function removeOldMailbagMessages(client) {
+  console.log("Clearing old mailbag messages...");
   // Get all mailbag messages from the database
   let mailbagMessages = await client.settings.get(
     process.env.YKS_GUILD_ID,
@@ -149,17 +150,33 @@ async function removeOldMailbagMessages(client) {
   );
 
   // Fetch each message and check the date. If older than 30 days, remove it.
+  console.log(
+    "Attempting to resolve guild:",
+    process.env.YKS_GUILD_ID,
+    client.guilds.cache
+  );
+
   var guildObj = client.util.resolveGuild(
     process.env.YKS_GUILD_ID,
     client.guilds.cache
   );
   if (!guildObj) return;
 
+  console.log("Found guild obj: ", guildObj);
+
+  console.log(
+    "Attempting to resolve channel:",
+    process.env.YKS_MAILBAG_CHANNEL_ID,
+    guildObj.channels.cache
+  );
+
   var mailbagChannel = client.util.resolveChannel(
     process.env.YKS_MAILBAG_CHANNEL_ID,
     guildObj.channels.cache
   );
   if (!mailbagChannel) return;
+
+  console.log("Found channel obj: ", mailbagChannel);
 
   mailbagMessages = await mailbagMessages.reduce(
     async (arrPromise, rawMessage) => {
