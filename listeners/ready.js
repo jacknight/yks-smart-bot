@@ -148,38 +148,12 @@ async function removeOldMailbagMessages(client) {
     []
   );
 
-  // Fetch each message and check the date. If older than 30 days, remove it.
-  var guildObj = client.util.resolveGuild(
-    process.env.YKS_GUILD_ID,
-    client.guilds.cache
-  );
-  if (!guildObj) return;
-
-  var mailbagChannel = client.util.resolveChannel(
-    process.env.YKS_MAILBAG_CHANNEL_ID,
-    guildObj.channels.cache
-  );
-  if (!mailbagChannel) return;
-
-  mailbagMessages = await mailbagMessages.reduce(
-    async (arrPromise, rawMessage) => {
-      const arr = await arrPromise;
-      try {
-        const message = await mailbagChannel.messages.fetch(
-          JSON.parse(rawMessage).id
-        );
-        if (!message) return arr;
-
-        const diff = Date.now() - message.createdTimestamp;
-        const thirtyDays = 1000 * 60 * 60 * 24 * 30;
-        if (diff < thirtyDays) arr.push(rawMessage);
-        return arr;
-      } catch (e) {
-        console.error(e);
-      }
-    },
-    []
-  );
+  mailbagMessages = mailbagMessages.reduce((arr, rawMessage) => {
+    const diff = Date.now() - JSON.parse(rawMessage).ts;
+    const thirtyDays = 1000 * 60 * 60 * 24 * 30;
+    if (diff < thirtyDays) arr.push(rawMessage);
+    return arr;
+  }, []);
 
   console.log("Cleared old mailbag messages.");
   return client.settings.set(

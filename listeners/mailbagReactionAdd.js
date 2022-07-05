@@ -46,7 +46,11 @@ class MailbagReactionAddListener extends Listener {
 
       if (index < 0) {
         // Create a new object, then stringify it and add it to the array.
-        const msgObject = { id: reaction.message.id, count: 1 };
+        const msgObject = {
+          id: reaction.message.id,
+          count: 1,
+          ts: reaction.message.createdTimestamp,
+        };
         mailbagMessages.push(JSON.stringify(msgObject));
       } else {
         // Update the existing object by incrementing the count.
