@@ -26,7 +26,7 @@
     "http": "^0.0.1-security",
     "libsodium-wrappers": "^0.7.10",
     "lodash": "^4.17.21",
-    "mongoose": "^6.2.9",
+    "mongoose": "^6.4.6",
     "node-fetch": "^2.6.7",
     "openai-api": "^1.2.6",
     "pretty-ms": "^7.0.1",
