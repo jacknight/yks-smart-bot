@@ -1,4 +1,5 @@
 const { Command } = require("discord-akairo");
+const { random } = require("lodash");
 
 const globalToday = new Date();
 class MugCommand extends Command {
@@ -24,7 +25,9 @@ class MugCommand extends Command {
         self.client.globalRates.get(message.guild.id).delete("mug");
       }, 1000 * 60); // once per min
 
-      const attachment = this.client.util.attachment("./assets/mug.png");
+      const mugs = ["./assets/mug.png", "./assets/mug2.jpg"];
+      const mug = mugs[random(1)];
+      const attachment = this.client.util.attachment(mug);
       message.channel.send({ files: [attachment] });
     }
   }
