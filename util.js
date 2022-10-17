@@ -1,3 +1,11 @@
+const unsplash = require("unsplash-js");
+const nodeFetch = require("node-fetch");
+
+exports.unsplash = unsplash.createApi({
+  accessKey: process.env.UNSPLASH_ACCESS_KEY,
+  fetch: nodeFetch.default,
+});
+
 exports.shuffle = (array) => {
   var currentIndex = array.length,
     temporaryValue,
