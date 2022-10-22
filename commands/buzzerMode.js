@@ -1,12 +1,12 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
 class BuzzerModeCommand extends Command {
   constructor() {
-    super("mode", {
-      aliases: ["mode"],
-      category: "buzzer",
-      channel: "guild",
-      prefix: "!buzz.",
+    super('mode', {
+      aliases: ['mode'],
+      category: 'buzzer',
+      channel: 'guild',
+      prefix: '!buzz.',
       cooldown: 1000,
       ratelimit: 1,
     });
@@ -14,7 +14,7 @@ class BuzzerModeCommand extends Command {
 
   async userPermissions(message) {
     const buzzerRole = await this.client.settings
-      .get(message.guild.id, "buzzerRole", "buzzer")
+      .get(message.guild.id, 'buzzerRole', 'buzzer')
       .toLowerCase();
     if (
       !message.member.roles.cache.some((role) => {
@@ -27,45 +27,35 @@ class BuzzerModeCommand extends Command {
   }
 
   async exec(message) {
-    if (
-      await this.client.settings.get(message.guild.id, "buzzerReady", false)
-    ) {
-      return message.channel.send(
-        "You can't change the mode while the buzzer is enabled."
-      );
+    if (await this.client.settings.get(message.guild.id, 'buzzerReady', false)) {
+      return message.channel.send("You can't change the mode while the buzzer is enabled.");
     }
     // There must be a better way to do this...
     if (
       JSON.parse(
         await this.client.settings.get(
           message.guild.id,
-          "buzzerChannel",
-          JSON.stringify(message.channel)
-        )
+          'buzzerChannel',
+          JSON.stringify(message.channel),
+        ),
       ).id !== message.channel.id
     ) {
       return;
     }
 
-    const oldMode = await this.client.settings.get(
-      message.guild.id,
-      "buzzerMode",
-      "normal"
-    );
-    const newMode = oldMode === "normal" ? "chaos" : "normal";
-    await this.client.settings.set(message.guild.id, "buzzerMode", newMode);
+    const oldMode = await this.client.settings.get(message.guild.id, 'buzzerMode', 'normal');
+    const newMode = oldMode === 'normal' ? 'chaos' : 'normal';
+    await this.client.settings.set(message.guild.id, 'buzzerMode', newMode);
 
     if (this.client.sockets.has(message.guild.id)) {
       this.client.sockets.get(message.guild.id).forEach((socket) => {
-        socket.emit("responseMode", { mode: newMode });
+        socket.emit('responseMode', { mode: newMode });
       });
     }
 
     try {
-      if (newMode === "chaos") {
-        return message.channel.send(
-          `Buddy...you are now in **${newMode} mode!!!**`
-        );
+      if (newMode === 'chaos') {
+        return message.channel.send(`Buddy...you are now in **${newMode} mode!!!**`);
       } else {
         return message.channel.send(`You are now in **${newMode} mode**`);
       }

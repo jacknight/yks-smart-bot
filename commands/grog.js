@@ -1,12 +1,12 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
 class GrogCommand extends Command {
   constructor() {
-    super("grog", {
+    super('grog', {
       cooldown: 3600000,
       ratelimit: 1,
       regex: /^grog$/i,
-      category: "eater-egg",
+      category: 'eater-egg',
     });
   }
 
@@ -15,13 +15,13 @@ class GrogCommand extends Command {
       this.client.globalRates.set(message.guild.id, new Set());
     }
 
-    if (!this.client.globalRates.get(message.guild.id).has("grog")) {
-      this.client.globalRates.get(message.guild.id).add("grog");
+    if (!this.client.globalRates.get(message.guild.id).has('grog')) {
+      this.client.globalRates.get(message.guild.id).add('grog');
       const self = this;
       setTimeout(function () {
-        self.client.globalRates.get(message.guild.id).delete("grog");
+        self.client.globalRates.get(message.guild.id).delete('grog');
       }, 1000 * 60 * 60 * 12); // twice a day.
-      message.channel.send("grog");
+      message.channel.send('grog');
     }
   }
 }

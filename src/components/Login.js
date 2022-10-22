@@ -1,15 +1,15 @@
-import React, { useEffect, useState } from "react";
-import queryString from "query-string";
-import fetch from "node-fetch";
-import { useNavigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import queryString from 'query-string';
+import fetch from 'node-fetch';
+import { useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 
 const createSession = (code, fetchSignal) => {
   return fetch(`${process.env.REACT_APP_HOST}/api/login`, {
-    method: "POST",
+    method: 'POST',
     signal: fetchSignal,
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     },
     body: `{ "code": "${code}" }`,
   })
@@ -52,7 +52,7 @@ const Login = ({ setSession, setUser, clearSession }) => {
     );
   } else {
     if (location.pathname !== '/') {
-      navigate("/");
+      navigate('/');
     }
     return (
       <main>

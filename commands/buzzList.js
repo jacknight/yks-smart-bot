@@ -1,12 +1,12 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
 class BuzzerListCommand extends Command {
   constructor() {
-    super("list", {
-      aliases: ["list"],
-      category: "buzzer",
-      channel: "guild",
-      prefix: "!buzz.",
+    super('list', {
+      aliases: ['list'],
+      category: 'buzzer',
+      channel: 'guild',
+      prefix: '!buzz.',
       cooldown: 10000,
       ratelimit: 1,
     });
@@ -14,7 +14,7 @@ class BuzzerListCommand extends Command {
 
   async userPermissions(message) {
     const buzzerRole = await this.client.settings
-      .get(message.guild.id, "buzzerRole", "buzzer")
+      .get(message.guild.id, 'buzzerRole', 'buzzer')
       .toLowerCase();
     if (
       !message.member.roles.cache.some((role) => {
@@ -27,14 +27,10 @@ class BuzzerListCommand extends Command {
   }
 
   async exec(message) {
-    const buzzerQueue = await this.client.settings.get(
-      message.guild.id,
-      "buzzerQueue",
-      []
-    );
+    const buzzerQueue = await this.client.settings.get(message.guild.id, 'buzzerQueue', []);
 
     if (buzzerQueue.length === 0) {
-      return message.channel.send("Buzz list is empty.");
+      return message.channel.send('Buzz list is empty.');
     }
 
     var num = 1;
@@ -42,10 +38,10 @@ class BuzzerListCommand extends Command {
       `Dookie list: ${buzzerQueue.reduce((str, buzz) => {
         const member = this.client.util.resolveMember(
           JSON.parse(buzz).id,
-          message.guild.members.cache
+          message.guild.members.cache,
         );
         return str + `${num++}. ${member.nickname || member.user.username}\n`;
-      }, "\n")}`
+      }, '\n')}`,
     );
   }
 }

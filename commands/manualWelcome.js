@@ -1,10 +1,10 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
 class WelcomeCommand extends Command {
   constructor() {
-    super("newmember", {
-      aliases: ["newmember"],
-      args: [{ id: "id" }],
+    super('newmember', {
+      aliases: ['newmember'],
+      args: [{ id: 'id' }],
       ownerOnly: true,
     });
   }
@@ -13,7 +13,7 @@ class WelcomeCommand extends Command {
     // Lookup guild by ID
     const guildObj = this.client.util.resolveGuild(
       process.env.YKS_GUILD_ID,
-      this.client.guilds.cache
+      this.client.guilds.cache,
     );
     if (!guildObj) return;
 
@@ -21,7 +21,7 @@ class WelcomeCommand extends Command {
     const member = this.client.util.resolveMember(id, guildObj.members.cache);
     if (!member) return;
 
-    return this.client.emit("guildMemberAdd", member);
+    return this.client.emit('guildMemberAdd', member);
   }
 }
 

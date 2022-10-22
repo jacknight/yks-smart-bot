@@ -1,19 +1,19 @@
-import React, { useEffect, useState } from "react";
-import Header from "./components/Header";
-import Login from "./components/Login";
-import Nav from "./components/Nav";
-import NavLink from "./components/NavLink";
-import Title from "./components/Title";
-import Main from "./components/Main";
-import Footer from "./components/Footer";
-import Clips from "./components/Clips";
-import Episodes from "./components/Episodes";
-import RealOrFake from "./components/RealOrFake";
-import Mailbag from "./components/Mailbag";
-import Buzzer from "./components/Buzzer";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import useSession from "./utilities/useSession";
-import NavButton from "./components/NavButton";
+import React, { useEffect, useState } from 'react';
+import Header from './components/Header';
+import Login from './components/Login';
+import Nav from './components/Nav';
+import NavLink from './components/NavLink';
+import Title from './components/Title';
+import Main from './components/Main';
+import Footer from './components/Footer';
+import Clips from './components/Clips';
+import Episodes from './components/Episodes';
+import RealOrFake from './components/RealOrFake';
+import Mailbag from './components/Mailbag';
+import Buzzer from './components/Buzzer';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import useSession from './utilities/useSession';
+import NavButton from './components/NavButton';
 
 const App = () => {
   const { session, setSession, clearSession } = useSession();
@@ -23,11 +23,7 @@ const App = () => {
     return (
       <BrowserRouter>
         <div className="App">
-          <Login
-            setSession={setSession}
-            setUser={setUser}
-            clearSession={clearSession}
-          />
+          <Login setSession={setSession} setUser={setUser} clearSession={clearSession} />
         </div>
       </BrowserRouter>
     );
@@ -76,24 +72,12 @@ const App = () => {
               }
             ></Route>
             <Route
-              path={"/clips/:page"}
-              element={
-                <Clips
-                  user={user}
-                  session={session}
-                  clearSession={clearSession}
-                />
-              }
+              path={'/clips/:page'}
+              element={<Clips user={user} session={session} clearSession={clearSession} />}
             ></Route>
             <Route
               path="/clips"
-              element={
-                <Clips
-                  user={user}
-                  session={session}
-                  clearSession={clearSession}
-                />
-              }
+              element={<Clips user={user} session={session} clearSession={clearSession} />}
             ></Route>
             <Route
               path="/real-or-fake"

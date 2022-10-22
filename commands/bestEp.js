@@ -1,41 +1,35 @@
-const { Command } = require("discord-akairo");
-const Parser = require("rss-parser");
+const { Command } = require('discord-akairo');
+const Parser = require('rss-parser');
 const parser = new Parser();
 const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
 
 class BestCommand extends Command {
   constructor() {
-    super("best", {
-      aliases: ["best"],
+    super('best', {
+      aliases: ['best'],
       cooldown: 1000 * 60 * 30, // once every 30 min
       ratelimit: 1,
-      args: [{ id: "num", type: "number", default: "list" }],
+      args: [{ id: 'num', type: 'number', default: 'list' }],
     });
   }
 
   async exec(message, { num }) {
-    const listOnly = num === "list";
+    const listOnly = num === 'list';
     const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
     if (!listOnly) {
       if (num < 1) return;
       if (num === 101) {
         return message.channel.send(
-          "We already know Episode 101 is the best. This is for all the other ones."
+          'We already know Episode 101 is the best. This is for all the other ones.',
         );
       }
 
       // Check if provided argument is bigger than the latest known episode.
-      let latestEpNum = await this.client.settings.get(
-        this.client.user.id,
-        "latestEpNum",
-        0
-      );
+      let latestEpNum = await this.client.settings.get(this.client.user.id, 'latestEpNum', 0);
 
       if (num > latestEpNum) {
         // Maybe a new episode has been released and it's really good...
-        let latestEpNum = mainFeed.items[0].title.match(
-          /Ep ([0-9]+)|Episode ([0-9]+)/i
-        );
+        let latestEpNum = mainFeed.items[0].title.match(/Ep ([0-9]+)|Episode ([0-9]+)/i);
         latestEpNum = latestEpNum
           ? Number(latestEpNum[1])
             ? Number(latestEpNum[1])
@@ -43,24 +37,18 @@ class BestCommand extends Command {
           : null;
 
         if (latestEpNum) {
-          await this.client.settings.set(
-            this.client.user.id,
-            "latestEpNum",
-            latestEpNum
-          );
+          await this.client.settings.set(this.client.user.id, 'latestEpNum', latestEpNum);
         }
 
         // Ok, they just gave an invalid episode. Nice try.
-        if (num > latestEpNum) return message.channel.send("Not an episode.");
+        if (num > latestEpNum) return message.channel.send('Not an episode.');
       }
     }
 
     let tempBestEpByUser = JSON.parse(
-      await this.client.settings.get(message.guild.id, "bestEpByUser", '""')
+      await this.client.settings.get(message.guild.id, 'bestEpByUser', '""'),
     );
-    var bestEpByUser = !tempBestEpByUser
-      ? new Map()
-      : new Map(tempBestEpByUser);
+    var bestEpByUser = !tempBestEpByUser ? new Map() : new Map(tempBestEpByUser);
 
     let bestEpTotals = new Map();
     bestEpByUser.forEach((ep, user) => {
@@ -72,7 +60,7 @@ class BestCommand extends Command {
       }
     });
 
-    var messagePrefix = "";
+    var messagePrefix = '';
     if (!listOnly) {
       const prevUserVote = bestEpByUser.get(message.author.id);
       if (prevUserVote) {
@@ -86,7 +74,7 @@ class BestCommand extends Command {
 
           messagePrefix = `You thought **Episode ${prevUserVote}** was the best. Now...\n`;
         } else {
-          return message.reply("No change.");
+          return message.reply('No change.');
         }
       }
 
@@ -95,13 +83,13 @@ class BestCommand extends Command {
       bestEpTotals.set(num, (bestEpTotals.get(num) || 0) + 1);
       await this.client.settings.set(
         message.guild.id,
-        "bestEpByUser",
-        JSON.stringify(Array.from(bestEpByUser.entries()))
+        'bestEpByUser',
+        JSON.stringify(Array.from(bestEpByUser.entries())),
       );
       await this.client.settings.set(
         message.guild.id,
-        "bestEpTotals",
-        JSON.stringify(Array.from(bestEpTotals.entries()))
+        'bestEpTotals',
+        JSON.stringify(Array.from(bestEpTotals.entries())),
       );
     }
 
@@ -112,13 +100,13 @@ class BestCommand extends Command {
           return Math.floor(Math.random() * 2) === 0 ? -1 : 1;
         }
         return b[1] - a[1];
-      })
+      }),
     );
 
     let count = 0;
     let embed = {
       color: 0x83c133,
-      title: "",
+      title: '',
       fields: [],
     };
 
@@ -126,12 +114,10 @@ class BestCommand extends Command {
       if (count === 10) return;
       count++;
       let title = mainFeed.items.find(
-        (item) =>
-          item.title.includes(`Ep ${key}:`) ||
-          item.title.includes(`Episode ${key}:`)
+        (item) => item.title.includes(`Ep ${key}:`) || item.title.includes(`Episode ${key}:`),
       )?.title;
 
-      if (!title) title = "title not found";
+      if (!title) title = 'title not found';
 
       embed.fields.push({
         name: `**${count}.** ${title}`,

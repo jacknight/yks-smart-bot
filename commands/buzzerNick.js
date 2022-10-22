@@ -1,13 +1,13 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
 class BuzzerNickCommand extends Command {
   constructor() {
-    super("nick", {
-      aliases: ["nick", "nickname", "name"],
-      category: "buzzer",
-      channel: "guild",
-      prefix: "!buzz.",
-      args: [{ id: "nick", match: "content" }],
+    super('nick', {
+      aliases: ['nick', 'nickname', 'name'],
+      category: 'buzzer',
+      channel: 'guild',
+      prefix: '!buzz.',
+      args: [{ id: 'nick', match: 'content' }],
       cooldown: 60000,
       ratelimit: 1,
     });
@@ -15,7 +15,7 @@ class BuzzerNickCommand extends Command {
 
   async userPermissions(message) {
     const buzzerRole = await this.client.settings
-      .get(message.guild.id, "buzzerRole", "buzzer")
+      .get(message.guild.id, 'buzzerRole', 'buzzer')
       .toLowerCase();
     if (
       !message.member.roles.cache.some((role) => {
@@ -29,11 +29,7 @@ class BuzzerNickCommand extends Command {
 
   async exec(message, { nick }) {
     try {
-      if (
-        await message.guild.members.cache
-          .get(this.client.user.id)
-          .setNickname(nick)
-      ) {
+      if (await message.guild.members.cache.get(this.client.user.id).setNickname(nick)) {
         return message.channel.send(`Hey, check out my new name!`);
       }
     } catch {

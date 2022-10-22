@@ -1,20 +1,16 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
 class TopKickstartersCommand extends Command {
   constructor() {
-    super("topkickstarters", {
-      aliases: ["topkickstarters", "bestkickstarters", "topks", "bestks"],
+    super('topkickstarters', {
+      aliases: ['topkickstarters', 'bestkickstarters', 'topks', 'bestks'],
       cooldown: 1000 * 60 * 60, // once per hour
       ratelimit: 1,
     });
   }
 
   async exec(message) {
-    let kickstarters = await this.client.settings.get(
-      message.guild.id,
-      "kickstarters",
-      []
-    );
+    let kickstarters = await this.client.settings.get(message.guild.id, 'kickstarters', []);
 
     if (kickstarters.length > 0) {
       // Sort, descending
@@ -32,7 +28,7 @@ class TopKickstartersCommand extends Command {
 
         const kickstarterChannel = await this.client.util.resolveChannel(
           process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID,
-          message.guild.channels.cache
+          message.guild.channels.cache,
         );
         if (kickstarterChannel) {
           const msg = await kickstarterChannel.messages.fetch(msgId);

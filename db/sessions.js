@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const sessionsSchema = new Schema(
@@ -12,7 +12,7 @@ const sessionsSchema = new Schema(
       require: true,
     },
   },
-  { minimize: false }
+  { minimize: false },
 );
 
-module.exports = mongoose.model("sessions", sessionsSchema);
+module.exports = mongoose.model('sessions', sessionsSchema);

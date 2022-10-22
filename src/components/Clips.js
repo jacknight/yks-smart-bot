@@ -1,9 +1,9 @@
-import { uniqueId } from "lodash";
-import React, { useEffect, useState } from "react";
-import Paginator from "./Paginator";
-import { useParams, useNavigate } from "react-router-dom";
-import queryString from "query-string";
-import fetch from "node-fetch";
+import { uniqueId } from 'lodash';
+import React, { useEffect, useState } from 'react';
+import Paginator from './Paginator';
+import { useParams, useNavigate } from 'react-router-dom';
+import queryString from 'query-string';
+import fetch from 'node-fetch';
 
 const Clips = ({ session, clearSession }) => {
   const params = useParams();
@@ -24,7 +24,7 @@ const Clips = ({ session, clearSession }) => {
         setCurrClips(data.clips);
         setPageCount(Math.ceil(data.totalClips / clipsPerPage));
       } else {
-        navigate("/");
+        navigate('/');
         clearSession();
       }
     });
@@ -33,9 +33,9 @@ const Clips = ({ session, clearSession }) => {
   const fetchClipUrls = (pageNumber, data) => {
     let params = queryString.stringify(data);
     return fetch(`/api/clips/${pageNumber}?${params}`, {
-      method: "GET",
+      method: 'GET',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
     })
       .then((data) => data.json())
@@ -52,9 +52,9 @@ const Clips = ({ session, clearSession }) => {
       session,
     };
     return fetch(`/api/share-clip`, {
-      method: "POST",
+      method: 'POST',
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
     });
@@ -67,7 +67,7 @@ const Clips = ({ session, clearSession }) => {
   return (
     <>
       <button
-        className={"clipButton"}
+        className={'clipButton'}
         onClick={() => {
           const randomPage = Math.ceil(Math.random() * pageCount);
           setCurrPage(randomPage);
@@ -100,7 +100,7 @@ const Clips = ({ session, clearSession }) => {
         })}
       </div>
 
-      <button className={"clipButton"} onClick={shareClip}>
+      <button className={'clipButton'} onClick={shareClip}>
         Share On The Pisscord
       </button>
     </>

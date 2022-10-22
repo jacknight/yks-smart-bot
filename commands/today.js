@@ -1,21 +1,21 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
-const Parser = require("rss-parser");
+const Parser = require('rss-parser');
 const parser = new Parser();
 const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
 const BONUS_FEED_RSS = process.env.BONUS_FEED_RSS;
 
 const epEmbed = (feedTitle, iconURL, epURL, epTitle, desc) => {
-  const isBonus = epURL.includes("patreon.com");
+  const isBonus = epURL.includes('patreon.com');
   return {
     color: isBonus ? 0xddaf74 : 0x83c133,
     title: feedTitle,
     author: {
-      icon_url: isBonus ? "https://i.imgur.com/5sHYjAX.jpeg" : iconURL,
-      url: "https://www.patreon.com/yourkickstartersucks",
+      icon_url: isBonus ? 'https://i.imgur.com/5sHYjAX.jpeg' : iconURL,
+      url: 'https://www.patreon.com/yourkickstartersucks',
     },
     thumbnail: {
-      url: isBonus ? "https://i.imgur.com/5sHYjAX.jpeg" : iconURL,
+      url: isBonus ? 'https://i.imgur.com/5sHYjAX.jpeg' : iconURL,
     },
     fields: [
       {
@@ -24,7 +24,7 @@ const epEmbed = (feedTitle, iconURL, epURL, epTitle, desc) => {
         inline: false,
       },
       {
-        name: "Link",
+        name: 'Link',
         value: `[Patreon](${epURL})`,
         inline: false,
       },
@@ -34,17 +34,17 @@ const epEmbed = (feedTitle, iconURL, epURL, epTitle, desc) => {
 
 class TodayCommand extends Command {
   constructor() {
-    super("today", {
-      aliases: ["today"],
+    super('today', {
+      aliases: ['today'],
       cooldown: 1000 * 60, // one per min
       rateLimit: 1,
     });
   }
 
   async exec(message) {
-    const today = new Date().toLocaleString("en-us", {
-      month: "numeric",
-      day: "numeric",
+    const today = new Date().toLocaleString('en-us', {
+      month: 'numeric',
+      day: 'numeric',
     });
 
     const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
@@ -56,23 +56,22 @@ class TodayCommand extends Command {
       return { ...item, feedTitle: bonusFeed.title };
     });
     bonusFeed.items = bonusFeed.items.filter(
-      (episode) =>
-        !mainFeed.items.some((mainEp) => mainEp.title !== episode.title)
+      (episode) => !mainFeed.items.some((mainEp) => mainEp.title !== episode.title),
     );
     const combinedFeed = mainFeed.items.concat(bonusFeed.items);
     const filteredFeed = combinedFeed.filter(
       (episode) =>
-        new Date(episode.isoDate).toLocaleString("en-us", {
-          month: "numeric",
-          day: "numeric",
-        }) === today
+        new Date(episode.isoDate).toLocaleString('en-us', {
+          month: 'numeric',
+          day: 'numeric',
+        }) === today,
     );
 
     if (filteredFeed.length > 0) {
       let embeds = [];
       filteredFeed.forEach((episode) => {
-        const dateStr = new Date(episode.isoDate).toLocaleString("en-us", {
-          dateStyle: "medium",
+        const dateStr = new Date(episode.isoDate).toLocaleString('en-us', {
+          dateStyle: 'medium',
         });
         embeds.push(
           epEmbed(
@@ -80,14 +79,14 @@ class TodayCommand extends Command {
             episode.itunes.image,
             episode.link,
             episode.title,
-            episode.contentSnippet
-          )
+            episode.contentSnippet,
+          ),
         );
       });
 
       message.channel.send({ embeds });
     } else {
-      message.channel.send("Nothing happened on this date.");
+      message.channel.send('Nothing happened on this date.');
     }
   }
 }

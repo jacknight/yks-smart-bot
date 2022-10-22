@@ -1,4 +1,4 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const guildSchema = new Schema(
@@ -12,7 +12,7 @@ const guildSchema = new Schema(
       require: true,
     },
   },
-  { minimize: false }
+  { minimize: false },
 );
 
-module.exports = mongoose.model("model", guildSchema);
+module.exports = mongoose.model('model', guildSchema);

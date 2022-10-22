@@ -1,12 +1,12 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
 class BuzzerClearCommand extends Command {
   constructor() {
-    super("clear", {
-      aliases: ["clear"],
-      category: "buzzer",
-      channel: "guild",
-      prefix: "!buzz.",
+    super('clear', {
+      aliases: ['clear'],
+      category: 'buzzer',
+      channel: 'guild',
+      prefix: '!buzz.',
       cooldown: 1000,
       ratelimit: 1,
     });
@@ -14,7 +14,7 @@ class BuzzerClearCommand extends Command {
 
   async userPermissions(message) {
     const buzzerRole = await this.client.settings
-      .get(message.guild.id, "buzzerRole", "buzzer")
+      .get(message.guild.id, 'buzzerRole', 'buzzer')
       .toLowerCase();
     if (
       !message.member.roles.cache.some((role) => {
@@ -32,22 +32,22 @@ class BuzzerClearCommand extends Command {
       JSON.parse(
         await this.client.settings.get(
           message.guild.id,
-          "buzzerChannel",
-          JSON.stringify(message.channel)
-        )
+          'buzzerChannel',
+          JSON.stringify(message.channel),
+        ),
       ).id !== message.channel.id
     ) {
       return;
     }
 
-    await this.client.settings.set(message.guild.id, "buzzerQueue", []);
+    await this.client.settings.set(message.guild.id, 'buzzerQueue', []);
     if (this.client.sockets.has(message.guild.id)) {
       this.client.sockets.get(message.guild.id).forEach((socket) => {
-        socket.emit("buzz", []);
+        socket.emit('buzz', []);
       });
     }
     try {
-      return message.channel.send("Cleared the dookie list.");
+      return message.channel.send('Cleared the dookie list.');
     } catch (err) {
       console.log(err);
     }

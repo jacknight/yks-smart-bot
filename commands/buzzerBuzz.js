@@ -1,11 +1,11 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
 class BuzzerBuzzCommand extends Command {
   constructor() {
-    super("buzz", {
-      aliases: ["heep", "meep"],
-      category: "buzzer",
-      channel: "guild",
+    super('buzz', {
+      aliases: ['heep', 'meep'],
+      category: 'buzzer',
+      channel: 'guild',
       cooldown: 5000,
       ratelimit: 5,
     });
@@ -17,41 +17,25 @@ class BuzzerBuzzCommand extends Command {
         JSON.parse(
           await this.client.settings.get(
             message.guild.id,
-            "buzzerChannel",
-            JSON.stringify(message.channel)
-          )
+            'buzzerChannel',
+            JSON.stringify(message.channel),
+          ),
         ).id ||
-      !(await this.client.settings.get(message.guild.id, "buzzerReady", false))
+      !(await this.client.settings.get(message.guild.id, 'buzzerReady', false))
     )
       return;
 
-    const buzzerQueue = await this.client.settings.get(
-      message.guild.id,
-      "buzzerQueue",
-      []
-    );
+    const buzzerQueue = await this.client.settings.get(message.guild.id, 'buzzerQueue', []);
 
-    if (
-      !buzzerQueue.find((author) => JSON.parse(author).id === message.author.id)
-    ) {
+    if (!buzzerQueue.find((author) => JSON.parse(author).id === message.author.id)) {
       buzzerQueue.push(JSON.stringify(message.author));
-      if (
-        (await this.client.settings.get(
-          message.guild.id,
-          "buzzerMode",
-          "normal"
-        )) === "chaos"
-      ) {
-        require("../util").shuffle(buzzerQueue);
+      if ((await this.client.settings.get(message.guild.id, 'buzzerMode', 'normal')) === 'chaos') {
+        require('../util').shuffle(buzzerQueue);
       }
-      await this.client.settings.set(
-        message.guild.id,
-        "buzzerQueue",
-        buzzerQueue
-      );
+      await this.client.settings.set(message.guild.id, 'buzzerQueue', buzzerQueue);
       if (this.client.sockets.has(message.guild.id)) {
         this.client.sockets.get(message.guild.id).forEach((socket) => {
-          socket.emit("buzz", buzzerQueue);
+          socket.emit('buzz', buzzerQueue);
         });
       }
       try {
@@ -62,12 +46,10 @@ class BuzzerBuzzCommand extends Command {
             `Dookie list: ${buzzerQueue.reduce((str, buzz) => {
               const member = this.client.util.resolveMember(
                 JSON.parse(buzz).id,
-                message.guild.members.cache
+                message.guild.members.cache,
               );
-              return (
-                str + `${num++}. ${member.nickname || member.user.username}\n`
-              );
-            }, "\n")}`
+              return str + `${num++}. ${member.nickname || member.user.username}\n`;
+            }, '\n')}`,
           );
         }
       } catch (err) {

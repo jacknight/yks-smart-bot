@@ -1,20 +1,20 @@
-const { Listener } = require("discord-akairo");
-const SessionModel = require("../db/sessions");
-const Parser = require("rss-parser");
+const { Listener } = require('discord-akairo');
+const SessionModel = require('../db/sessions');
+const Parser = require('rss-parser');
 const parser = new Parser();
 const MAIN_FEED_RSS = process.env.MAIN_FEED_RSS;
 const BONUS_FEED_RSS = process.env.BONUS_FEED_RSS;
-const { createAudioPlayer, NoSubscriberBehavior } = require("@discordjs/voice");
+const { createAudioPlayer, NoSubscriberBehavior } = require('@discordjs/voice');
 class ReadyListener extends Listener {
   constructor() {
-    super("ready", {
-      emitter: "client",
-      event: "ready",
+    super('ready', {
+      emitter: 'client',
+      event: 'ready',
     });
   }
 
   async exec() {
-    console.log("Starting up.");
+    console.log('Starting up.');
 
     // Create an audio player for the !listen command
     this.client.listen = {
@@ -40,7 +40,7 @@ class ReadyListener extends Listener {
 
     // Delete expired tokens
     await SessionModel.deleteMany({
-      "session.expirationDate": { $lt: new Date(Date.now()) },
+      'session.expirationDate': { $lt: new Date(Date.now()) },
     });
   }
 }
@@ -55,10 +55,10 @@ async function pollRss(client) {
 
   if (mainFeed && mainFeed.items && bonusFeed && bonusFeed.items) {
     // See what's stored in the DB for the latest main ep...
-    const latestMainEpTitle = await client.settings.get(client.user.id, "latestMainEpTitle", "");
+    const latestMainEpTitle = await client.settings.get(client.user.id, 'latestMainEpTitle', '');
 
     // ...and the latest bonus ep...
-    const latestBonusEpTitle = await client.settings.get(client.user.id, "latestBonusEpTitle", "");
+    const latestBonusEpTitle = await client.settings.get(client.user.id, 'latestBonusEpTitle', '');
 
     // ...and compare to the RSS feed.
     const newMain = latestMainEpTitle != mainFeed.items[0].title;
@@ -66,34 +66,34 @@ async function pollRss(client) {
 
     // Set bot status
     client.user.setPresence({
-      status: "dnd",
+      status: 'dnd',
       activities: [
         {
           name: bonusFeed.items[0].title, // this is always the most recent ep
-          type: "LISTENING",
+          type: 'LISTENING',
           url: null,
         },
       ],
     });
 
     if (newMain || newBonus) {
-      const feed = newMain ? "main" : "bonus";
+      const feed = newMain ? 'main' : 'bonus';
       // Store newest ep title in DB
       if (newMain) {
-        await client.settings.set(client.user.id, "latestMainEpTitle", mainFeed.items[0].title);
+        await client.settings.set(client.user.id, 'latestMainEpTitle', mainFeed.items[0].title);
       }
       if (newBonus) {
-        await client.settings.set(client.user.id, "latestBonusEpTitle", bonusFeed.items[0].title);
+        await client.settings.set(client.user.id, 'latestBonusEpTitle', bonusFeed.items[0].title);
       }
       // For each guild the bot is a member, check if there is an RSS channel
       // channel configured and if so, send a message regarding the new ep.
       client.guilds.cache.forEach(async (guild) => {
         const channel = await getRssChannel(client, guild);
-        const command = await client.commandHandler.findCommand("latest");
+        const command = await client.commandHandler.findCommand('latest');
         if (channel && command) {
           client.commandHandler.runCommand({ guild, channel }, command, {
             feed,
-            newEp: "yes",
+            newEp: 'yes',
           });
         }
       });
@@ -105,7 +105,7 @@ async function getRssChannel(client, guildObj) {
   const channel = JSON.parse(
     // Get the configured rss channel from the db.
     // If none set, return null
-    await client.settings.get(guildObj.id, "rssChannel", null)
+    await client.settings.get(guildObj.id, 'rssChannel', null),
   );
 
   return channel ? client.util.resolveChannel(channel.id, guildObj.channels.cache) : null;
@@ -113,7 +113,7 @@ async function getRssChannel(client, guildObj) {
 
 async function removeOldMailbagMessages(client) {
   // Get all mailbag messages from the database
-  let mailbagMessages = await client.settings.get(process.env.YKS_GUILD_ID, "mailbagMessages", []);
+  let mailbagMessages = await client.settings.get(process.env.YKS_GUILD_ID, 'mailbagMessages', []);
 
   mailbagMessages = mailbagMessages.reduce((arr, rawMessage) => {
     const diff = Date.now() - JSON.parse(rawMessage).ts;
@@ -122,8 +122,8 @@ async function removeOldMailbagMessages(client) {
     return arr;
   }, []);
 
-  console.log("Cleared old mailbag messages.");
-  return client.settings.set(process.env.YKS_GUILD_ID, "mailbagMessages", mailbagMessages);
+  console.log('Cleared old mailbag messages.');
+  return client.settings.set(process.env.YKS_GUILD_ID, 'mailbagMessages', mailbagMessages);
 }
 
 module.exports = ReadyListener;

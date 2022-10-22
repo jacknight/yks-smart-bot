@@ -1,9 +1,9 @@
-const { Inhibitor } = require("discord-akairo");
+const { Inhibitor } = require('discord-akairo');
 
 class BlacklistInhibitor extends Inhibitor {
   constructor() {
-    super("blacklist", {
-      reason: "blacklist",
+    super('blacklist', {
+      reason: 'blacklist',
     });
   }
 

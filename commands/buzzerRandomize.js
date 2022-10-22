@@ -1,12 +1,12 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
 class BuzzerRandomizeCommand extends Command {
   constructor() {
-    super("randomize", {
-      aliases: ["randomize", "random", "shuffle"],
-      category: "buzzer",
-      channel: "guild",
-      prefix: "!buzz.",
+    super('randomize', {
+      aliases: ['randomize', 'random', 'shuffle'],
+      category: 'buzzer',
+      channel: 'guild',
+      prefix: '!buzz.',
       cooldown: 1000,
       ratelimit: 1,
     });
@@ -14,7 +14,7 @@ class BuzzerRandomizeCommand extends Command {
 
   async userPermissions(message) {
     const buzzerRole = await this.client.settings
-      .get(message.guild.id, "buzzerRole", "buzzer")
+      .get(message.guild.id, 'buzzerRole', 'buzzer')
       .toLowerCase();
     if (
       !message.member.roles.cache.some((role) => {
@@ -32,29 +32,21 @@ class BuzzerRandomizeCommand extends Command {
         JSON.parse(
           await this.client.settings.get(
             message.guild.id,
-            "buzzerChannel",
-            JSON.stringify(message.channel)
-          )
+            'buzzerChannel',
+            JSON.stringify(message.channel),
+          ),
         ).id ||
-      !(await this.client.settings.get(message.guild.id, "buzzerReady", false))
+      !(await this.client.settings.get(message.guild.id, 'buzzerReady', false))
     )
       return;
 
-    const buzzerQueue = await this.client.settings.get(
-      message.guild.id,
-      "buzzerQueue",
-      []
-    );
+    const buzzerQueue = await this.client.settings.get(message.guild.id, 'buzzerQueue', []);
 
-    require("../util").shuffle(buzzerQueue);
-    await this.client.settings.set(
-      message.guild.id,
-      "buzzerQueue",
-      buzzerQueue
-    );
+    require('../util').shuffle(buzzerQueue);
+    await this.client.settings.set(message.guild.id, 'buzzerQueue', buzzerQueue);
     if (this.client.sockets.has(message.guild.id)) {
       this.client.sockets.get(message.guild.id).forEach((socket) => {
-        socket.emit("buzz", buzzerQueue);
+        socket.emit('buzz', buzzerQueue);
       });
     }
     if (buzzerQueue.length > 0) {
@@ -64,12 +56,10 @@ class BuzzerRandomizeCommand extends Command {
           `Randomized the dookie list: ${buzzerQueue.reduce((str, buzz) => {
             const member = this.client.util.resolveMember(
               JSON.parse(buzz).id,
-              message.guild.members.cache
+              message.guild.members.cache,
             );
-            return (
-              str + `${num++}. ${member.nickname || member.user.username}\n`
-            );
-          }, "\n")}`
+            return str + `${num++}. ${member.nickname || member.user.username}\n`;
+          }, '\n')}`,
         );
       } catch (err) {
         console.log(err);

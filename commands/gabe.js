@@ -1,9 +1,9 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
 class GabeCommand extends Command {
   constructor() {
-    super("gabe", {
-      aliases: ["gabe", "terrorists", "thesouth", "cancel", "virtuesignal"],
+    super('gabe', {
+      aliases: ['gabe', 'terrorists', 'thesouth', 'cancel', 'virtuesignal'],
       cooldown: 1000 * 60, // once per min
       ratelimit: 1,
     });
@@ -11,17 +11,17 @@ class GabeCommand extends Command {
 
   exec(message) {
     // Sorry, Ashen. Vinny made me do it.
-    if (message.member.id === "162020527471329281") return;
+    if (message.member.id === '162020527471329281') return;
 
     if (!this.client.globalRates.get(message.guild.id)) {
       this.client.globalRates.set(message.guild.id, new Set());
     }
 
-    if (!this.client.globalRates.get(message.guild.id).has("gabe")) {
-      this.client.globalRates.get(message.guild.id).add("gabe");
+    if (!this.client.globalRates.get(message.guild.id).has('gabe')) {
+      this.client.globalRates.get(message.guild.id).add('gabe');
       const self = this;
       setTimeout(function () {
-        self.client.globalRates.get(message.guild.id).delete("gabe");
+        self.client.globalRates.get(message.guild.id).delete('gabe');
       }, 1000 * 60 * 60 * 24); // once per day
 
       message.channel

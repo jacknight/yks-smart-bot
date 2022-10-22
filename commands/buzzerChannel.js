@@ -1,13 +1,13 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
 class BuzzerChannelCommand extends Command {
   constructor() {
-    super("channel", {
-      aliases: ["channel"],
-      category: "buzzer",
-      channel: "guild",
-      prefix: "!buzz.",
-      args: [{ id: "channel", type: "channel" }],
+    super('channel', {
+      aliases: ['channel'],
+      category: 'buzzer',
+      channel: 'guild',
+      prefix: '!buzz.',
+      args: [{ id: 'channel', type: 'channel' }],
       cooldown: 10000,
       ratelimit: 1,
     });
@@ -15,7 +15,7 @@ class BuzzerChannelCommand extends Command {
 
   async userPermissions(message) {
     const buzzerRole = await this.client.settings
-      .get(message.guild.id, "buzzerRole", "buzzer")
+      .get(message.guild.id, 'buzzerRole', 'buzzer')
       .toLowerCase();
     if (
       !message.member.roles.cache.some((role) => {
@@ -32,7 +32,7 @@ class BuzzerChannelCommand extends Command {
       return message.channel.send(`That channel does not exist.`);
     }
 
-    if (channel.type !== "GUILD_TEXT") {
+    if (channel.type !== 'GUILD_TEXT') {
       try {
         return message.reply({
           content: `${channel} is not a text channel. No change.`,
@@ -43,11 +43,7 @@ class BuzzerChannelCommand extends Command {
       }
     }
 
-    await this.client.settings.set(
-      message.guild.id,
-      "buzzerChannel",
-      JSON.stringify(channel)
-    );
+    await this.client.settings.set(message.guild.id, 'buzzerChannel', JSON.stringify(channel));
     try {
       return channel.send(`Buzzer now listening on ${channel}.`);
     } catch (err) {

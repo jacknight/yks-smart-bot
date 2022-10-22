@@ -1,10 +1,10 @@
-const { Listener } = require("discord-akairo");
+const { Listener } = require('discord-akairo');
 
 class MailbagReactionRemoveListener extends Listener {
   constructor() {
-    super("mailbagReactionRemove", {
-      emitter: "client",
-      event: "messageReactionRemove",
+    super('mailbagReactionRemove', {
+      emitter: 'client',
+      event: 'messageReactionRemove',
     });
   }
 
@@ -14,7 +14,7 @@ class MailbagReactionRemoveListener extends Listener {
       try {
         await reaction.fetch();
       } catch (error) {
-        console.log("Unable to fetch message for partial reaction:", error);
+        console.log('Unable to fetch message for partial reaction:', error);
         return;
       }
     }
@@ -25,23 +25,22 @@ class MailbagReactionRemoveListener extends Listener {
     // 3. the message has an embed
     // then update the tally for the message ID in the database
     if (
-      reaction._emoji.name === "this" &&
+      reaction._emoji.name === 'this' &&
       reaction.message.channel.id === process.env.YKS_MAILBAG_CHANNEL_ID
     ) {
       // Get array of existing mailbagMessages that have been reacted to
       const mailbagMessages = await this.client.settings.get(
         reaction.message.guild.id,
-        "mailbagMessages",
-        []
+        'mailbagMessages',
+        [],
       );
 
       // Check if this message is in the list and if so, grab it and update
       // the tally. Otherwise, create a new object and add it to the list.
       let index = JSON.parse(
         mailbagMessages.findIndex(
-          (mailbagMessage) =>
-            JSON.parse(mailbagMessage).id === reaction.message.id
-        )
+          (mailbagMessage) => JSON.parse(mailbagMessage).id === reaction.message.id,
+        ),
       );
 
       if (index >= 0) {
@@ -57,11 +56,7 @@ class MailbagReactionRemoveListener extends Listener {
       }
 
       // Update database.
-      this.client.settings.set(
-        reaction.message.guild.id,
-        "mailbagMessages",
-        mailbagMessages
-      );
+      this.client.settings.set(reaction.message.guild.id, 'mailbagMessages', mailbagMessages);
     }
   }
 }

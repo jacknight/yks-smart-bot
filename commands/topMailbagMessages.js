@@ -1,21 +1,17 @@
-const { Command } = require("discord-akairo");
-const ellipsis = require("text-ellipsis");
+const { Command } = require('discord-akairo');
+const ellipsis = require('text-ellipsis');
 
 class TopMailbagCommand extends Command {
   constructor() {
-    super("topmailbag", {
-      aliases: ["topmailbag", "topmail", "bestmailbag", "bestmail"],
+    super('topmailbag', {
+      aliases: ['topmailbag', 'topmail', 'bestmailbag', 'bestmail'],
       cooldown: 1000 * 60 * 60, // once per hour
       ratelimit: 1,
     });
   }
 
   async exec(message) {
-    let mailbagMessages = await this.client.settings.get(
-      message.guild.id,
-      "mailbagMessages",
-      []
-    );
+    let mailbagMessages = await this.client.settings.get(message.guild.id, 'mailbagMessages', []);
 
     if (mailbagMessages.length > 0) {
       // Sort descending
@@ -23,7 +19,7 @@ class TopMailbagCommand extends Command {
       const count = mailbagMessages.length < 10 ? mailbagMessages.length : 10;
       const embed = {
         color: 0x83c133,
-        title: "__Top Mailbag Messages (Last 30 Days)__\n",
+        title: '__Top Mailbag Messages (Last 30 Days)__\n',
         fields: [],
       };
       let skip = 0;
@@ -33,7 +29,7 @@ class TopMailbagCommand extends Command {
 
         const mailbagChannel = await this.client.util.resolveChannel(
           process.env.YKS_MAILBAG_CHANNEL_ID,
-          message.guild.channels.cache
+          message.guild.channels.cache,
         );
         if (mailbagChannel) {
           const msg = await mailbagChannel.messages.fetch(msgId);
@@ -46,10 +42,7 @@ class TopMailbagCommand extends Command {
 
             embed.fields.push({
               name: `${i - skip}. From ${msg.author.username}`,
-              value: ellipsis(
-                `[Jump to message](${url})\n${msg.content}`,
-                1024
-              ),
+              value: ellipsis(`[Jump to message](${url})\n${msg.content}`, 1024),
             });
           }
         }

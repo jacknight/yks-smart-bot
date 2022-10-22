@@ -1,12 +1,12 @@
-const { Command } = require("discord-akairo");
+const { Command } = require('discord-akairo');
 
 class BustardCommand extends Command {
   constructor() {
-    super("bustard", {
+    super('bustard', {
       cooldown: 3600000,
       ratelimit: 1,
       regex: /^bustard$/i,
-      category: "eater-egg",
+      category: 'eater-egg',
     });
   }
 
@@ -15,13 +15,13 @@ class BustardCommand extends Command {
       this.client.globalRates.set(message.guild.id, new Set());
     }
 
-    if (!this.client.globalRates.get(message.guild.id).has("bustard")) {
-      this.client.globalRates.get(message.guild.id).add("bustard");
+    if (!this.client.globalRates.get(message.guild.id).has('bustard')) {
+      this.client.globalRates.get(message.guild.id).add('bustard');
       const self = this;
       setTimeout(function () {
-        self.client.globalRates.get(message.guild.id).delete("bustard");
+        self.client.globalRates.get(message.guild.id).delete('bustard');
       }, 1000 * 60 * 60 * 12); // twice a day.
-      message.channel.send("bustard");
+      message.channel.send('bustard');
     }
   }
 }

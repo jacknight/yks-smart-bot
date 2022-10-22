@@ -4,22 +4,22 @@ const {
   InhibitorHandler,
   ListenerHandler,
   MongooseProvider,
-} = require("discord-akairo");
-const model = require("./db/model");
-require("dotenv").config();
-const path = require("path");
-const express = require("express");
-const mongoose = require("mongoose");
-const { default: fetch } = require("node-fetch");
-const SessionModel = require("./db/sessions");
-const { Constants, Intents } = require("discord.js");
-const cors = require("cors");
-const crypto = require("crypto");
+} = require('discord-akairo');
+const model = require('./db/model');
+require('dotenv').config();
+const path = require('path');
+const express = require('express');
+const mongoose = require('mongoose');
+const { default: fetch } = require('node-fetch');
+const SessionModel = require('./db/sessions');
+const { Constants, Intents } = require('discord.js');
+const cors = require('cors');
+const crypto = require('crypto');
 
 class YKSSmartBot extends AkairoClient {
   constructor() {
     super(
-      { ownerID: "329288617564569602" },
+      { ownerID: '329288617564569602' },
       {
         partials: [
           Constants.PartialTypes.REACTION,
@@ -34,7 +34,7 @@ class YKSSmartBot extends AkairoClient {
           Intents.FLAGS.GUILD_MESSAGE_REACTIONS,
           Intents.FLAGS.GUILD_VOICE_STATES,
         ],
-      }
+      },
     );
 
     // Database provider stored on the client.
@@ -48,17 +48,17 @@ class YKSSmartBot extends AkairoClient {
     this.globalRates = new Map();
 
     this.commandHandler = new CommandHandler(this, {
-      directory: "./commands/",
-      prefix: "!",
+      directory: './commands/',
+      prefix: '!',
       defaultCooldown: 1000,
       allowMention: true,
       aliasReplacement: /-/g, // !thiscommandworks and !this-command-works
     });
     this.inhibitorHandler = new InhibitorHandler(this, {
-      directory: "./inhibitors/",
+      directory: './inhibitors/',
     });
     this.listenerHandler = new ListenerHandler(this, {
-      directory: "./listeners",
+      directory: './listeners',
     });
 
     this.listenerHandler.setEmitters({
@@ -71,35 +71,32 @@ class YKSSmartBot extends AkairoClient {
     const app = express();
 
     app.use(cors());
-    app.use(express.static(path.resolve(__dirname, "./build")));
+    app.use(express.static(path.resolve(__dirname, './build')));
     app.use(express.json());
 
     // Handle discord authorization
-    app.post("/api/login", async (req, res) => {
+    app.post('/api/login', async (req, res) => {
       const code = req.body.code;
       if (code) {
         // get token
         try {
-          const oauthFetch = await fetch(
-            "https://discord.com/api/oauth2/token",
-            {
-              method: "POST",
-              body: new URLSearchParams({
-                client_id: process.env.DISCORD_BOT_CLIENT_ID,
-                client_secret: process.env.DISCORD_BOT_CLIENT_SECRET,
-                code,
-                grant_type: "authorization_code",
-                redirect_uri: `${process.env.REACT_APP_HOST}`,
-                scope: "identify guilds",
-              }),
-              headers: {
-                "Content-type": "application/x-www-form-urlencoded",
-              },
-            }
-          );
+          const oauthFetch = await fetch('https://discord.com/api/oauth2/token', {
+            method: 'POST',
+            body: new URLSearchParams({
+              client_id: process.env.DISCORD_BOT_CLIENT_ID,
+              client_secret: process.env.DISCORD_BOT_CLIENT_SECRET,
+              code,
+              grant_type: 'authorization_code',
+              redirect_uri: `${process.env.REACT_APP_HOST}`,
+              scope: 'identify guilds',
+            }),
+            headers: {
+              'Content-type': 'application/x-www-form-urlencoded',
+            },
+          });
           const oauthData = await oauthFetch.json();
           // Get user from discord
-          const userFetch = await fetch("https://discord.com/api/users/@me", {
+          const userFetch = await fetch('https://discord.com/api/users/@me', {
             headers: {
               authorization: `${oauthData.token_type} ${oauthData.access_token}`,
             },
@@ -107,30 +104,25 @@ class YKSSmartBot extends AkairoClient {
           const user = await userFetch.json();
           // Before we do anything, confirm user is a member of the
           // pisscord.
-          const guildsFetch = await fetch(
-            "https://discord.com/api/users/@me/guilds",
-            {
-              headers: {
-                authorization: `${oauthData.token_type} ${oauthData.access_token}`,
-              },
-            }
-          );
+          const guildsFetch = await fetch('https://discord.com/api/users/@me/guilds', {
+            headers: {
+              authorization: `${oauthData.token_type} ${oauthData.access_token}`,
+            },
+          });
           const guilds = await guildsFetch.json();
           if (
             !guilds ||
             !Array.isArray(guilds) ||
             !guilds.some((guild) => guild.id === process.env.YKS_GUILD_ID)
           ) {
-            return res.sendFile(
-              path.resolve(__dirname, "./build", "index.html")
-            );
+            return res.sendFile(path.resolve(__dirname, './build', 'index.html'));
           }
 
           // From this point on, if we find the provided session we'll just
           // assume they're still members of the pisscord. If they aren't, some
           // interactive stuff won't work.
           const expireDate = new Date(oauthData.expires_in * 1000 + Date.now());
-          const sessionId = crypto.randomBytes(16).toString("base64");
+          const sessionId = crypto.randomBytes(16).toString('base64');
           const session = new SessionModel({
             id: sessionId,
             session: {
@@ -148,12 +140,12 @@ class YKSSmartBot extends AkairoClient {
           return res.send({ user, session: sessionId });
         } catch (error) {
           console.log(error);
-          res.sendFile(path.resolve(__dirname, "./build", "index.html"));
+          res.sendFile(path.resolve(__dirname, './build', 'index.html'));
         }
       }
     });
 
-    app.get("/api/clips/:page", async (req, res) => {
+    app.get('/api/clips/:page', async (req, res) => {
       // Verify session
       const doc = await SessionModel.findOne({ id: req.query.session });
       const session = doc?.session;
@@ -164,7 +156,7 @@ class YKSSmartBot extends AkairoClient {
 
       // Grab array of clip URLs from the database
       var clips = [];
-      clips = this.settings.get(process.env.YKS_GUILD_ID, "clips", []);
+      clips = this.settings.get(process.env.YKS_GUILD_ID, 'clips', []);
       // Get clips requested based on 1) page number 2) clips per page
       // In this case, page number is 1 since none was provided
       const clipsPerPage = req.query.clips || 1;
@@ -179,7 +171,7 @@ class YKSSmartBot extends AkairoClient {
       });
     });
 
-    app.post("/api/share-clip", async (req, res) => {
+    app.post('/api/share-clip', async (req, res) => {
       const { clip } = req.body;
 
       // Verify session
@@ -190,13 +182,11 @@ class YKSSmartBot extends AkairoClient {
         return res.send({ logout: true });
       }
 
-      const pisscord = this.guilds?.cache?.find(
-        (guild) => guild.id === process.env.YKS_GUILD_ID
-      );
+      const pisscord = this.guilds?.cache?.find((guild) => guild.id === process.env.YKS_GUILD_ID);
       const clipChannel = pisscord?.channels?.cache?.find(
-        (channel) => channel.id === process.env.YKS_CLIP_CHANNEL_ID
+        (channel) => channel.id === process.env.YKS_CLIP_CHANNEL_ID,
       );
-      const command = await this.commandHandler.findCommand("clip");
+      const command = await this.commandHandler.findCommand('clip');
       const member = pisscord?.members?.cache?.find((member) => {
         return member.user.id === session.user;
       });
@@ -209,18 +199,18 @@ class YKSSmartBot extends AkairoClient {
           clip,
         },
         command,
-        {}
+        {},
       );
       res.send();
     });
 
     // All other GET requests not handled before will return our React app
-    app.get("*", (req, res) => {
-      res.sendFile(path.resolve(__dirname, "./build", "index.html"));
+    app.get('*', (req, res) => {
+      res.sendFile(path.resolve(__dirname, './build', 'index.html'));
     });
 
     this.server = app.listen(process.env.PORT || 3000, () => {
-      console.log("Server running on port: " + process.env.PORT || 3000);
+      console.log('Server running on port: ' + process.env.PORT || 3000);
     });
 
     this.commandHandler.loadAll();
@@ -242,7 +232,7 @@ mongoose
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    }
+    },
   )
   .then(() => {
     // TODO: Do a little housekeeping with the session IDs
@@ -255,9 +245,9 @@ mongoose
     // Using Socket.io to communicate with the frontend component
     // of the bot. Since commands can be triggered from the chat
     // or from a website, sockets keep them in sync.
-    const io = require("socket.io")(client.server, {
+    const io = require('socket.io')(client.server, {
       cors: {
-        origin: "*",
+        origin: '*',
       },
     });
 
@@ -279,12 +269,12 @@ mongoose
     // potentially respond to them with our own emit,
     // or if it's general server information to all
     // sockets currently observing that server.
-    io.on("connection", (socket) => {
+    io.on('connection', (socket) => {
       // Provide the web control panel with the right
       // href values to authorize the bot, login, logout.
       // This is mainly just to make dev/prod switching
       // easier for me.
-      socket.emit("links", {
+      socket.emit('links', {
         bot: process.env.DISCORD_BOT_LINK,
         login: process.env.DISCORD_LOGIN_LINK,
         logout: process.env.DISCORD_LOGOUT_LINK,
@@ -292,18 +282,18 @@ mongoose
 
       // The user already had a session ID stored in their
       // browser so they'll try to use it here.
-      socket.on("authorize", ({ session }) => {
+      socket.on('authorize', ({ session }) => {
         // Lookup session, see if it's still valid.
         SessionModel.findOne({ id: session })
           .then((doc) => {
             const today = new Date();
             if (!doc || !doc.session || doc.session.expirationDate <= today) {
-              return socket.emit("sessionExpired");
+              return socket.emit('sessionExpired');
             }
             const tokenType = doc.session.tokenType;
             const accessToken = doc.session.accessToken;
 
-            fetch("https://discord.com/api/users/@me/guilds", {
+            fetch('https://discord.com/api/users/@me/guilds', {
               headers: {
                 authorization: `${tokenType} ${accessToken}`,
               },
@@ -313,7 +303,7 @@ mongoose
                 // Emit the list of servers this user is a member of
                 // in order to display only the servers which both
                 // the bot and the user are members.
-                socket.emit("servers", response);
+                socket.emit('servers', response);
               });
           })
           .catch((err) => {
@@ -322,7 +312,7 @@ mongoose
       });
 
       // User logged out, remove the session ID from the database.
-      socket.on("logout", ({ session }) => {
+      socket.on('logout', ({ session }) => {
         // Remove session from the database.
         SessionModel.deleteOne({ id: session }).catch((err) => {
           console.log(err);
@@ -341,34 +331,34 @@ mongoose
       //    is then cross-referenced with the list of servers the
       //    bot is a member of and the list is whittled down to only
       //    the relevant servers.
-      socket.on("login", ({ code, redirect_uri }) => {
+      socket.on('login', ({ code, redirect_uri }) => {
         // Exchange code for access token,
         // and associate it with a session ID in the db.
         const data = {
           client_id: process.env.DISCORD_BOT_CLIENT_ID,
           client_secret: process.env.DISCORD_BOT_CLIENT_SECRET,
-          grant_type: "authorization_code",
+          grant_type: 'authorization_code',
           redirect_uri: redirect_uri,
           code: code,
-          scope: "identify guilds",
+          scope: 'identify guilds',
         };
-        fetch("https://discord.com/api/oauth2/token", {
-          method: "POST",
+        fetch('https://discord.com/api/oauth2/token', {
+          method: 'POST',
           body: new URLSearchParams(data),
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
+            'Content-Type': 'application/x-www-form-urlencoded',
           },
         })
           .then((res) => res.json())
           .then((info) => {
             if (!info.access_token) {
-              return socket.emit("sessionExpired");
+              return socket.emit('sessionExpired');
             }
-            const crypto = require("crypto");
-            const session = crypto.randomBytes(16).toString("base64");
+            const crypto = require('crypto');
+            const session = crypto.randomBytes(16).toString('base64');
             const expireDate = new Date(info.expires_in * 1000 + Date.now());
 
-            fetch("https://discord.com/api/users/@me", {
+            fetch('https://discord.com/api/users/@me', {
               headers: {
                 authorization: `${info.token_type} ${info.access_token}`,
               },
@@ -383,7 +373,7 @@ mongoose
                     expirationDate: expireDate,
                     refreshToken: info.refresh_token,
                     scope: info.scope,
-                    userId: response.message ? "" : response.id,
+                    userId: response.message ? '' : response.id,
                   },
                 });
                 session
@@ -392,8 +382,8 @@ mongoose
                   .catch((err) => console.log(err));
               });
 
-            socket.emit("session", session);
-            fetch("https://discord.com/api/users/@me/guilds", {
+            socket.emit('session', session);
+            fetch('https://discord.com/api/users/@me/guilds', {
               headers: {
                 authorization: `${info.token_type} ${info.access_token}`,
               },
@@ -403,7 +393,7 @@ mongoose
                 // Emit the list of servers this user is a member of
                 // in order to display only the servers which both
                 // the bot and the user are members.
-                socket.emit("servers", response);
+                socket.emit('servers', response);
               });
           })
           .catch((err) => console.log(err));
@@ -412,7 +402,7 @@ mongoose
       // There is a socket connection for this particular guild, so
       // any changes made to this guild's settings need to be propagated
       // to this socket.
-      socket.on("identifySocket", ({ guild }) => {
+      socket.on('identifySocket', ({ guild }) => {
         if (!client.sockets.has(guild.id)) {
           client.sockets.set(guild.id, [socket]);
         } else {
@@ -424,7 +414,7 @@ mongoose
 
       // User changed servers on the web front end, and no longer
       // need updates for this guild.
-      socket.on("unidentifySocket", ({ guild }) => {
+      socket.on('unidentifySocket', ({ guild }) => {
         if (client.sockets.has(guild.id)) {
           const idx = client.sockets.get(guild.id).indexOf(socket);
           if (idx >= 0) {
@@ -436,32 +426,29 @@ mongoose
       });
 
       // Toggle buzzer mode (chaos/normal)
-      socket.on("changeMode", ({ guild, mode, session }) => {
-        if (guild.id === "") return;
+      socket.on('changeMode', ({ guild, mode, session }) => {
+        if (guild.id === '') return;
         // Look up user associated with session ID.
         SessionModel.findOne({ id: session }).then(async (doc) => {
           if (doc.session) {
-            const guildObj = client.util.resolveGuild(
-              guild.id,
-              client.guilds.cache
-            );
+            const guildObj = client.util.resolveGuild(guild.id, client.guilds.cache);
             if (guildObj) {
               // Check role permissions
               if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
                 // Raise an alert on the frontend
-                return socket.emit("commandUnauthorized", {
-                  command: "changeMode",
+                return socket.emit('commandUnauthorized', {
+                  command: 'changeMode',
                 });
               }
-              await client.settings.set(guild.id, "buzzerMode", mode);
+              await client.settings.set(guild.id, 'buzzerMode', mode);
 
-              socket.emit("responseMode", {
+              socket.emit('responseMode', {
                 mode: mode,
               });
 
               let channelObj = await getBuzzerChannel(guildObj);
               if (channelObj) {
-                if (mode === "chaos") {
+                if (mode === 'chaos') {
                   channelObj.send(`Buddy...you are now in **${mode} mode!!!**`);
                 } else {
                   channelObj.send(`You are now in **${mode} mode**`);
@@ -473,206 +460,166 @@ mongoose
       });
 
       // Enable/disabled the buzzer.
-      socket.on("changeReady", ({ guild, ready, session }) => {
-        if (guild.id === "") return;
+      socket.on('changeReady', ({ guild, ready, session }) => {
+        if (guild.id === '') return;
         // Look up user associated with session ID.
         SessionModel.findOne({ id: session }).then(async (doc) => {
           if (doc.session) {
-            const guildObj = client.util.resolveGuild(
-              guild.id,
-              client.guilds.cache
-            );
+            const guildObj = client.util.resolveGuild(guild.id, client.guilds.cache);
             if (guildObj) {
               // Check role permissions
               if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
                 // Raise an alert on the frontend
-                return socket.emit("commandUnauthorized", {
-                  command: "changeReady",
+                return socket.emit('commandUnauthorized', {
+                  command: 'changeReady',
                 });
               }
 
-              await client.settings.set(guildObj.id, "buzzerReady", ready);
-              socket.emit("responseReady", {
+              await client.settings.set(guildObj.id, 'buzzerReady', ready);
+              socket.emit('responseReady', {
                 ready: ready,
                 clear: true,
               });
               const channelObj = await getBuzzerChannel(guildObj);
 
               if (channelObj) {
-                channelObj.send(
-                  `Buzzer is **${ready ? "ready" : "not ready"}**`
-                );
+                channelObj.send(`Buzzer is **${ready ? 'ready' : 'not ready'}**`);
               }
             }
           }
         });
       });
 
-      socket.on("changeChannel", ({ guild, id, session }) => {
-        if (guild.id === "") return;
+      socket.on('changeChannel', ({ guild, id, session }) => {
+        if (guild.id === '') return;
         // Look up user associated with session ID.
         SessionModel.findOne({ id: session }).then(async (doc) => {
           if (doc.session) {
-            const guildObj = client.util.resolveGuild(
-              guild.id,
-              client.guilds.cache
-            );
+            const guildObj = client.util.resolveGuild(guild.id, client.guilds.cache);
 
             if (guildObj) {
               // Check role permissions
               if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
                 // Raise an alert on the frontend
-                return socket.emit("commandUnauthorized", {
-                  command: "changeChannel",
+                return socket.emit('commandUnauthorized', {
+                  command: 'changeChannel',
                 });
               }
 
-              const channelObj = client.util.resolveChannel(
-                id,
-                guildObj.channels.cache
-              );
-              await client.settings.set(
-                guildObj.id,
-                "buzzerChannel",
-                JSON.stringify(channelObj)
-              );
+              const channelObj = client.util.resolveChannel(id, guildObj.channels.cache);
+              await client.settings.set(guildObj.id, 'buzzerChannel', JSON.stringify(channelObj));
               if (channelObj) {
-                channelObj.send(
-                  "Buzzer now listening on " + channelObj.toString()
-                );
+                channelObj.send('Buzzer now listening on ' + channelObj.toString());
               }
             }
           }
         });
       });
 
-      socket.on("clearQueue", ({ guild, session }) => {
-        if (guild.id === "") return;
+      socket.on('clearQueue', ({ guild, session }) => {
+        if (guild.id === '') return;
         // Look up user associated with session ID.
         SessionModel.findOne({ id: session }).then(async (doc) => {
           if (doc.session) {
-            const guildObj = client.util.resolveGuild(
-              guild.id,
-              client.guilds.cache
-            );
+            const guildObj = client.util.resolveGuild(guild.id, client.guilds.cache);
 
             if (guildObj) {
               // Check role permissions
               if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
                 // Raise an alert on the frontend
-                return socket.emit("commandUnauthorized", {
-                  command: "clearQueue",
+                return socket.emit('commandUnauthorized', {
+                  command: 'clearQueue',
                 });
               }
-              await client.settings.set(guildObj.id, "buzzerQueue", []);
+              await client.settings.set(guildObj.id, 'buzzerQueue', []);
               const channelObj = await getBuzzerChannel(guildObj);
               if (channelObj) {
-                channelObj.send("Cleared the dookie list.");
+                channelObj.send('Cleared the dookie list.');
               }
-              socket.emit(
-                "buzz",
-                await client.settings.get(guild.id, "buzzerQueue", [])
-              );
+              socket.emit('buzz', await client.settings.get(guild.id, 'buzzerQueue', []));
             }
           }
         });
       });
 
-      socket.on("randomizeQueue", ({ guild, session }) => {
-        if (guild.id === "") return;
+      socket.on('randomizeQueue', ({ guild, session }) => {
+        if (guild.id === '') return;
         // Look up user associated with session ID.
         SessionModel.findOne({ id: session }).then(async (doc) => {
           if (doc.session) {
-            const guildObj = client.util.resolveGuild(
-              guild.id,
-              client.guilds.cache
-            );
+            const guildObj = client.util.resolveGuild(guild.id, client.guilds.cache);
 
             if (guildObj) {
               // Check role permissions
               if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
                 // Raise an alert on the frontend
-                return socket.emit("commandUnauthorized", {
-                  command: "randomizeQueue",
+                return socket.emit('commandUnauthorized', {
+                  command: 'randomizeQueue',
                 });
               }
-              let buzzerQueue = await client.settings.get(
-                guild.id,
-                "buzzerQueue",
-                []
-              );
-              require("./util").shuffle(buzzerQueue);
-              await client.settings.set(guild.id, "buzzerQueue", buzzerQueue);
+              let buzzerQueue = await client.settings.get(guild.id, 'buzzerQueue', []);
+              require('./util').shuffle(buzzerQueue);
+              await client.settings.set(guild.id, 'buzzerQueue', buzzerQueue);
               const channelObj = await getBuzzerChannel(guildObj);
 
               try {
                 var num = 1;
                 if (channelObj) {
                   return channelObj.send(
-                    `Randomized the dookie list: ${buzzerQueue.reduce(
-                      (str, buzz) => {
-                        const member = client.util.resolveMember(
-                          JSON.parse(buzz).id,
-                          guildObj.members.cache
-                        );
-                        return (
-                          str +
-                          (member
-                            ? `${num++}. ${
-                                member.nickname || member.user.username
-                              }\n`
-                            : "")
-                        );
-                      },
-                      "\n"
-                    )}`
+                    `Randomized the dookie list: ${buzzerQueue.reduce((str, buzz) => {
+                      const member = client.util.resolveMember(
+                        JSON.parse(buzz).id,
+                        guildObj.members.cache,
+                      );
+                      return (
+                        str +
+                        (member ? `${num++}. ${member.nickname || member.user.username}\n` : '')
+                      );
+                    }, '\n')}`,
                   );
                 }
               } catch (err) {
                 console.log(err);
               }
-              socket.emit("buzz", buzzerQueue);
+              socket.emit('buzz', buzzerQueue);
             }
           }
         });
       });
 
-      socket.on("requestServers", () => {
+      socket.on('requestServers', () => {
         // Emit list of servers of which the bot is a member
         emitServers();
       });
 
-      socket.on("requestChannels", ({ id }) => {
+      socket.on('requestChannels', ({ id }) => {
         // Emit list of channels for the given server id.
         emitChannels(id);
       });
 
-      socket.on("requestReady", async ({ guild }) => {
+      socket.on('requestReady', async ({ guild }) => {
         if (client.guilds.cache.has(guild.id)) {
           // Emit current buzzer status (ready/not ready)
-          socket.emit("responseReady", {
-            ready: await client.settings.get(guild.id, "buzzerReady", false),
+          socket.emit('responseReady', {
+            ready: await client.settings.get(guild.id, 'buzzerReady', false),
             clear: false, // don't ever clear the buzzer list in this scenario
           });
         }
       });
 
-      socket.on("requestMode", async ({ guild }) => {
+      socket.on('requestMode', async ({ guild }) => {
         if (client.guilds.cache.has(guild.id)) {
           // Emit current buzzer mode (chaos/normal)
-          socket.emit("responseMode", {
-            mode: await client.settings.get(guild.id, "buzzerMode", "normal"),
+          socket.emit('responseMode', {
+            mode: await client.settings.get(guild.id, 'buzzerMode', 'normal'),
           });
         }
       });
 
-      socket.on("requestQueue", async ({ guild }) => {
+      socket.on('requestQueue', async ({ guild }) => {
         if (client.guilds.cache.has(guild.id)) {
           // Emit current buzzer list
-          socket.emit(
-            "buzz",
-            await client.settings.get(guild.id, "buzzerQueue", [])
-          );
+          socket.emit('buzz', await client.settings.get(guild.id, 'buzzerQueue', []));
         }
       });
     });
@@ -686,7 +633,7 @@ mongoose
       servers.forEach((guild, id) => {
         ids.push({ name: guild.name, id: id });
       });
-      io.sockets.emit("serversList", ids);
+      io.sockets.emit('serversList', ids);
     }
 
     // Emit list of channels for the given server id
@@ -695,13 +642,13 @@ mongoose
       const ids = [];
       channels.forEach((channel) => {
         // Bot currently only active on text channels.
-        if (channel.type === "GUILD_VOICE") return;
-        if (channel.type === "GUILD_CATEGORY") return;
-        if (channel.type === "GUILD_TEXT") {
+        if (channel.type === 'GUILD_VOICE') return;
+        if (channel.type === 'GUILD_CATEGORY') return;
+        if (channel.type === 'GUILD_TEXT') {
           ids.push({ guild: id, topic: channel.name, id: channel.id });
         }
       });
-      io.sockets.emit("channelsList", ids);
+      io.sockets.emit('channelsList', ids);
     }
 
     async function getBuzzerChannel(guildObj) {
@@ -711,9 +658,9 @@ mongoose
         // often be the "#general" topic.
         await client.settings.get(
           guildObj.id,
-          "buzzerChannel",
-          JSON.stringify(guildObj.systemChannel)
-        )
+          'buzzerChannel',
+          JSON.stringify(guildObj.systemChannel),
+        ),
       );
 
       return client.util.resolveChannel(channel.id, guildObj.channels.cache);
@@ -727,9 +674,7 @@ mongoose
         member.roles.cache.some(async (role) => {
           return (
             role.name.toLowerCase() ===
-            (await client.settings
-              .get(guildObj.id, "buzzerRole", "buzzer")
-              .toLowerCase())
+            (await client.settings.get(guildObj.id, 'buzzerRole', 'buzzer').toLowerCase())
           );
         }) || member.id === client.ownerID
       );
