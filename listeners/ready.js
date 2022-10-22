@@ -55,33 +55,14 @@ async function pollRss(client) {
 
   if (mainFeed && mainFeed.items && bonusFeed && bonusFeed.items) {
     // See what's stored in the DB for the latest main ep...
-    const latestMainEpTitle = await client.settings.get(
-      client.user.id,
-      "latestMainEpTitle",
-      ""
-    );
+    const latestMainEpTitle = await client.settings.get(client.user.id, "latestMainEpTitle", "");
 
     // ...and the latest bonus ep...
-    const latestBonusEpTitle = await client.settings.get(
-      client.user.id,
-      "latestBonusEpTitle",
-      ""
-    );
+    const latestBonusEpTitle = await client.settings.get(client.user.id, "latestBonusEpTitle", "");
 
     // ...and compare to the RSS feed.
     const newMain = latestMainEpTitle != mainFeed.items[0].title;
-    // Bonus feed is trickier because it has both the bonus episodes
-    // and the main feed episodes. We don't know which will go up first
-    // for certain, so we have to do a bit of regex to make sure it's
-    // a "true" premium episode. If they change this title format, it
-    // will at least default to not working instead of over-working.
-    //
-    // We'll also do a sanity check to make sure the bonus ep title
-    // and main feed title aren't the same thing.
-    const newBonus =
-      bonusFeed.items[0].title.match(/S[0-9]+E[0-9]+/i) &&
-      latestBonusEpTitle != bonusFeed.items[0].title &&
-      mainFeed.items[0].title != bonusFeed.items[0].title;
+    const newBonus = latestBonusEpTitle != bonusFeed.items[0].title;
 
     // Set bot status
     client.user.setPresence({
@@ -99,18 +80,10 @@ async function pollRss(client) {
       const feed = newMain ? "main" : "bonus";
       // Store newest ep title in DB
       if (newMain) {
-        await client.settings.set(
-          client.user.id,
-          "latestMainEpTitle",
-          mainFeed.items[0].title
-        );
+        await client.settings.set(client.user.id, "latestMainEpTitle", mainFeed.items[0].title);
       }
       if (newBonus) {
-        await client.settings.set(
-          client.user.id,
-          "latestBonusEpTitle",
-          bonusFeed.items[0].title
-        );
+        await client.settings.set(client.user.id, "latestBonusEpTitle", bonusFeed.items[0].title);
       }
       // For each guild the bot is a member, check if there is an RSS channel
       // channel configured and if so, send a message regarding the new ep.
@@ -135,18 +108,12 @@ async function getRssChannel(client, guildObj) {
     await client.settings.get(guildObj.id, "rssChannel", null)
   );
 
-  return channel
-    ? client.util.resolveChannel(channel.id, guildObj.channels.cache)
-    : null;
+  return channel ? client.util.resolveChannel(channel.id, guildObj.channels.cache) : null;
 }
 
 async function removeOldMailbagMessages(client) {
   // Get all mailbag messages from the database
-  let mailbagMessages = await client.settings.get(
-    process.env.YKS_GUILD_ID,
-    "mailbagMessages",
-    []
-  );
+  let mailbagMessages = await client.settings.get(process.env.YKS_GUILD_ID, "mailbagMessages", []);
 
   mailbagMessages = mailbagMessages.reduce((arr, rawMessage) => {
     const diff = Date.now() - JSON.parse(rawMessage).ts;
@@ -156,11 +123,7 @@ async function removeOldMailbagMessages(client) {
   }, []);
 
   console.log("Cleared old mailbag messages.");
-  return client.settings.set(
-    process.env.YKS_GUILD_ID,
-    "mailbagMessages",
-    mailbagMessages
-  );
+  return client.settings.set(process.env.YKS_GUILD_ID, "mailbagMessages", mailbagMessages);
 }
 
 module.exports = ReadyListener;
