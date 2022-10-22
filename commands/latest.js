@@ -27,29 +27,10 @@ class LatestCommand extends Command {
   async exec(message, { feed, newEp }) {
     // Main feed
     const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
-    let epNum = mainFeed.items[0].title.match(/(Ep [0-9]+|Episode [0-9]+)/i);
-
-    let epTitle = !epNum
-      ? mainFeed.items[0].title
-      : mainFeed.items[0].title.substring(0, epNum.index) +
-        mainFeed.items[0].title
-          .substring(epNum.index + epNum[0].length)
-          .split(":")
-          .join(" ");
-
-    if (!epNum) {
-      console.log(
-        "Couldn't parse main episode title: ",
-        mainFeed.items[0].title
-      );
-      epNum = ["New Episode"];
-    }
-
-    const epLink = mainFeed.items[0].link;
+    const mainEpisode = mainFeed.items[0];
     const overCastLink = "https://overcast.fm/itunes1204911385";
     const appleLink =
       "https://podcasts.apple.com/us/podcast/your-kickstarter-sucks/id1204911385";
-
     const mainEmbed = {
       color: 0x83c133,
       title: mainFeed.title,
@@ -63,13 +44,8 @@ class LatestCommand extends Command {
       },
       fields: [
         {
-          name: epNum[0],
-          value: epTitle ? epTitle : ".",
-          inline: false,
-        },
-        {
-          name: "Links",
-          value: `[Acast](${epLink})
+          name: mainEpisode.title,
+          value: `[Acast](${mainEpisode.link})
 [Overcast](${overCastLink})
 [Apple](${appleLink})`,
           inline: false,
@@ -79,35 +55,14 @@ class LatestCommand extends Command {
 
     // Bonus feed
     const bonusFeed = await parser.parseURL(BONUS_FEED_RSS);
-    let itemNum = 0;
-    if (
-      bonusFeed.items[itemNum].title.normalize().trim() ===
-      mainFeed.items[itemNum].title.normalize().trim()
-    ) {
-      itemNum++;
-    }
-
-    let bonusEpNum = bonusFeed.items[itemNum].title.match(
-      /(YKS S[0-9]+E[0-9]+|YKS Premium S[0-9]+E[0-9]+|Episode [0-9]+|Mailbag S[0-9]+E[0-9]+)/i
+    const bonusEpisode = bonusFeed.items.find(
+      (bonusItem) =>
+        !mainFeed.items.some(
+          (mainItem) =>
+            bonusItem.title.normalize().trim() ===
+            mainItem.title.normalize().trim()
+        )
     );
-
-    const bonusEpTitle = !bonusEpNum
-      ? bonusFeed.items[itemNum].title
-      : bonusFeed.items[itemNum].title.substring(0, bonusEpNum.index) +
-        bonusFeed.items[itemNum].title
-          .substring(bonusEpNum.index + bonusEpNum[0].length)
-          .split(":")
-          .join(" ");
-
-    if (!bonusEpNum) {
-      console.log(
-        "Couldn't parse bonus episode title: ",
-        bonusFeed.items[itemNum].title
-      );
-      bonusEpNum = ["New Episode"];
-    }
-
-    const bonusEpLink = bonusFeed.items[itemNum].link;
     const bonusEmbed = {
       color: 0xddaf74,
       title: bonusFeed.title,
@@ -120,13 +75,8 @@ class LatestCommand extends Command {
       },
       fields: [
         {
-          name: bonusEpNum[0],
-          value: bonusEpTitle ? bonusEpTitle : ".",
-          inline: false,
-        },
-        {
-          name: "Link",
-          value: `[Patreon](${bonusEpLink})`,
+          name: bonusEpisode.title,
+          value: `[Patreon](${bonusEpisode.link})`,
           inline: false,
         },
       ],
