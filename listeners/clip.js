@@ -17,7 +17,7 @@ class ClipListener extends Listener {
       message.attachments.size > 0
     ) {
       message.attachments.forEach(async (attachment) => {
-        const filetype = attachment.url.substring(attachment.url.lastIndexOf('.') + 1);
+        const filetype = attachment.proxyURL.substring(attachment.proxyURL.lastIndexOf('.') + 1);
         if (
           filetype === 'mov' ||
           filetype === 'mp4' ||
@@ -27,9 +27,11 @@ class ClipListener extends Listener {
           filetype === 'ogg'
         ) {
           const clips = await this.client.settings.get(message.guild.id, 'clips', []);
-          if (clips.find((clip) => clip === attachment.url)) return;
+          if (clips.find((clip) => clip === attachment.proxyURL)) return;
 
-          if (clips.length === 499) {
+          await message.guild.members.fetch();
+
+          if (clips.length === 999) {
             const mike = this.client.util.resolveMember(
               '882331792798003250',
               message.guild.members.cache,
@@ -44,21 +46,21 @@ class ClipListener extends Listener {
               thumbnail: {
                 url: 'https://pbs.twimg.com/media/E0-Qc05XsAcTf3T?format=jpg&name=large',
               },
-              url: `https://pisscord.site`,
-              description: `${message.author} just posted the 500th clip! Please join me in thanking them for helping us reach this milestone and enriching the community in the process!
+              url: `https://im-at.work`,
+              description: `${message.author} just posted the 1000th clip! Please join me in thanking them for helping us reach this milestone and enriching the community in the process!
 
 As a thank you for fully embracing the dirtbag left culture cultivated here in the YKS pisscord, please contact ${mike} or ${jf} for your prize!`,
               image: {
-                url: 'https://cdn.discordapp.com/attachments/672146620275621918/882070930107551774/Screenshot_2021-08-29_22.50.38.png',
+                url: 'https://media.discordapp.net/attachments/672146620275621918/882070930107551774/Screenshot_2021-08-29_22.50.38.png',
               },
               footer: {
-                text: "Restrictions apply. Must be 18 or older, but not too old (let's say up to 33 just to pick a number). Must reside in the United States or somewhere cool (please provide proof of this).\n\nThis message is fully approved by Jesse Farrar and Michael Hale and I definitely asked them.",
+                text: "Restrictions apply. Must be 18 or older, but not too old (let's say up to 34 just to pick a number). Must reside in the United States or somewhere cool (please provide proof of this).\n\nThis message is fully approved by Jesse Farrar and Michael Hale and I definitely asked them.",
               },
             };
             message.reply({ embeds: [embed] });
           }
 
-          clips.push(attachment.url);
+          clips.push(attachment.proxyURL);
           this.client.settings.set(message.guild.id, 'clips', clips);
         }
       });
