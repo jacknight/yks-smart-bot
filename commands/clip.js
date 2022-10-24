@@ -1,3 +1,4 @@
+const axios = require('axios');
 const { Command } = require('discord-akairo');
 
 class ClipCommand extends Command {
@@ -12,10 +13,12 @@ class ClipCommand extends Command {
   async checkLink(url) {
     const result = { valid: false, remove: false };
     try {
-      await axios.get(url.replace('cdn.discordapp.com', 'media.discordapp.net'));
+      const resp = await axios.get(url.replace('cdn.discordapp.com', 'media.discordapp.net'));
+      console.log(resp);
       result.valid = true;
       result.remove = false;
     } catch (e) {
+      console.log(e);
       if (e?.response?.status === 404) {
         result.remove = true;
         result.valid = false;
