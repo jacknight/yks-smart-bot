@@ -14,12 +14,12 @@ class ClipCommand extends Command {
     const result = { valid: false, remove: false };
     try {
       const resp = await axios.get(url.replace('cdn.discordapp.com', 'media.discordapp.net'));
-      console.log(resp);
       result.valid = true;
       result.remove = false;
     } catch (e) {
-      console.log(e);
+      console.error(e);
       if (e?.response?.status === 404) {
+        console.error('Remvoing url from clips: ', url);
         result.remove = true;
         result.valid = false;
       }
