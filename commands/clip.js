@@ -16,7 +16,7 @@ class ClipCommand extends Command {
       result.valid = true;
       result.remove = false;
     } catch (e) {
-      if (e.response.status === 404) {
+      if (e?.response?.status === 404) {
         result.remove = true;
         result.valid = false;
       }
