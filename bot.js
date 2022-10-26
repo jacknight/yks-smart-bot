@@ -73,140 +73,44 @@ class YKSSmartBot extends AkairoClient {
     app.use(cors());
     app.use(express.static(path.resolve(__dirname, './build')));
     app.use(express.json());
-
-    // Handle discord authorization
-    app.post('/api/login', async (req, res) => {
-      const code = req.body.code;
-      if (code) {
-        // get token
-        try {
-          const oauthFetch = await fetch('https://discord.com/api/oauth2/token', {
-            method: 'POST',
-            body: new URLSearchParams({
-              client_id: process.env.DISCORD_BOT_CLIENT_ID,
-              client_secret: process.env.DISCORD_BOT_CLIENT_SECRET,
-              code,
-              grant_type: 'authorization_code',
-              redirect_uri: `${process.env.REACT_APP_HOST}`,
-              scope: 'identify guilds',
-            }),
-            headers: {
-              'Content-type': 'application/x-www-form-urlencoded',
-            },
-          });
-          const oauthData = await oauthFetch.json();
-          // Get user from discord
-          const userFetch = await fetch('https://discord.com/api/users/@me', {
-            headers: {
-              authorization: `${oauthData.token_type} ${oauthData.access_token}`,
-            },
-          });
-          const user = await userFetch.json();
-          // Before we do anything, confirm user is a member of the
-          // pisscord.
-          const guildsFetch = await fetch('https://discord.com/api/users/@me/guilds', {
-            headers: {
-              authorization: `${oauthData.token_type} ${oauthData.access_token}`,
-            },
-          });
-          const guilds = await guildsFetch.json();
-          if (
-            !guilds ||
-            !Array.isArray(guilds) ||
-            !guilds.some((guild) => guild.id === process.env.YKS_GUILD_ID)
-          ) {
-            return res.sendFile(path.resolve(__dirname, './build', 'index.html'));
-          }
-
-          // From this point on, if we find the provided session we'll just
-          // assume they're still members of the pisscord. If they aren't, some
-          // interactive stuff won't work.
-          const expireDate = new Date(oauthData.expires_in * 1000 + Date.now());
-          const sessionId = crypto.randomBytes(16).toString('base64');
-          const session = new SessionModel({
-            id: sessionId,
-            session: {
-              user: user.id,
-              accessToken: oauthData.access_token,
-              tokenType: oauthData.token_type,
-              expirationDate: expireDate,
-              refreshToken: oauthData.refresh_token,
-              scope: oauthData.scope,
-            },
-          });
-
-          session.save().catch((err) => console.log(err));
-
-          return res.send({ user, session: sessionId });
-        } catch (error) {
-          console.log(error);
-          res.sendFile(path.resolve(__dirname, './build', 'index.html'));
-        }
-      }
-    });
-
-    app.get('/api/clips/:page', async (req, res) => {
-      // Verify session
-      const doc = await SessionModel.findOne({ id: req.query.session });
-      const session = doc?.session;
-      if (!session || session?.expirationDate?.getTime() < Date.now()) {
-        // Log them out
-        return res.send({ logout: true });
-      }
-
-      // Grab array of clip URLs from the database
-      var clips = [];
-      clips = this.settings.get(process.env.YKS_GUILD_ID, 'clips', []);
-      // Get clips requested based on 1) page number 2) clips per page
-      // In this case, page number is 1 since none was provided
-      const clipsPerPage = req.query.clips || 1;
-      const totalClips = clips.length;
-      const page = req.params.page;
-      const offset = clipsPerPage * (page - 1);
-      clips = clips.slice(offset, offset + clipsPerPage);
-      res.send({
-        clips,
-        totalClips,
-        page,
-      });
-    });
-
     app.post('/api/share-clip', async (req, res) => {
-      const { clip } = req.body;
-
-      // Verify session
-      const doc = await SessionModel.findOne({ id: req.body.session });
-      const session = doc?.session;
-      if (!session || session?.expirationDate?.getTime() < Date.now()) {
-        // Log them out
-        return res.send({ logout: true });
+      // check for basic auth header
+      if (!req.headers.authorization || req.headers.authorization.indexOf('Basic ') === -1) {
+        return res.status(401).json({ message: 'Missing Authorization Header' });
       }
 
+      // verify auth credentials
+      const base64Credentials = req.headers.authorization.split(' ')[1];
+      const credentials = Buffer.from(base64Credentials, 'base64').toString('ascii');
+      const [username, password] = credentials.split(':');
+
+      if (
+        username !== process.env.BOT_AUTH_USERNAME ||
+        password !== process.env.BOT_AUTH_PASSWORD
+      ) {
+        return res.status(401).send({
+          message: `Invalid credentials.`,
+        });
+      }
+
+      const { userId, page, url } = req.body;
+      if (!userId || !page || !url) {
+        console.error('Missing params on share-clip request.');
+        return res.status(400).end();
+      }
+
+      await this.guilds.fetch();
       const pisscord = this.guilds?.cache?.find((guild) => guild.id === process.env.YKS_GUILD_ID);
+      await pisscord.channels.fetch();
       const clipChannel = pisscord?.channels?.cache?.find(
         (channel) => channel.id === process.env.YKS_CLIP_CHANNEL_ID,
       );
-      const command = await this.commandHandler.findCommand('clip');
-      const member = pisscord?.members?.cache?.find((member) => {
-        return member.user.id === session.user;
+      clipChannel.send({
+        embeds: [
+          { description: `<@${userId}> shared a clip from https://im-at.work/clips/${page}` },
+        ],
+        files: [url],
       });
-      this.commandHandler.runCommand(
-        {
-          guild: pisscord,
-          channel: clipChannel,
-          member,
-          isViaSite: true,
-          clip,
-        },
-        command,
-        {},
-      );
-      res.send();
-    });
-
-    // All other GET requests not handled before will return our React app
-    app.get('*', (req, res) => {
-      res.sendFile(path.resolve(__dirname, './build', 'index.html'));
     });
 
     this.server = app.listen(process.env.PORT || 3000, () => {
