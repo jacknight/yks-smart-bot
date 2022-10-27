@@ -99,18 +99,23 @@ class YKSSmartBot extends AkairoClient {
         return res.status(400).end();
       }
 
+      console.debug('share-clip: Fetching guilds');
       await this.guilds.fetch();
       const pisscord = this.guilds?.cache?.find((guild) => guild.id === process.env.YKS_GUILD_ID);
-      await pisscord.channels.fetch();
+      console.debug('share-clip: Fetching channels');
+      await pisscord?.channels.fetch();
       const clipChannel = pisscord?.channels?.cache?.find(
         (channel) => channel.id === process.env.YKS_CLIP_CHANNEL_ID,
       );
-      clipChannel.send({
-        embeds: [
-          { description: `<@${userId}> shared a clip from https://im-at.work/clips/${page}` },
-        ],
-        files: [url],
-      });
+      console.debug('share-clip: Sending clip - ', Date.now());
+      clipChannel
+        ?.send({
+          embeds: [
+            { description: `<@${userId}> shared a clip from https://im-at.work/clips/${page}` },
+          ],
+          files: [url],
+        })
+        .then(() => console.log('share-clip: Message sent. - ', Date.now()));
     });
 
     this.server = app.listen(process.env.PORT || 3000, () => {
