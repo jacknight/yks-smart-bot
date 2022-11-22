@@ -37,7 +37,7 @@
     "react-router-dom": "^6.3.0",
     "react-scripts": "^5.0.1",
     "rss-parser": "^3.12.0",
-    "socket.io": "^4.4.1",
+    "socket.io": "^4.5.3",
     "text-ellipsis": "^1.0.3",
     "unsplash-js": "^7.0.15"
   },
