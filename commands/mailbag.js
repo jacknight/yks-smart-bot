@@ -15,7 +15,7 @@ class MailbagCommand extends Command {
         {
           color: 0x83c133,
           title: 'P.U. Box',
-          description: '544 W Main St #209\nGallatin, TN\n37066\nUSA',
+          description: '540 W Main St #209\nGallatin, TN\n37066\nUSA',
           footer: {
             text: 'Remember to put an embarrassing name on the package',
           },
