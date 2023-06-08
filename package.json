@@ -43,8 +43,6 @@
   },
   "scripts": {
     "start": "node ./bot.js",
-    "react-start": "react-scripts start",
-    "build": "react-scripts build",
     "dev": "nodemon ./bot.js"
   },
   "devDependencies": {
