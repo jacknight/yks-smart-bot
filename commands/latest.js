@@ -26,7 +26,10 @@ class LatestCommand extends Command {
 
   async exec(message, { feed, newEp }) {
     // Main feed
-    const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
+    const mainFeed = await parser
+      .parseURL(MAIN_FEED_RSS)
+      .catch((e) => console.error('Failed to parse main feed RSS: ', e.message));
+
     const mainEpisode = mainFeed.items[0];
     const overCastLink = 'https://overcast.fm/itunes1204911385';
     const appleLink = 'https://podcasts.apple.com/us/podcast/your-kickstarter-sucks/id1204911385';
@@ -53,7 +56,10 @@ class LatestCommand extends Command {
     };
 
     // Bonus feed
-    const bonusFeed = await parser.parseURL(BONUS_FEED_RSS);
+    const bonusFeed = await parser
+      .parseURL(BONUS_FEED_RSS)
+      .catch((e) => console.error('Failed to parse bonus feed RSS: ', e.message));
+
     const bonusEpisode = bonusFeed.items.find(
       (bonusItem) =>
         !mainFeed.items.some(

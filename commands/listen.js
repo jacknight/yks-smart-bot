@@ -85,7 +85,10 @@ class ListenCommand extends Command {
       }
     }
 
-    let mainFeed = await parser.parseURL(MAIN_FEED_RSS);
+    let mainFeed = await parser
+      .parseURL(MAIN_FEED_RSS)
+      .catch((e) => console.error('Failed to parse main feed RSS: ', e.message));
+
     // Sometimes bonus episodes and other things get released into the main feed
     // We need to filter those out.
     mainFeed = mainFeed.items.filter((ep) => ep.title.match(/ [0-9]+:/));

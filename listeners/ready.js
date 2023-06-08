@@ -50,8 +50,12 @@ class ReadyListener extends Listener {
 // main feed YKS episode. Wanted to spoof rich
 // presence spotify but bots don't have that option.
 async function pollRss(client) {
-  const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
-  const bonusFeed = await parser.parseURL(BONUS_FEED_RSS);
+  const mainFeed = await parser
+    .parseURL(MAIN_FEED_RSS)
+    .catch((e) => console.error('Failed to parse main feed RSS: ', e.message));
+  const bonusFeed = await parser
+    .parseURL(BONUS_FEED_RSS)
+    .catch((e) => console.error('Failed to parse bonus feed RSS: ', e.message));
 
   if (mainFeed && mainFeed.items && bonusFeed && bonusFeed.items) {
     // See what's stored in the DB for the latest main ep...

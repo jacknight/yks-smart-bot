@@ -47,8 +47,14 @@ class TodayCommand extends Command {
       day: 'numeric',
     });
 
-    const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
-    const bonusFeed = await parser.parseURL(BONUS_FEED_RSS);
+    const mainFeed = await parser
+      .parseURL(MAIN_FEED_RSS)
+      .catch((e) => console.error('Failed to parse main feed RSS: ', e.message));
+
+    const bonusFeed = await parser
+      .parseURL(BONUS_FEED_RSS)
+      .catch((e) => console.error('Failed to parse bonus feed RSS: ', e.message));
+
     mainFeed.items = mainFeed.items.map((item) => {
       return { ...item, feedTitle: mainFeed.title };
     });

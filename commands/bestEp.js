@@ -15,7 +15,9 @@ class BestCommand extends Command {
 
   async exec(message, { num }) {
     const listOnly = num === 'list';
-    const mainFeed = await parser.parseURL(MAIN_FEED_RSS);
+    const mainFeed = await parser
+      .parseURL(MAIN_FEED_RSS)
+      .catch((e) => console.error('Failed to parse main feed RSS (bestEp): ', e.message));
     if (!listOnly) {
       if (num < 1) return;
       if (num === 101) {
