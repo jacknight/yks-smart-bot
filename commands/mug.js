@@ -26,7 +26,7 @@ class MugCommand extends Command {
       }, 1000 * 60); // once per min
 
       const mugs = ['./assets/mug.png', './assets/mug2.jpg', './assets/mug3.png'];
-      const mug = mugs[random(1)];
+      const mug = mugs[random(2)];
       const attachment = this.client.util.attachment(mug);
       message.channel.send({ files: [attachment] });
     }
