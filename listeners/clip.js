@@ -1,4 +1,5 @@
 const { Listener } = require('discord-akairo');
+const ClipsModel = require('../db/clips');
 
 class ClipListener extends Listener {
   constructor() {
@@ -61,7 +62,7 @@ As a thank you for fully embracing the dirtbag left culture cultivated here in t
           }
 
           clips.push(attachment.proxyURL);
-          this.client.settings.set(message.guild.id, 'clips', clips);
+          ClipsModel.create({ id: attachment.proxyURL, attachment });
         }
       });
     }

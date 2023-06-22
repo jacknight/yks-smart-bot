@@ -14,7 +14,7 @@ const { default: fetch } = require('node-fetch');
 const SessionModel = require('./db/sessions');
 const { Constants, Intents } = require('discord.js');
 const cors = require('cors');
-const crypto = require('crypto');
+const clips = require('./db/clips');
 
 class YKSSmartBot extends AkairoClient {
   constructor() {
@@ -39,6 +39,7 @@ class YKSSmartBot extends AkairoClient {
 
     // Database provider stored on the client.
     this.settings = new MongooseProvider(model);
+    this.clips = new MongooseProvider(clips);
 
     // Rate limit certain commands per guild in memory.
     // I don't think it's necessary to do this with the
@@ -131,6 +132,7 @@ class YKSSmartBot extends AkairoClient {
 
   async login(token) {
     await this.settings.init();
+    await this.clips.init();
     return super.login(token);
   }
 }

@@ -1,18 +1,18 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
-const guildSchema = new Schema(
+const clipsSchema = new Schema(
   {
     id: {
       type: String,
       required: true,
     },
-    settings: {
+    attachment: {
       type: Object,
-      required: true,
+      required: false,
     },
   },
   { minimize: false },
 );
 
-module.exports = mongoose.model('model', guildSchema);
+module.exports = mongoose.model('clips', clipsSchema);
