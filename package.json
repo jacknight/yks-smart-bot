@@ -42,11 +42,13 @@
     "unsplash-js": "^7.0.15"
   },
   "scripts": {
-    "start": "node ./bot.js",
-    "dev": "nodemon ./bot.js"
+    "start": "ts-node ./bot.ts",
+    "dev": "nodemon ./bot.ts"
   },
   "devDependencies": {
-    "nodemon": "^2.0.15"
+    "@types/node": "^20.5.0",
+    "nodemon": "^2.0.15",
+    "ts-node": "^10.9.1"
   },
   "browserslist": {
     "production": [

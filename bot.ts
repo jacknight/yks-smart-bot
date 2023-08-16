@@ -1,3 +1,10 @@
+import path from 'path';
+import express from 'express';
+import mongoose, { ConnectOptions } from 'mongoose';
+import fetch from 'node-fetch';
+import { Channel, Constants, Guild, Intents, Role, TextChannel } from 'discord.js';
+import cors from 'cors';
+import socketio from 'socket.io';
 const {
   AkairoClient,
   CommandHandler,
@@ -5,15 +12,9 @@ const {
   ListenerHandler,
   MongooseProvider,
 } = require('discord-akairo');
-const model = require('./db/model');
 require('dotenv').config();
-const path = require('path');
-const express = require('express');
-const mongoose = require('mongoose');
-const { default: fetch } = require('node-fetch');
+const model = require('./db/model');
 const SessionModel = require('./db/sessions');
-const { Constants, Intents } = require('discord.js');
-const cors = require('cors');
 const clips = require('./db/clips');
 
 class YKSSmartBot extends AkairoClient {
@@ -102,11 +103,13 @@ class YKSSmartBot extends AkairoClient {
 
       console.debug('share-clip: Fetching guilds');
       await this.guilds.fetch();
-      const pisscord = this.guilds?.cache?.find((guild) => guild.id === process.env.YKS_GUILD_ID);
+      const pisscord = this.guilds?.cache?.find(
+        (guild: Guild) => guild.id === process.env.YKS_GUILD_ID,
+      );
       console.debug('share-clip: Fetching channels');
       await pisscord?.channels.fetch();
       const clipChannel = pisscord?.channels?.cache?.find(
-        (channel) => channel.id === process.env.YKS_CLIP_CHANNEL_ID,
+        (channel: Channel) => channel.id === process.env.YKS_CLIP_CHANNEL_ID,
       );
       console.debug('share-clip: Sending clip - ', Date.now());
       clipChannel
@@ -130,7 +133,7 @@ class YKSSmartBot extends AkairoClient {
     this.listenerHandler.loadAll();
   }
 
-  async login(token) {
+  async login(token: string) {
     await this.settings.init();
     await this.clips.init();
     return super.login(token);
@@ -143,7 +146,7 @@ mongoose
     {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-    },
+    } as ConnectOptions,
   )
   .then(() => {
     // TODO: Do a little housekeeping with the session IDs
@@ -151,12 +154,12 @@ mongoose
     // moment, they only get removed when the user explicitly
     // click logout.
     const client = new YKSSmartBot();
-    client.login(process.env.AUTH_TOKEN);
+    client.login(process.env.AUTH_TOKEN!);
 
     // Using Socket.io to communicate with the frontend component
     // of the bot. Since commands can be triggered from the chat
     // or from a website, sockets keep them in sync.
-    const io = require('socket.io')(client.server, {
+    const io = new socketio.Server(client.server, {
       cors: {
         origin: '*',
       },
@@ -196,7 +199,7 @@ mongoose
       socket.on('authorize', ({ session }) => {
         // Lookup session, see if it's still valid.
         SessionModel.findOne({ id: session })
-          .then((doc) => {
+          .then((doc: any) => {
             const today = new Date();
             if (!doc || !doc.session || doc.session.expirationDate <= today) {
               return socket.emit('sessionExpired');
@@ -217,7 +220,7 @@ mongoose
                 socket.emit('servers', response);
               });
           })
-          .catch((err) => {
+          .catch((err: any) => {
             console.log(err);
           });
       });
@@ -225,7 +228,7 @@ mongoose
       // User logged out, remove the session ID from the database.
       socket.on('logout', ({ session }) => {
         // Remove session from the database.
-        SessionModel.deleteOne({ id: session }).catch((err) => {
+        SessionModel.deleteOne({ id: session }).catch((err: any) => {
           console.log(err);
         });
       });
@@ -246,8 +249,8 @@ mongoose
         // Exchange code for access token,
         // and associate it with a session ID in the db.
         const data = {
-          client_id: process.env.DISCORD_BOT_CLIENT_ID,
-          client_secret: process.env.DISCORD_BOT_CLIENT_SECRET,
+          client_id: process.env.DISCORD_BOT_CLIENT_ID!,
+          client_secret: process.env.DISCORD_BOT_CLIENT_SECRET!,
           grant_type: 'authorization_code',
           redirect_uri: redirect_uri,
           code: code,
@@ -276,7 +279,7 @@ mongoose
             })
               .then((res) => res.json())
               .then((response) => {
-                const session = new SessionModel({
+                const sesh = new SessionModel({
                   id: session,
                   session: {
                     accessToken: info.access_token,
@@ -287,10 +290,10 @@ mongoose
                     userId: response.message ? '' : response.id,
                   },
                 });
-                session
+                sesh
                   .save()
-                  .then((doc) => {})
-                  .catch((err) => console.log(err));
+                  .then((doc: any) => {})
+                  .catch((err: any) => console.log(err));
               });
 
             socket.emit('session', session);
@@ -340,7 +343,7 @@ mongoose
       socket.on('changeMode', ({ guild, mode, session }) => {
         if (guild.id === '') return;
         // Look up user associated with session ID.
-        SessionModel.findOne({ id: session }).then(async (doc) => {
+        SessionModel.findOne({ id: session }).then(async (doc: any) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(guild.id, client.guilds.cache);
             if (guildObj) {
@@ -374,7 +377,7 @@ mongoose
       socket.on('changeReady', ({ guild, ready, session }) => {
         if (guild.id === '') return;
         // Look up user associated with session ID.
-        SessionModel.findOne({ id: session }).then(async (doc) => {
+        SessionModel.findOne({ id: session }).then(async (doc: any) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(guild.id, client.guilds.cache);
             if (guildObj) {
@@ -404,7 +407,7 @@ mongoose
       socket.on('changeChannel', ({ guild, id, session }) => {
         if (guild.id === '') return;
         // Look up user associated with session ID.
-        SessionModel.findOne({ id: session }).then(async (doc) => {
+        SessionModel.findOne({ id: session }).then(async (doc: any) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(guild.id, client.guilds.cache);
 
@@ -430,7 +433,7 @@ mongoose
       socket.on('clearQueue', ({ guild, session }) => {
         if (guild.id === '') return;
         // Look up user associated with session ID.
-        SessionModel.findOne({ id: session }).then(async (doc) => {
+        SessionModel.findOne({ id: session }).then(async (doc: any) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(guild.id, client.guilds.cache);
 
@@ -456,7 +459,7 @@ mongoose
       socket.on('randomizeQueue', ({ guild, session }) => {
         if (guild.id === '') return;
         // Look up user associated with session ID.
-        SessionModel.findOne({ id: session }).then(async (doc) => {
+        SessionModel.findOne({ id: session }).then(async (doc: any) => {
           if (doc.session) {
             const guildObj = client.util.resolveGuild(guild.id, client.guilds.cache);
 
@@ -477,7 +480,7 @@ mongoose
                 var num = 1;
                 if (channelObj) {
                   return channelObj.send(
-                    `Randomized the dookie list: ${buzzerQueue.reduce((str, buzz) => {
+                    `Randomized the dookie list: ${buzzerQueue.reduce((str: string, buzz: any) => {
                       const member = client.util.resolveMember(
                         JSON.parse(buzz).id,
                         guildObj.members.cache,
@@ -540,29 +543,29 @@ mongoose
     // be done server side, potential privacy issue.
     function emitServers() {
       const servers = client.guilds.cache;
-      let ids = [];
-      servers.forEach((guild, id) => {
+      let ids: { name: string; id: string }[] = [];
+      servers.forEach((guild: Guild, id: string) => {
         ids.push({ name: guild.name, id: id });
       });
       io.sockets.emit('serversList', ids);
     }
 
     // Emit list of channels for the given server id
-    function emitChannels(id) {
+    function emitChannels(id: string) {
       const channels = client.guilds.resolve(id).channels.cache;
-      const ids = [];
-      channels.forEach((channel) => {
+      const ids: { guild: string; topic: string; id: string }[] = [];
+      channels.forEach((channel: Channel) => {
         // Bot currently only active on text channels.
         if (channel.type === 'GUILD_VOICE') return;
         if (channel.type === 'GUILD_CATEGORY') return;
         if (channel.type === 'GUILD_TEXT') {
-          ids.push({ guild: id, topic: channel.name, id: channel.id });
+          ids.push({ guild: id, topic: (channel as TextChannel).name, id: channel.id });
         }
       });
       io.sockets.emit('channelsList', ids);
     }
 
-    async function getBuzzerChannel(guildObj) {
+    async function getBuzzerChannel(guildObj: Guild) {
       const channel = JSON.parse(
         // Get the configured buzzer channel from the db.
         // If none set, use the system channel. This will
@@ -579,10 +582,10 @@ mongoose
 
     // Actions coming in from the frontend need to be
     // checked for permission.
-    function userHasBuzzerRole(guildObj, userId) {
+    function userHasBuzzerRole(guildObj: Guild, userId: string) {
       const member = client.util.resolveMember(userId, guildObj.members.cache);
       return (
-        member.roles.cache.some(async (role) => {
+        member.roles.cache.some(async (role: Role) => {
           return (
             role.name.toLowerCase() ===
             (await client.settings.get(guildObj.id, 'buzzerRole', 'buzzer').toLowerCase())
