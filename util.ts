@@ -1,12 +1,12 @@
-const unsplash = require('unsplash-js');
-const nodeFetch = require('node-fetch');
+import { createApi } from 'unsplash-js';
+import nodeFetch from 'node-fetch';
 
-exports.unsplash = unsplash.createApi({
-  accessKey: process.env.UNSPLASH_ACCESS_KEY,
-  fetch: nodeFetch.default,
+export const unsplash = createApi({
+  accessKey: process.env.UNSPLASH_ACCESS_KEY!,
+  fetch: nodeFetch,
 });
 
-exports.shuffle = (array) => {
+exports.shuffle = (array: string[]) => {
   var currentIndex = array.length,
     temporaryValue,
     randomIndex;
@@ -27,16 +27,16 @@ exports.getRealKickstarters = async () => {
   const fs = require('fs');
   const readline = require('readline');
   const { once } = require('events');
-  const responses = [];
+  const responses: any = [];
   // Grab from file of real kickstarters
   const rl = readline.createInterface({
     input: fs.createReadStream('assets/PromptCompletion_prepared.jsonl'),
     crlfDelay: Infinity,
   });
 
-  rl.on('error', (err) => console.error(err));
+  rl.on('error', (err: any) => console.error(err));
 
-  rl.on('line', (line) => {
+  rl.on('line', (line: any) => {
     if (!line) return;
 
     // Add completion to responses array.
@@ -49,20 +49,20 @@ exports.getRealKickstarters = async () => {
   return responses;
 };
 
-exports.sleep = (ms) => {
+exports.sleep = (ms: number) => {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 };
 
-exports.sendRequest = async (url, method, opts = {}) => {
+exports.sendRequest = async (url: string, method: string, opts: any = {}) => {
   const axios = require('axios');
-  let camelToUnderscore = (key) => {
+  let camelToUnderscore = (key: string) => {
     let result = key.replace(/([A-Z])/g, ' $1');
     return result.split(' ').join('_').toLowerCase();
   };
 
-  const data = {};
+  const data: any = {};
   for (const key in opts) {
     data[camelToUnderscore(key)] = opts[key];
   }
@@ -78,7 +78,7 @@ exports.sendRequest = async (url, method, opts = {}) => {
   });
 };
 
-exports.getAIResponse = async (name, userID) => {
+exports.getAIResponse = async (name: string, userID: string) => {
   try {
     const response = await exports.sendRequest('https://api.openai.com/v1/completions', 'post', {
       prompt: `**Name**: ${name}`,
@@ -96,7 +96,7 @@ exports.getAIResponse = async (name, userID) => {
       user: userID,
     });
     return response;
-  } catch (e) {
+  } catch (e: any) {
     if (e.response) {
       return `(OpenAI Error) ${e.response.statusText}`;
     }
@@ -104,7 +104,7 @@ exports.getAIResponse = async (name, userID) => {
   }
 };
 
-exports.getKickstarterEmbed = (completion, realOrFake) => {
+exports.getKickstarterEmbed = (completion: string, realOrFake: string) => {
   const title = completion.match(/\*\*Name\*\*: (.*)/);
   const category = completion.match(/\*\*Category\*\*: (.*)/);
   const status = completion.match(/\*\*Status\*\*: (.*)/);
@@ -163,7 +163,7 @@ exports.getKickstarterEmbed = (completion, realOrFake) => {
   }
 };
 
-exports.undoRateLimit = (client, userID, commandID) => {
+exports.undoRateLimit = (client: any, userID: string, commandID: string) => {
   const userCooldown = client.commandHandler.cooldowns.get(userID);
   if (userCooldown) {
     const userCommandCooldown = userCooldown[commandID];
