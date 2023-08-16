@@ -31,7 +31,6 @@ class LatestCommand extends Command {
       .catch((e) => console.error('Failed to parse main feed RSS: ', e.message));
 
     const mainEpisode = mainFeed.items[0];
-    console.log(mainEpisode);
     const overCastLink = 'https://overcast.fm/itunes1204911385';
     const appleLink = 'https://podcasts.apple.com/us/podcast/your-kickstarter-sucks/id1204911385';
     const mainEmbed = {
@@ -71,11 +70,11 @@ class LatestCommand extends Command {
       color: 0xddaf74,
       title: bonusFeed.title,
       author: {
-        icon_url: 'https://i.imgur.com/5sHYjAX.jpeg',
+        icon_url: 'https://i.imgur.com/Cmb1RTP.jpg',
         url: 'https://www.patreon.com/yourkickstartersucks',
       },
       thumbnail: {
-        url: 'https://i.imgur.com/5sHYjAX.jpeg',
+        url: 'https://i.imgur.com/Cmb1RTP.jpg',
       },
       fields: [
         {

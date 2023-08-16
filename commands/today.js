@@ -11,11 +11,11 @@ const epEmbed = (feedTitle, iconURL, epURL, epTitle, desc) => {
     color: isBonus ? 0xddaf74 : 0x83c133,
     title: feedTitle,
     author: {
-      icon_url: isBonus ? 'https://i.imgur.com/5sHYjAX.jpeg' : iconURL,
+      icon_url: isBonus ? 'https://i.imgur.com/Cmb1RTP.jpg' : iconURL,
       url: 'https://www.patreon.com/yourkickstartersucks',
     },
     thumbnail: {
-      url: isBonus ? 'https://i.imgur.com/5sHYjAX.jpeg' : iconURL,
+      url: isBonus ? 'https://i.imgur.com/Cmb1RTP.jpg' : iconURL,
     },
     fields: [
       {
