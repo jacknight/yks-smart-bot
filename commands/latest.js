@@ -31,6 +31,7 @@ class LatestCommand extends Command {
       .catch((e) => console.error('Failed to parse main feed RSS: ', e.message));
 
     const mainEpisode = mainFeed.items[0];
+    console.log(mainEpisode);
     const overCastLink = 'https://overcast.fm/itunes1204911385';
     const appleLink = 'https://podcasts.apple.com/us/podcast/your-kickstarter-sucks/id1204911385';
     const mainEmbed = {
@@ -38,16 +39,16 @@ class LatestCommand extends Command {
       title: mainFeed.title,
       author: {
         icon_url:
-          'https://res.cloudinary.com/pippa/image/fetch/h_500,w_500,f_auto/https://assets.pippa.io/shows/5d137ece8b774eb816199f63/1562125598000-ef38e8a9cd086f609f806209d1341102.jpeg',
-        url: 'https://shows.acast.com/yourkickstartersucks',
+          'https://content.production.cdn.art19.com/images/c8/38/41/df/c83841df-2683-4baf-8959-28a8e7d66774/3e98f6d3fffcf5ebd7e02df5609cfe5fe9997e62f24382a26649e59061a6d029a0e16417689b0ccd00f7fc7638344abe1f61bc8d9e3c7235e4e60f43efec8c38.jpeg',
+        url: 'https://art19.com/shows/your-kickstarter-sucks',
       },
       thumbnail: {
-        url: 'https://res.cloudinary.com/pippa/image/fetch/h_500,w_500,f_auto/https://assets.pippa.io/shows/5d137ece8b774eb816199f63/1562125598000-ef38e8a9cd086f609f806209d1341102.jpeg',
+        url: 'https://content.production.cdn.art19.com/images/c8/38/41/df/c83841df-2683-4baf-8959-28a8e7d66774/3e98f6d3fffcf5ebd7e02df5609cfe5fe9997e62f24382a26649e59061a6d029a0e16417689b0ccd00f7fc7638344abe1f61bc8d9e3c7235e4e60f43efec8c38.jpeg',
       },
       fields: [
         {
           name: mainEpisode.title,
-          value: `[Acast](${mainEpisode.link})
+          value: `[ART19](${mainEpisode.enclosure.url})
 [Overcast](${overCastLink})
 [Apple](${appleLink})`,
           inline: false,
