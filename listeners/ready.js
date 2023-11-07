@@ -31,8 +31,8 @@ class ReadyListener extends Listener {
     });
 
     // Set bot status and check for new episodes
-    pollRss(this.client);
-    setInterval(pollRss, 60 * 1000, this.client); // every 60 sec
+    setInterval(pollMainRss, 20 * 1000, this.client); // every 20 sec
+    setInterval(pollBonusRss, 20 * 1000, this.client); // every 20 sec
 
     // Remove old mailbag messages (older than a month)
     removeOldMailbagMessages(this.client);
@@ -45,50 +45,22 @@ class ReadyListener extends Listener {
   }
 }
 
-// Set the bot's presence.
-// Currently setting to "Listening to" the latest
-// main feed YKS episode. Wanted to spoof rich
-// presence spotify but bots don't have that option.
-async function pollRss(client) {
-  const mainFeed = await parser
+async function pollMainRss(client) {
+  const feed = await parser
     .parseURL(MAIN_FEED_RSS)
     .catch((e) => console.error('Failed to parse main feed RSS: ', e.message));
-  const bonusFeed = await parser
-    .parseURL(BONUS_FEED_RSS)
-    .catch((e) => console.error('Failed to parse bonus feed RSS: ', e.message));
 
-  if (mainFeed && mainFeed.items && bonusFeed && bonusFeed.items) {
+  if (mainFeed && mainFeed.items && mainFeed.items.length > 0) {
     // See what's stored in the DB for the latest main ep...
     const latestMainEpTitle = await client.settings.get(client.user.id, 'latestMainEpTitle', '');
 
-    // ...and the latest bonus ep...
-    const latestBonusEpTitle = await client.settings.get(client.user.id, 'latestBonusEpTitle', '');
-
     // ...and compare to the RSS feed.
-    const newMain = latestMainEpTitle != mainFeed.items[0].title;
-    const newBonus = latestBonusEpTitle != bonusFeed.items[0].title;
+    const newMain = latestMainEpTitle !== mainFeed.items[0].title;
 
-    // Set bot status
-    client.user.setPresence({
-      status: 'dnd',
-      activities: [
-        {
-          name: bonusFeed.items[0].title, // this is always the most recent ep
-          type: 'LISTENING',
-          url: null,
-        },
-      ],
-    });
-
-    if (newMain || newBonus) {
-      const feed = newMain ? 'main' : 'bonus';
+    if (newMain) {
       // Store newest ep title in DB
-      if (newMain) {
-        await client.settings.set(client.user.id, 'latestMainEpTitle', mainFeed.items[0].title);
-      }
-      if (newBonus) {
-        await client.settings.set(client.user.id, 'latestBonusEpTitle', bonusFeed.items[0].title);
-      }
+      await client.settings.set(client.user.id, 'latestMainEpTitle', mainFeed.items[0].title);
+
       // For each guild the bot is a member, check if there is an RSS channel
       // channel configured and if so, send a message regarding the new ep.
       client.guilds.cache.forEach(async (guild) => {
@@ -96,11 +68,54 @@ async function pollRss(client) {
         const command = await client.commandHandler.findCommand('latest');
         if (channel && command) {
           client.commandHandler.runCommand({ guild, channel }, command, {
-            feed,
+            feed: 'main',
             newEp: 'yes',
           });
         }
       });
+    }
+  }
+}
+
+async function pollBonusRss(client) {
+  const bonusFeed = await parser
+    .parseURL(BONUS_FEED_RSS)
+    .catch((e) => console.error('Failed to parse bonus feed RSS: ', e.message));
+
+  if (bonusFeed && bonusFeed.items && bonusFeed.items.length > 0) {
+    // See what's stored in the DB for the latest bonus ep...
+    const latestBonusEpTitle = await client.settings.get(client.user.id, 'latestBonusEpTitle', '');
+
+    const newBonus = latestBonusEpTitle !== bonusFeed.items[0].title;
+
+    if (newBonus) {
+      // Set bot status
+      client.user.setPresence({
+        status: 'dnd',
+        activities: [
+          {
+            name: bonusFeed.items[0].title, // this is always the most recent ep
+            type: 'LISTENING',
+            url: null,
+          },
+        ],
+      });
+
+      const latestMainEpTitle = await client.settings.get(client.user.id, 'latestMainEpTitle', '');
+      if (latestBonusEpTitle !== latestMainEpTitle) {
+        // For each guild the bot is a member, check if there is an RSS channel
+        // channel configured and if so, send a message regarding the new ep.
+        client.guilds.cache.forEach(async (guild) => {
+          const channel = await getRssChannel(client, guild);
+          const command = await client.commandHandler.findCommand('latest');
+          if (channel && command) {
+            client.commandHandler.runCommand({ guild, channel }, command, {
+              feed: 'bonus',
+              newEp: 'yes',
+            });
+          }
+        });
+      }
     }
   }
 }
