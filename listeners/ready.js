@@ -89,6 +89,9 @@ async function pollBonusRss(client) {
     const newBonus = latestBonusEpTitle !== bonusFeed.items[0].title;
 
     if (newBonus) {
+      // Store newest ep title in DB
+      await client.settings.set(client.user.id, 'latestBonusEpTitle', bonusFeed.items[0].title);
+
       // Set bot status
       client.user.setPresence({
         status: 'dnd',
