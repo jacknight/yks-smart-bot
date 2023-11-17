@@ -46,7 +46,7 @@ class ReadyListener extends Listener {
 }
 
 async function pollMainRss(client) {
-  const feed = await parser
+  const mainFeed = await parser
     .parseURL(MAIN_FEED_RSS)
     .catch((e) => console.error('Failed to parse main feed RSS: ', e.message));
 
