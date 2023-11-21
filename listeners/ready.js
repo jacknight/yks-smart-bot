@@ -51,15 +51,12 @@ async function pollMainRss(client) {
     .catch((e) => console.error('Failed to parse main feed RSS: ', e.message));
 
   if (mainFeed && mainFeed.items && mainFeed.items.length > 0) {
-    // See what's stored in the DB for the latest main ep...
     const latestMainEpTitle = await client.settings.get(client.user.id, 'latestMainEpTitle', '');
-
-    // ...and compare to the RSS feed.
-    const newMain = latestMainEpTitle !== mainFeed.items[0].title;
+    const feedMainEpTitle = mainfEed.items[0].title;
+    const newMain = latestMainEpTitle !== feedMainEpTitle;
 
     if (newMain) {
-      // Store newest ep title in DB
-      await client.settings.set(client.user.id, 'latestMainEpTitle', mainFeed.items[0].title);
+      await client.settings.set(client.user.id, 'latestMainEpTitle', feedMainEpTitle);
 
       // For each guild the bot is a member, check if there is an RSS channel
       // channel configured and if so, send a message regarding the new ep.
@@ -83,28 +80,26 @@ async function pollBonusRss(client) {
     .catch((e) => console.error('Failed to parse bonus feed RSS: ', e.message));
 
   if (bonusFeed && bonusFeed.items && bonusFeed.items.length > 0) {
-    // See what's stored in the DB for the latest bonus ep...
+    const latestMainEpTitle = await client.settings.get(client.user.id, 'latestMainEpTitle', '');
     const latestBonusEpTitle = await client.settings.get(client.user.id, 'latestBonusEpTitle', '');
-
-    const newBonus = latestBonusEpTitle !== bonusFeed.items[0].title;
+    const feedBonusEpTitle = bonusFeed.items[0].title;
+    const newBonus = latestBonusEpTitle !== feedBonusEpTitle;
 
     if (newBonus) {
-      // Store newest ep title in DB
-      await client.settings.set(client.user.id, 'latestBonusEpTitle', bonusFeed.items[0].title);
+      await client.settings.set(client.user.id, 'latestBonusEpTitle', feedBonusEpTitle);
 
       // Set bot status
       client.user.setPresence({
         status: 'dnd',
         activities: [
           {
-            name: bonusFeed.items[0].title, // this is always the most recent ep
+            name: feedBonusEpTitle, // this is always the most recent ep
             type: 'LISTENING',
             url: null,
           },
         ],
       });
 
-      const latestMainEpTitle = await client.settings.get(client.user.id, 'latestMainEpTitle', '');
       if (latestBonusEpTitle !== latestMainEpTitle) {
         // For each guild the bot is a member, check if there is an RSS channel
         // channel configured and if so, send a message regarding the new ep.
