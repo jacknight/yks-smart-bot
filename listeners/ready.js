@@ -52,7 +52,7 @@ async function pollMainRss(client) {
 
   if (mainFeed && mainFeed.items && mainFeed.items.length > 0) {
     const latestMainEpTitle = await client.settings.get(client.user.id, 'latestMainEpTitle', '');
-    const feedMainEpTitle = mainfEed.items[0].title;
+    const feedMainEpTitle = mainFeed.items[0].title;
     const newMain = latestMainEpTitle !== feedMainEpTitle;
 
     if (newMain) {
