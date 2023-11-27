@@ -100,7 +100,7 @@ async function pollBonusRss(client) {
         ],
       });
 
-      if (latestBonusEpTitle !== latestMainEpTitle) {
+      if (feedBonusEpTitle !== latestMainEpTitle) {
         // For each guild the bot is a member, check if there is an RSS channel
         // channel configured and if so, send a message regarding the new ep.
         client.guilds.cache.forEach(async (guild) => {
