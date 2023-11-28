@@ -29,7 +29,7 @@ class BuzzerNickCommand extends Command {
 
   async exec(message, { nick }) {
     try {
-      if (await message.guild.members.cache.get(this.client.user.id).setNickname(nick)) {
+      if (await message.guild.members.cache.get(this.client.clientID).setNickname(nick)) {
         return message.channel.send(`Hey, check out my new name!`);
       }
     } catch {

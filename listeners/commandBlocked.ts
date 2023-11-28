@@ -1,3 +1,6 @@
+import { Command } from 'discord-akairo';
+import { Message } from 'discord.js';
+
 const { Listener } = require('discord-akairo');
 
 class CommandBlockedListener extends Listener {
@@ -8,7 +11,7 @@ class CommandBlockedListener extends Listener {
     });
   }
 
-  exeC(message, command, reason) {
+  exec(message: Message, command: Command, reason: string) {
     console.log(
       `${message.author.username} was blocked from using ${command.id} because of ${reason}`,
     );

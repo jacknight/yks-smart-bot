@@ -29,7 +29,7 @@ class RealOrFakeCommand extends Command {
       response = responses[Math.floor(Math.random() * responses.length)];
     } else {
       // Grab a completion from the AI.
-      response = await getAIResponse('', this.client.user.id);
+      response = await getAIResponse('', this.client.clientID);
     }
 
     // Do some sleeping if necessary so all response times take at least 2s.

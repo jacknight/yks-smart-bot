@@ -1,3 +1,5 @@
+import { MessageReaction, User } from 'discord.js';
+
 const { AudioPlayerStatus } = require('@discordjs/voice');
 const { Listener } = require('discord-akairo');
 
@@ -9,36 +11,37 @@ class ListenListener extends Listener {
     });
   }
 
-  async exec(reaction, user) {
+  async exec(reaction: MessageReaction, user: User) {
     if (reaction.partial) {
       // Don't deal with partials for this. If the bot restarted, the player
       // died with it!
       return;
     }
 
-    if (user.id === this.client.user.id) return;
+    if (user.id === this.client.clientID) return;
 
     if (this.client.listen.message?.id === reaction.message.id) {
       let action = null;
-      if (reaction._emoji.name === '▶️') {
+      if (reaction.emoji.name === '▶️') {
         if (
           this.client.listen.player.state.status === AudioPlayerStatus.Paused ||
           this.client.listen.player.state.status === AudioPlayerStatus.AutoPaused
         ) {
           action = 'play';
         }
-      } else if (reaction._emoji.name === '⏸') {
+      } else if (reaction.emoji.name === '⏸') {
         if (this.client.listen.player.state.status === AudioPlayerStatus.Playing) {
           action = 'pause';
         }
-      } else if (reaction._emoji.name === '⏹') {
+      } else if (reaction.emoji.name === '⏹') {
         if (this.client.listen.player.state.status !== AudioPlayerStatus.Idle) {
           const msg = await reaction.message.channel.send('Are you sure you want to stop?');
           await msg.react('✅');
           await msg.react('❌');
 
-          const filter = (r, u) => {
-            return ['✅', '❌'].includes(r._emoji.name) && u.id === user.id;
+          const filter = (r: MessageReaction, u: User) => {
+            if (!r.emoji.name) return false;
+            return ['✅', '❌'].includes(r.emoji.name) && u.id === user.id;
           };
 
           await msg
@@ -46,7 +49,7 @@ class ListenListener extends Listener {
             .then((collected) => {
               const r = collected.first();
 
-              if (r._emoji.name === '✅') {
+              if (r?.emoji.name === '✅') {
                 action = 'stop';
               }
             })

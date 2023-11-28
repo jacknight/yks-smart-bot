@@ -2,22 +2,34 @@ import path from 'path';
 import express from 'express';
 import mongoose, { ConnectOptions } from 'mongoose';
 import fetch from 'node-fetch';
-import { Channel, Constants, Guild, Intents, Role, TextChannel } from 'discord.js';
+import { Channel, ClientUser, Constants, Guild, Intents, Role, TextChannel } from 'discord.js';
 import cors from 'cors';
 import socketio from 'socket.io';
-const {
+import {
   AkairoClient,
   CommandHandler,
   InhibitorHandler,
   ListenerHandler,
   MongooseProvider,
-} = require('discord-akairo');
+} from 'discord-akairo';
 require('dotenv').config();
 const model = require('./db/model');
 const SessionModel = require('./db/sessions');
 const clips = require('./db/clips');
 
 class YKSSmartBot extends AkairoClient {
+  settings: MongooseProvider;
+  clips: MongooseProvider;
+  globalRates: Map<any, any>;
+  commandHandler: CommandHandler;
+  inhibitorHandler: InhibitorHandler;
+  listenerHandler: ListenerHandler;
+  server: import('http').Server<
+    typeof import('http').IncomingMessage,
+    typeof import('http').ServerResponse
+  >;
+  sockets!: Map<any, any>;
+  clientID: string;
   constructor() {
     super(
       { ownerID: '329288617564569602' },
@@ -38,6 +50,7 @@ class YKSSmartBot extends AkairoClient {
       },
     );
 
+    this.clientID = this.user?.id || '';
     // Database provider stored on the client.
     this.settings = new MongooseProvider(model);
     this.clips = new MongooseProvider(clips);
@@ -112,14 +125,16 @@ class YKSSmartBot extends AkairoClient {
         (channel: Channel) => channel.id === process.env.YKS_CLIP_CHANNEL_ID,
       );
       console.debug('share-clip: Sending clip - ', Date.now());
-      clipChannel
-        ?.send({
-          embeds: [
-            { description: `<@${userId}> shared a clip from https://im-at.work/clips/${page}` },
-          ],
-          files: [url],
-        })
-        .then(() => console.log('share-clip: Message sent. - ', Date.now()));
+      if (clipChannel?.isText()) {
+        clipChannel
+          ?.send({
+            embeds: [
+              { description: `<@${userId}> shared a clip from https://im-at.work/clips/${page}` },
+            ],
+            files: [url],
+          })
+          .then(() => console.log('share-clip: Message sent. - ', Date.now()));
+      }
     });
 
     this.server = app.listen(process.env.PORT || 3000, () => {
@@ -348,7 +363,7 @@ mongoose
             const guildObj = client.util.resolveGuild(guild.id, client.guilds.cache);
             if (guildObj) {
               // Check role permissions
-              if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+              if (!(await userHasBuzzerRole(guildObj, doc.session.userId))) {
                 // Raise an alert on the frontend
                 return socket.emit('commandUnauthorized', {
                   command: 'changeMode',
@@ -361,7 +376,7 @@ mongoose
               });
 
               let channelObj = await getBuzzerChannel(guildObj);
-              if (channelObj) {
+              if (channelObj && channelObj.isText()) {
                 if (mode === 'chaos') {
                   channelObj.send(`Buddy...you are now in **${mode} mode!!!**`);
                 } else {
@@ -382,7 +397,7 @@ mongoose
             const guildObj = client.util.resolveGuild(guild.id, client.guilds.cache);
             if (guildObj) {
               // Check role permissions
-              if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+              if (!(await userHasBuzzerRole(guildObj, doc.session.userId))) {
                 // Raise an alert on the frontend
                 return socket.emit('commandUnauthorized', {
                   command: 'changeReady',
@@ -396,7 +411,7 @@ mongoose
               });
               const channelObj = await getBuzzerChannel(guildObj);
 
-              if (channelObj) {
+              if (channelObj && channelObj.isText()) {
                 channelObj.send(`Buzzer is **${ready ? 'ready' : 'not ready'}**`);
               }
             }
@@ -413,7 +428,7 @@ mongoose
 
             if (guildObj) {
               // Check role permissions
-              if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+              if (!(await userHasBuzzerRole(guildObj, doc.session.userId))) {
                 // Raise an alert on the frontend
                 return socket.emit('commandUnauthorized', {
                   command: 'changeChannel',
@@ -422,7 +437,7 @@ mongoose
 
               const channelObj = client.util.resolveChannel(id, guildObj.channels.cache);
               await client.settings.set(guildObj.id, 'buzzerChannel', JSON.stringify(channelObj));
-              if (channelObj) {
+              if (channelObj && channelObj.isText()) {
                 channelObj.send('Buzzer now listening on ' + channelObj.toString());
               }
             }
@@ -439,7 +454,7 @@ mongoose
 
             if (guildObj) {
               // Check role permissions
-              if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+              if (!(await userHasBuzzerRole(guildObj, doc.session.userId))) {
                 // Raise an alert on the frontend
                 return socket.emit('commandUnauthorized', {
                   command: 'clearQueue',
@@ -447,7 +462,7 @@ mongoose
               }
               await client.settings.set(guildObj.id, 'buzzerQueue', []);
               const channelObj = await getBuzzerChannel(guildObj);
-              if (channelObj) {
+              if (channelObj && channelObj.isText()) {
                 channelObj.send('Cleared the dookie list.');
               }
               socket.emit('buzz', await client.settings.get(guild.id, 'buzzerQueue', []));
@@ -465,7 +480,7 @@ mongoose
 
             if (guildObj) {
               // Check role permissions
-              if (!userHasBuzzerRole(guildObj, doc.session.userId)) {
+              if (!(await userHasBuzzerRole(guildObj, doc.session.userId))) {
                 // Raise an alert on the frontend
                 return socket.emit('commandUnauthorized', {
                   command: 'randomizeQueue',
@@ -478,7 +493,7 @@ mongoose
 
               try {
                 var num = 1;
-                if (channelObj) {
+                if (channelObj && channelObj.isText()) {
                   return channelObj.send(
                     `Randomized the dookie list: ${buzzerQueue.reduce((str: string, buzz: any) => {
                       const member = client.util.resolveMember(
@@ -552,9 +567,9 @@ mongoose
 
     // Emit list of channels for the given server id
     function emitChannels(id: string) {
-      const channels = client.guilds.resolve(id).channels.cache;
+      const channels = client.guilds.resolve(id)?.channels.cache;
       const ids: { guild: string; topic: string; id: string }[] = [];
-      channels.forEach((channel: Channel) => {
+      channels?.forEach((channel: Channel) => {
         // Bot currently only active on text channels.
         if (channel.type === 'GUILD_VOICE') return;
         if (channel.type === 'GUILD_CATEGORY') return;
@@ -582,16 +597,19 @@ mongoose
 
     // Actions coming in from the frontend need to be
     // checked for permission.
-    function userHasBuzzerRole(guildObj: Guild, userId: string) {
+    async function userHasBuzzerRole(guildObj: Guild, userId: string) {
       const member = client.util.resolveMember(userId, guildObj.members.cache);
-      return (
-        member.roles.cache.some(async (role: Role) => {
-          return (
-            role.name.toLowerCase() ===
-            (await client.settings.get(guildObj.id, 'buzzerRole', 'buzzer').toLowerCase())
-          );
-        }) || member.id === client.ownerID
-      );
+      if (member.id === client.ownerID) return true;
+
+      for (const role of member.roles.cache.values()) {
+        if (
+          role.name.toLowerCase() ===
+          (await client.settings.get(guildObj.id, 'buzzerRole', 'buzzer').toLowerCase())
+        )
+          return true;
+      }
     }
   })
   .catch((err) => console.log(err));
+
+export default YKSSmartBot;

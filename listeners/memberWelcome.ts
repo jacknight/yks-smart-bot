@@ -1,3 +1,5 @@
+import { GuildMember } from 'discord.js';
+
 const { Listener } = require('discord-akairo');
 const Canvas = require('canvas');
 
@@ -9,12 +11,12 @@ class MemberWelcomeListener extends Listener {
     });
   }
 
-  async exec(member) {
+  async exec(member: GuildMember) {
     if (this.client.settings.get(member.guild.id, 'welcomeMsgDisabled', false)) return;
 
     // Check if they've already been welcomed
     const welcomedMembers = await this.client.settings.get(member.guild.id, 'welcomedMembers', []);
-    if (welcomedMembers.some((id) => id === member.id)) return;
+    if (welcomedMembers.some((id: string) => id === member.id)) return;
 
     // Add to welcomed members for guild so we don't do this again.
     welcomedMembers.push(member.id);
@@ -65,7 +67,7 @@ class MemberWelcomeListener extends Listener {
       'If you see JF or DB in here, avert your eyes from their posts as a sign of respect.',
       'Vote for your favorite episode # using the command `!best <episode number>`',
     ];
-    member.guild.systemChannel.send({
+    return member.guild.systemChannel?.send({
       content: `Welcome, ${member}! ${responses[Math.floor(Math.random() * responses.length)]}`,
       files: [attachment],
     });
@@ -73,7 +75,7 @@ class MemberWelcomeListener extends Listener {
 }
 
 // New member greeting helper to reduce size of text as necessary.
-function applyText(canvas, text) {
+function applyText(canvas: any, text: string) {
   const ctx = canvas.getContext('2d');
 
   // Declare a base size of the font

@@ -11,7 +11,7 @@ class HelloCommand extends Command {
   }
 
   exec(message) {
-    if (message.mentions.users.has(this.client.user.id)) {
+    if (message.mentions.users.has(this.client.clientID)) {
       message.channel.send("Can't talk, I'm at work. Let's meet face-to-face.");
     }
   }

@@ -14,5 +14,6 @@
     "forceConsistentCasingInFileNames": true,
     "moduleResolution": "node16"
   },
-  "include": ["./**/*"]
+  "include": ["./**/*"],
+  "files": ["./index.d.ts"]
 }

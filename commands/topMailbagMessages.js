@@ -35,7 +35,7 @@ class TopMailbagCommand extends Command {
           const msg = await mailbagChannel.messages.fetch(msgId);
           const url = `https://discord.com/channels/${path}`;
           if (msg) {
-            if (msg.author.id === this.client.user.id) {
+            if (msg.author.id === this.client.clientID) {
               skip++;
               continue;
             }

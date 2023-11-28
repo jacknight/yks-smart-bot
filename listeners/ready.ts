@@ -1,3 +1,6 @@
+import { Guild, Message } from 'discord.js';
+import YKSSmartBot from '../bot';
+
 const { Listener } = require('discord-akairo');
 const SessionModel = require('../db/sessions');
 const Parser = require('rss-parser');
@@ -45,18 +48,18 @@ class ReadyListener extends Listener {
   }
 }
 
-async function pollMainRss(client) {
+async function pollMainRss(client: YKSSmartBot) {
   const mainFeed = await parser
     .parseURL(MAIN_FEED_RSS)
-    .catch((e) => console.error('Failed to parse main feed RSS: ', e.message));
+    .catch((e: any) => console.error('Failed to parse main feed RSS: ', e.message));
 
   if (mainFeed && mainFeed.items && mainFeed.items.length > 0) {
-    const latestMainEpTitle = await client.settings.get(client.user.id, 'latestMainEpTitle', '');
+    const latestMainEpTitle = await client.settings.get(client.clientID, 'latestMainEpTitle', '');
     const feedMainEpTitle = mainFeed.items[0].title;
     const newMain = latestMainEpTitle !== feedMainEpTitle;
 
     if (newMain) {
-      await client.settings.set(client.user.id, 'latestMainEpTitle', feedMainEpTitle);
+      await client.settings.set(client.clientID, 'latestMainEpTitle', feedMainEpTitle);
 
       // For each guild the bot is a member, check if there is an RSS channel
       // channel configured and if so, send a message regarding the new ep.
@@ -64,7 +67,7 @@ async function pollMainRss(client) {
         const channel = await getRssChannel(client, guild);
         const command = await client.commandHandler.findCommand('latest');
         if (channel && command) {
-          client.commandHandler.runCommand({ guild, channel }, command, {
+          client.commandHandler.runCommand({ guild, channel } as Message<boolean>, command, {
             feed: 'main',
             newEp: 'yes',
           });
@@ -74,28 +77,27 @@ async function pollMainRss(client) {
   }
 }
 
-async function pollBonusRss(client) {
+async function pollBonusRss(client: YKSSmartBot) {
   const bonusFeed = await parser
     .parseURL(BONUS_FEED_RSS)
-    .catch((e) => console.error('Failed to parse bonus feed RSS: ', e.message));
+    .catch((e: any) => console.error('Failed to parse bonus feed RSS: ', e.message));
 
   if (bonusFeed && bonusFeed.items && bonusFeed.items.length > 0) {
-    const latestMainEpTitle = await client.settings.get(client.user.id, 'latestMainEpTitle', '');
-    const latestBonusEpTitle = await client.settings.get(client.user.id, 'latestBonusEpTitle', '');
+    const latestMainEpTitle = await client.settings.get(client.clientID, 'latestMainEpTitle', '');
+    const latestBonusEpTitle = await client.settings.get(client.clientID, 'latestBonusEpTitle', '');
     const feedBonusEpTitle = bonusFeed.items[0].title;
     const newBonus = latestBonusEpTitle !== feedBonusEpTitle;
 
     if (newBonus) {
-      await client.settings.set(client.user.id, 'latestBonusEpTitle', feedBonusEpTitle);
+      await client.settings.set(client.clientID, 'latestBonusEpTitle', feedBonusEpTitle);
 
       // Set bot status
-      client.user.setPresence({
+      client.user?.setPresence({
         status: 'dnd',
         activities: [
           {
             name: feedBonusEpTitle, // this is always the most recent ep
             type: 'LISTENING',
-            url: null,
           },
         ],
       });
@@ -107,7 +109,7 @@ async function pollBonusRss(client) {
           const channel = await getRssChannel(client, guild);
           const command = await client.commandHandler.findCommand('latest');
           if (channel && command) {
-            client.commandHandler.runCommand({ guild, channel }, command, {
+            client.commandHandler.runCommand({ guild, channel } as Message<boolean>, command, {
               feed: 'bonus',
               newEp: 'yes',
             });
@@ -118,7 +120,7 @@ async function pollBonusRss(client) {
   }
 }
 
-async function getRssChannel(client, guildObj) {
+async function getRssChannel(client: YKSSmartBot, guildObj: Guild) {
   const channel = JSON.parse(
     // Get the configured rss channel from the db.
     // If none set, return null
@@ -128,11 +130,11 @@ async function getRssChannel(client, guildObj) {
   return channel ? client.util.resolveChannel(channel.id, guildObj.channels.cache) : null;
 }
 
-async function removeOldMailbagMessages(client) {
+async function removeOldMailbagMessages(client: YKSSmartBot) {
   // Get all mailbag messages from the database
-  let mailbagMessages = await client.settings.get(process.env.YKS_GUILD_ID, 'mailbagMessages', []);
+  let mailbagMessages = await client.settings.get(process.env.YKS_GUILD_ID!, 'mailbagMessages', []);
 
-  mailbagMessages = mailbagMessages.reduce((arr, rawMessage) => {
+  mailbagMessages = mailbagMessages.reduce((arr: string[], rawMessage: string) => {
     const diff = Date.now() - JSON.parse(rawMessage).ts;
     const thirtyDays = 1000 * 60 * 60 * 24 * 30;
     if (diff < thirtyDays) arr.push(rawMessage);
@@ -140,7 +142,7 @@ async function removeOldMailbagMessages(client) {
   }, []);
 
   console.log('Cleared old mailbag messages.');
-  return client.settings.set(process.env.YKS_GUILD_ID, 'mailbagMessages', mailbagMessages);
+  return client.settings.set(process.env.YKS_GUILD_ID!, 'mailbagMessages', mailbagMessages);
 }
 
 module.exports = ReadyListener;

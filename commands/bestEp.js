@@ -27,7 +27,7 @@ class BestCommand extends Command {
       }
 
       // Check if provided argument is bigger than the latest known episode.
-      let latestEpNum = await this.client.settings.get(this.client.user.id, 'latestEpNum', 0);
+      let latestEpNum = await this.client.settings.get(this.client.clientID, 'latestEpNum', 0);
 
       if (num > latestEpNum) {
         // Maybe a new episode has been released and it's really good...
@@ -39,7 +39,7 @@ class BestCommand extends Command {
           : null;
 
         if (latestEpNum) {
-          await this.client.settings.set(this.client.user.id, 'latestEpNum', latestEpNum);
+          await this.client.settings.set(this.client.clientID, 'latestEpNum', latestEpNum);
         }
 
         // Ok, they just gave an invalid episode. Nice try.

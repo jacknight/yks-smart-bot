@@ -1,3 +1,5 @@
+import { MessageReaction } from 'discord.js';
+
 const { Listener } = require('discord-akairo');
 
 class KickstarterReactionRemoveListener extends Listener {
@@ -8,7 +10,7 @@ class KickstarterReactionRemoveListener extends Listener {
     });
   }
 
-  async exec(reaction, user) {
+  async exec(reaction: MessageReaction) {
     if (reaction.partial) {
       // try to fetch the message, which may or may not work with a partial
       try {
@@ -25,14 +27,14 @@ class KickstarterReactionRemoveListener extends Listener {
     // 3. the message has an embed
     // then update the tally for the message ID in the database
     if (
-      reaction._emoji.name === 'this' &&
-      reaction.message.author.id === this.client.user.id &&
+      reaction.emoji.name === 'this' &&
+      reaction.message.author?.id === this.client.clientID &&
       reaction.message.channel.id === process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID &&
       reaction.message.embeds
     ) {
       // Get array of existing kickstarters that have been reacted to
       const kickstarters = await this.client.settings.get(
-        reaction.message.guild.id,
+        reaction.message.guild?.id,
         'kickstarters',
         [],
       );
@@ -40,7 +42,9 @@ class KickstarterReactionRemoveListener extends Listener {
       // Check if this kickstarter is in the list and if so, grab it and update
       // the tally. Otherwise, create a new object and add it to the list.
       let index = JSON.parse(
-        kickstarters.findIndex((kickstarter) => JSON.parse(kickstarter).id === reaction.message.id),
+        kickstarters.findIndex(
+          (kickstarter: string) => JSON.parse(kickstarter).id === reaction.message.id,
+        ),
       );
 
       if (index >= 0) {
@@ -56,7 +60,7 @@ class KickstarterReactionRemoveListener extends Listener {
       }
 
       // Update database.
-      this.client.settings.set(reaction.message.guild.id, 'kickstarters', kickstarters);
+      this.client.settings.set(reaction.message.guild?.id, 'kickstarters', kickstarters);
     }
   }
 }

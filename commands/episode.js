@@ -38,7 +38,7 @@ class EpisodeCommand extends Command {
         stream: false,
         stop: ['###'],
         echo: true,
-        user: this.client.user.id,
+        user: this.client.clientID,
       });
 
       const completion = response?.data?.choices[0].text.split('->');
