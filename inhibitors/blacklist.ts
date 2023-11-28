@@ -1,3 +1,5 @@
+import { Message } from 'discord.js';
+
 const { Inhibitor } = require('discord-akairo');
 
 class BlacklistInhibitor extends Inhibitor {
@@ -7,8 +9,8 @@ class BlacklistInhibitor extends Inhibitor {
     });
   }
 
-  exec(message) {
-    const blacklist = [];
+  exec(message: Message) {
+    const blacklist: string[] = [];
     return blacklist.includes(message.author.id);
   }
 }
