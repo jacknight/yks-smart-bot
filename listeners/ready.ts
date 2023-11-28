@@ -34,8 +34,7 @@ class ReadyListener extends Listener {
     });
 
     // Set bot status and check for new episodes
-    setInterval(pollMainRss, 20 * 1000, this.client); // every 20 sec
-    setInterval(pollBonusRss, 20 * 1000, this.client); // every 20 sec
+    setInterval(pollRss, 20 * 1000, this.client); // every 20 sec
 
     // Remove old mailbag messages (older than a month)
     removeOldMailbagMessages(this.client);
@@ -48,18 +47,30 @@ class ReadyListener extends Listener {
   }
 }
 
+const pollRss = async (client: YKSSmartBot) => {
+  await pollMainRss(client);
+  await pollBonusRss(client);
+};
+
 async function pollMainRss(client: YKSSmartBot) {
+  if (!client.user) return;
+
   const mainFeed = await parser
     .parseURL(MAIN_FEED_RSS)
     .catch((e: any) => console.error('Failed to parse main feed RSS: ', e.message));
 
   if (mainFeed && mainFeed.items && mainFeed.items.length > 0) {
-    const latestMainEpTitle = await client.settings.get(client.clientID, 'latestMainEpTitle', '');
-    const feedMainEpTitle = mainFeed.items[0].title;
-    const newMain = latestMainEpTitle !== feedMainEpTitle;
+    const latestMainEpTitle: string = (
+      await client.settings.get(client.user.id, 'latestMainEpTitle', '')
+    ).trim();
+    const feedMainEpTitle: string = mainFeed.items[0].title.trim();
+    const newMain: boolean = latestMainEpTitle !== feedMainEpTitle;
 
     if (newMain) {
-      await client.settings.set(client.clientID, 'latestMainEpTitle', feedMainEpTitle);
+      console.log(
+        `New main episode!\n  Previous: ${latestMainEpTitle}\n  Latest: ${feedMainEpTitle}`,
+      );
+      await client.settings.set(client.user.id, 'latestMainEpTitle', feedMainEpTitle);
 
       // For each guild the bot is a member, check if there is an RSS channel
       // channel configured and if so, send a message regarding the new ep.
@@ -78,18 +89,27 @@ async function pollMainRss(client: YKSSmartBot) {
 }
 
 async function pollBonusRss(client: YKSSmartBot) {
+  if (!client.user) return;
+
   const bonusFeed = await parser
     .parseURL(BONUS_FEED_RSS)
     .catch((e: any) => console.error('Failed to parse bonus feed RSS: ', e.message));
 
   if (bonusFeed && bonusFeed.items && bonusFeed.items.length > 0) {
-    const latestMainEpTitle = await client.settings.get(client.clientID, 'latestMainEpTitle', '');
-    const latestBonusEpTitle = await client.settings.get(client.clientID, 'latestBonusEpTitle', '');
-    const feedBonusEpTitle = bonusFeed.items[0].title;
-    const newBonus = latestBonusEpTitle !== feedBonusEpTitle;
+    const latestMainEpTitle: string = (
+      await client.settings.get(client.user.id, 'latestMainEpTitle', '')
+    ).trim();
+    const latestBonusEpTitle: string = (
+      await client.settings.get(client.user.id, 'latestBonusEpTitle', '')
+    ).trim();
+    const feedBonusEpTitle: string = bonusFeed.items[0].title.trim();
+    const newBonus: boolean = latestBonusEpTitle !== feedBonusEpTitle;
 
     if (newBonus) {
-      await client.settings.set(client.clientID, 'latestBonusEpTitle', feedBonusEpTitle);
+      console.log(
+        `New bonus episode!\n  Previous: ${latestBonusEpTitle}\n  Latest: ${feedBonusEpTitle}`,
+      );
+      await client.settings.set(client.user.id, 'latestBonusEpTitle', feedBonusEpTitle);
 
       // Set bot status
       client.user?.setPresence({
@@ -103,6 +123,9 @@ async function pollBonusRss(client: YKSSmartBot) {
       });
 
       if (feedBonusEpTitle !== latestMainEpTitle) {
+        console.log(
+          `New bonus ep is not the same as main feed:\n '${latestMainEpTitle}'\n '${feedBonusEpTitle}'`,
+        );
         // For each guild the bot is a member, check if there is an RSS channel
         // channel configured and if so, send a message regarding the new ep.
         client.guilds.cache.forEach(async (guild) => {

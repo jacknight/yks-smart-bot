@@ -28,7 +28,7 @@ class KickstarterReactionAddListener extends Listener {
     // then update the tally for the message ID in the database
     if (
       reaction.emoji.name === 'this' &&
-      reaction.message.author?.id === this.client.clientID &&
+      reaction.message.author?.id === this.client.user.id &&
       reaction.message.channel.id === process.env.YKS_KICKSTARTER_BOT_CHANNEL_ID &&
       reaction.message.embeds &&
       reaction.message.embeds[0].footer

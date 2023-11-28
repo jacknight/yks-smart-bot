@@ -18,7 +18,7 @@ class ListenListener extends Listener {
       return;
     }
 
-    if (user.id === this.client.clientID) return;
+    if (user.id === this.client.user.id) return;
 
     if (this.client.listen.message?.id === reaction.message.id) {
       let action = null;
