@@ -46,7 +46,6 @@ class KickstarterCommand extends Command {
       if (rawImage) {
         const buffer = Buffer.from(rawImage, 'base64');
         attachment = new MessageAttachment(buffer).setName(`temp-${new Date().valueOf()}.jpg`);
-        console.log(attachment);
         embed.setImage(`attachment://${attachment.name}`);
         return message.reply({ embeds: [embed], files: [attachment] });
       }
