@@ -187,7 +187,7 @@ export const undoRateLimit = (client: any, userID: string, commandID: string) =>
 };
 
 export const ksProductImage = async (title: string, desc: string): Promise<string | null> => {
-  const url = 'https://api.stability.ai/v1/generation/stable-diffusion-v1-6/text-to-image';
+  const url = 'https://api.stability.ai/v1/generation/stable-diffusion-512-v2-1/text-to-image';
 
   const headers = {
     Accept: 'application/json',
