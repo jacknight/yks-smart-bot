@@ -40,22 +40,22 @@ class KickstarterCommand extends Command {
     const response = await getAIResponse(name, message.member.id);
 
     const completion = response.data.choices[0].text;
+    const reply = message.reply('Working on it...');
     const { embed, rawImage } = await getKickstarterEmbed(completion, false);
+    (await reply).delete();
     if (embed) {
       let attachment = null;
       if (rawImage) {
         const buffer = Buffer.from(rawImage, 'base64');
-        attachment = new MessageAttachment(buffer, `temp-${slugify(name)}.jpg`);
-        embed.setImage(`attachment://temp-${slugify(name)}.jpg`);
+        attachment = new MessageAttachment(buffer).setName(`temp-${slugify(name)}.jpg`);
+        embed.setImage(`attachment://${attachment.name}`);
+        return message.reply({ embeds: [embed], files: [attachment] });
       }
-      return message.channel.send({
-        embeds: [embed],
-        ...(attachment && { files: [attachment] }),
-      });
+      return message.reply({ embeds: [embed] });
     } else {
       undoRateLimit(this.client, message.member.id, this.id);
       console.log(completion);
-      return message.channel.send('Something went wrong');
+      return message.reply('Something went wrong');
     }
   }
 }

@@ -1,8 +1,7 @@
 import { createApi } from 'unsplash-js';
 import fetch from 'node-fetch';
 import { MessageEmbed } from 'discord.js';
-import fs from 'fs';
-import slugify from 'slugify';
+import axios from 'axios';
 
 export const unsplash = createApi({
   accessKey: process.env.UNSPLASH_ACCESS_KEY!,
@@ -59,7 +58,6 @@ export const sleep = (ms: number) => {
 };
 
 export const sendRequest = async (url: string, method: string, opts: any = {}) => {
-  const axios = require('axios');
   let camelToUnderscore = (key: string) => {
     let result = key.replace(/([A-Z])/g, ' $1');
     return result.split(' ').join('_').toLowerCase();
@@ -189,18 +187,18 @@ export const undoRateLimit = (client: any, userID: string, commandID: string) =>
 };
 
 export const ksProductImage = async (title: string, desc: string): Promise<string | null> => {
-  const path = 'https://api.stability.ai/v1/generation/stable-diffusion-xl-1024-v1-0/text-to-image';
+  const url = 'https://api.stability.ai/v1/generation/stable-diffusion-v1-6/text-to-image';
 
   const headers = {
     Accept: 'application/json',
-    Authorization: `Bearer ${process.env.STABLE_DIFFUSION_API_KEY}`,
     'Content-Type': 'application/json',
+    Authorization: `Bearer ${process.env.STABLE_DIFFUSION_API_KEY}`,
   };
 
   const body = {
-    steps: 40,
-    width: 1024,
-    height: 1024,
+    steps: 10,
+    width: 512,
+    height: 512,
     seed: 0,
     cfg_scale: 5,
     samples: 1,
@@ -217,17 +215,17 @@ export const ksProductImage = async (title: string, desc: string): Promise<strin
     ],
   };
 
-  const response = await fetch(path, {
+  const response = await axios.post(url, JSON.stringify(body), {
     headers,
-    method: 'POST',
-    body: JSON.stringify(body),
+    timeout: 20000,
+    signal: AbortSignal.timeout(20000),
   });
 
-  if (!response.ok) {
-    throw new Error(`Non-200 response: ${await response.text()}`);
+  if (response.status < 200 || response.status >= 300) {
+    throw new Error(`Non-200 response: ${response.statusText}`);
   }
 
-  const responseJSON = await response.json();
+  const responseJSON = await response.data;
 
   if (responseJSON.artifacts.length > 0) {
     const image = responseJSON.artifacts[0];
