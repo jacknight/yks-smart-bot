@@ -187,13 +187,32 @@ export const undoRateLimit = (client: any, userID: string, commandID: string) =>
 };
 
 export const ksProductImage = async (title: string, desc: string): Promise<string | null> => {
-  const url = 'https://api.stability.ai/v1/generation/stable-diffusion-512-v2-1/text-to-image';
+  const url = 'https://api.stability.ai/v1/generation/stable-diffusion-v1-6/text-to-image';
 
   const headers = {
     Accept: 'application/json',
     'Content-Type': 'application/json',
     Authorization: `Bearer ${process.env.STABLE_DIFFUSION_API_KEY}`,
   };
+
+  const styles = [
+    '3d-model',
+    'analog-film',
+    'anime',
+    'cinematic',
+    'comic-book',
+    'digital-art',
+    'enhance',
+    'fantasy-art',
+    'isometric',
+    'line-art',
+    'low-poly',
+    'modeling-compound',
+    'neon-punk',
+    'origami',
+    'photographic',
+    'pixel-art',
+  ];
 
   const body = {
     steps: 10,
@@ -202,7 +221,7 @@ export const ksProductImage = async (title: string, desc: string): Promise<strin
     seed: 0,
     cfg_scale: 5,
     samples: 1,
-    style_preset: '3d-model',
+    style_preset: styles[Math.random() * styles.length],
     text_prompts: [
       {
         text: `A kickstarter campaign product image for a campaign with the title "${title}" and summary "${desc}"`,
