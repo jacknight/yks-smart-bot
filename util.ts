@@ -202,7 +202,7 @@ export const ksProductImage = async (title: string, desc: string): Promise<strin
     seed: 0,
     cfg_scale: 5,
     samples: 1,
-    style_preset: 'photographic',
+    style_preset: '3d-model',
     text_prompts: [
       {
         text: `A kickstarter campaign product image for a campaign with the title "${title}" and summary "${desc}"`,
