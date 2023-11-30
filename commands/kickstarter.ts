@@ -1,7 +1,8 @@
-import { Message } from 'discord.js';
+import { Message, MessageAttachment } from 'discord.js';
+import slugify from 'slugify';
 
 const { Command } = require('discord-akairo');
-const { sendRequest, getKickstarterEmbed, getAIResponse, undoRateLimit } = require('../util');
+import { getKickstarterEmbed, getAIResponse, undoRateLimit } from '../util';
 
 class KickstarterCommand extends Command {
   constructor() {
@@ -39,9 +40,18 @@ class KickstarterCommand extends Command {
     const response = await getAIResponse(name, message.member.id);
 
     const completion = response.data.choices[0].text;
-    const embed = getKickstarterEmbed(completion, false);
+    const { embed, rawImage } = await getKickstarterEmbed(completion, false);
     if (embed) {
-      return message.channel.send({ embeds: [embed] });
+      let attachment = null;
+      if (rawImage) {
+        const buffer = Buffer.from(rawImage, 'base64');
+        attachment = new MessageAttachment(buffer, `temp-${slugify(name)}.jpg`);
+        embed.setImage(`attachment://temp-${slugify(name)}.jpg`);
+      }
+      return message.channel.send({
+        embeds: [embed],
+        ...(attachment && { files: [attachment] }),
+      });
     } else {
       undoRateLimit(this.client, message.member.id, this.id);
       console.log(completion);

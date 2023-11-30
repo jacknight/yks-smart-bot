@@ -1,7 +1,7 @@
-import { Message } from 'discord.js';
+import { Message, MessageEmbed } from 'discord.js';
 
 const { Command } = require('discord-akairo');
-const { getRealKickstarters, sleep, getKickstarterEmbed, getAIResponse } = require('../util');
+import { getRealKickstarters, sleep, getKickstarterEmbed, getAIResponse } from '../util';
 
 class RealOrFakeCommand extends Command {
   constructor() {
@@ -46,7 +46,7 @@ class RealOrFakeCommand extends Command {
     }
 
     const completion = response.data.choices[0].text;
-    const embed = getKickstarterEmbed(completion, true);
+    const { embed } = await getKickstarterEmbed(completion, true);
     if (embed) {
       let realEmoji = this.client.util.resolveEmoji('real', message.guild.emojis.cache);
       let fakeEmoji = this.client.util.resolveEmoji('fake', message.guild.emojis.cache);

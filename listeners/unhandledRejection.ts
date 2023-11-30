@@ -8,8 +8,8 @@ class UnhandledRejectionListener extends Listener {
     });
   }
 
-  exec(promiseRejectionEvent: any) {
-    console.log("Unhandled rejection. Reason: '", JSON.stringify(promiseRejectionEvent));
+  exec(reason: string, promise: Promise<any>) {
+    console.log("Unhandled rejection. Reason: '", reason, "'\n", promise);
   }
 }
 
