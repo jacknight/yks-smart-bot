@@ -1,6 +1,4 @@
 import { Message, MessageAttachment } from 'discord.js';
-import slugify from 'slugify';
-
 const { Command } = require('discord-akairo');
 import { getKickstarterEmbed, getAIResponse, undoRateLimit } from '../util';
 
@@ -47,7 +45,8 @@ class KickstarterCommand extends Command {
       let attachment = null;
       if (rawImage) {
         const buffer = Buffer.from(rawImage, 'base64');
-        attachment = new MessageAttachment(buffer).setName(`temp-${slugify(name)}.jpg`);
+        attachment = new MessageAttachment(buffer).setName(`temp-${new Date().valueOf()}.jpg`);
+        console.log(attachment);
         embed.setImage(`attachment://${attachment.name}`);
         return message.reply({ embeds: [embed], files: [attachment] });
       }
