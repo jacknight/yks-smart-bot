@@ -360,3 +360,4 @@ TODO.md
 build/
 
 assets/*.jsonl
+!assets/kickstarters-prepared-long-prompt-style.jsonl

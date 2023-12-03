@@ -32,7 +32,7 @@ export const getRealKickstarters = async () => {
   const responses: any = [];
   // Grab from file of real kickstarters
   const rl = readline.createInterface({
-    input: fs.createReadStream('assets/PromptCompletion_prepared.jsonl'),
+    input: fs.createReadStream('assets/kickstarters-prepared-long-prompt-style.jsonl'),
     crlfDelay: Infinity,
   });
 
