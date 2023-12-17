@@ -37,7 +37,7 @@ const clipsCommand: CommandInterface = {
         return { name, value: result.id };
       });
 
-      await interaction.respond(choices);
+      await interaction.respond(choices.slice(0, 25));
     } catch (e: any) {
       console.error(e);
     }
