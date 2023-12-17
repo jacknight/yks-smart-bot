@@ -3,6 +3,7 @@ import { AutocompleteInteraction, CommandInteraction, Message } from 'discord.js
 import { CommandInterface } from '../../interfaces/command';
 import YKSSmartBot from '../../bot';
 import ClipsModel from '../../db/clips';
+var ObjectId = require('mongoose').Types.ObjectId;
 
 const commandName = 'findtheclimp';
 const clipsCommand: CommandInterface = {
@@ -21,20 +22,20 @@ const clipsCommand: CommandInterface = {
     try {
       const searchPhrase = interaction.options.getString('search');
       if (!searchPhrase || searchPhrase.length < 4) {
-        interaction.respond([{ name: 'Too short.', value: 'Too short.' }]);
+        return interaction.respond([{ name: 'Too short.', value: '' }]);
       }
 
       const results = await ClipsModel.find({ $text: { $search: searchPhrase } });
       if (!results || results.length == 0) {
-        interaction.respond([{ name: 'No results.', value: 'No results.' }]);
+        return interaction.respond([{ name: 'No results.', value: '' }]);
       }
 
-      const choices = results.map((result: { transcription: string; id: string }) => {
+      const choices = results.map((result: { transcription: string; id: string; _id: string }) => {
         const name =
           result.transcription.length > 50
             ? result.transcription.substring(0, 47) + '...'
             : result.transcription;
-        return { name, value: result.id };
+        return { name, value: result._id };
       });
 
       await interaction.respond(choices.slice(0, 25));
@@ -45,8 +46,11 @@ const clipsCommand: CommandInterface = {
 
   run: async (client: YKSSmartBot, interaction: CommandInteraction) => {
     const msg = await interaction.deferReply({ ephemeral: true, fetchReply: true });
-    const url = interaction.options.getString('search');
-    if (url) {
+    const objectId = interaction.options.getString('search');
+    const clip = objectId ? await ClipsModel.findOne({ _id: objectId }) : null;
+    const url = clip ? clip.id : null;
+    console.log(objectId, clip, url);
+    if (objectId && clip && url) {
       interaction.editReply({ content: 'Posting now in the clips channel.' });
     } else {
       return interaction.editReply({ content: 'Something went wrong.' });
