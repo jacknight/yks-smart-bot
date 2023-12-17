@@ -1,5 +1,9 @@
 import { Guild, Message } from 'discord.js';
 import YKSSmartBot from '../bot';
+import { ApplicationCommand, Client } from 'discord.js';
+import { REST } from '@discordjs/rest';
+import { Routes } from 'discord-api-types/v9';
+import commandList from '../commands/slash/_commands';
 
 const { Listener } = require('discord-akairo');
 const SessionModel = require('../db/sessions');
@@ -17,7 +21,7 @@ class ReadyListener extends Listener {
   }
 
   async exec() {
-    console.log('Starting up.');
+    console.info('Starting up.');
 
     // Create an audio player for the !listen command
     this.client.listen = {
@@ -44,8 +48,44 @@ class ReadyListener extends Listener {
     await SessionModel.deleteMany({
       'session.expirationDate': { $lt: new Date(Date.now()) },
     });
+
+    await setupSlashCommands(this.client);
   }
 }
+
+const setupSlashCommands = async (client: Client) => {
+  if (!client.application) return;
+
+  const rest = new REST().setToken(process.env.AUTH_TOKEN!);
+
+  const commandData = commandList.map((command) => command.data.toJSON());
+
+  const promises: Promise<ApplicationCommand>[] = [];
+  client.application.commands.cache.forEach((command) => {
+    promises.push(command.delete());
+  });
+  client.guilds.cache.forEach((guild) => {
+    guild.commands.cache.forEach((command) => {
+      promises.push(command.delete());
+    });
+  });
+  await Promise.all(promises);
+
+  console.info('Global and guild commands deleted. Registering most recent versions.');
+
+  await client.guilds.fetch();
+  await Promise.all(
+    client.guilds.cache.map(async (guild) => {
+      await Promise.all([guild.members.fetch(), guild.channels.fetch()]);
+    }),
+  );
+
+  await rest.put(Routes.applicationCommands(client.application.id), {
+    body: commandData,
+  });
+
+  console.info('Commands registered.');
+};
 
 const pollRss = async (client: YKSSmartBot) => {
   await pollMainRss(client);
@@ -67,7 +107,7 @@ async function pollMainRss(client: YKSSmartBot) {
     const newMain: boolean = latestMainEpTitle !== feedMainEpTitle;
 
     if (newMain) {
-      console.log(
+      console.info(
         `New main episode!\n  Previous: ${latestMainEpTitle}\n  Latest: ${feedMainEpTitle}`,
       );
       await client.settings.set(client.user.id, 'latestMainEpTitle', feedMainEpTitle);
@@ -106,7 +146,7 @@ async function pollBonusRss(client: YKSSmartBot) {
     const newBonus: boolean = latestBonusEpTitle !== feedBonusEpTitle;
 
     if (newBonus) {
-      console.log(
+      console.info(
         `New bonus episode!\n  Previous: ${latestBonusEpTitle}\n  Latest: ${feedBonusEpTitle}`,
       );
       await client.settings.set(client.user.id, 'latestBonusEpTitle', feedBonusEpTitle);
@@ -123,7 +163,7 @@ async function pollBonusRss(client: YKSSmartBot) {
       });
 
       if (feedBonusEpTitle !== latestMainEpTitle) {
-        console.log(
+        console.info(
           `New bonus ep is not the same as main feed:\n '${latestMainEpTitle}'\n '${feedBonusEpTitle}'`,
         );
         // For each guild the bot is a member, check if there is an RSS channel
@@ -164,7 +204,7 @@ async function removeOldMailbagMessages(client: YKSSmartBot) {
     return arr;
   }, []);
 
-  console.log('Cleared old mailbag messages.');
+  console.info('Cleared old mailbag messages.');
   return client.settings.set(process.env.YKS_GUILD_ID!, 'mailbagMessages', mailbagMessages);
 }
 

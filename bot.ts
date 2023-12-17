@@ -10,6 +10,8 @@ import {
   ListenerHandler,
   MongooseProvider,
 } from 'discord-akairo';
+import commandList from './commands/slash/_commands';
+import { CommandInterface } from './interfaces/command';
 require('dotenv').config();
 const guildModel = require('./db/model');
 const clipsModel = require('./db/clips');
@@ -17,6 +19,7 @@ const clipsModel = require('./db/clips');
 class YKSSmartBot extends AkairoClient {
   settings: MongooseProvider;
   clips: MongooseProvider;
+  slashCommands: CommandInterface[];
   globalRates: Map<any, any>;
   commandHandler: CommandHandler;
   inhibitorHandler: InhibitorHandler;
@@ -46,6 +49,7 @@ class YKSSmartBot extends AkairoClient {
       },
     );
 
+    this.slashCommands = commandList;
     this.clientID = '';
     // Database provider stored on the client.
     this.settings = new MongooseProvider(guildModel);
@@ -129,12 +133,12 @@ class YKSSmartBot extends AkairoClient {
             ],
             files: [url],
           })
-          .then(() => console.log('share-clip: Message sent. - ', Date.now()));
+          .then(() => console.info('share-clip: Message sent. - ', Date.now()));
       }
     });
 
     this.server = app.listen(process.env.PORT || 3000, () => {
-      console.log('Server running on port: ' + process.env.PORT || 3000);
+      console.info('Server running on port: ' + process.env.PORT || 3000);
     });
 
     this.commandHandler.loadAll();
@@ -146,15 +150,15 @@ class YKSSmartBot extends AkairoClient {
 
   async login(token: string) {
     try {
-      console.log('Initalizing settings model.');
+      console.info('Initalizing settings model.');
       await this.settings.init();
-      console.log('Initializing clips model.');
+      console.info('Initializing clips model.');
       await this.clips.init();
     } catch (e: any) {
       console.error(`Failed to initialize models: ${JSON.stringify(e)}`);
     }
 
-    console.log('Logging on.');
+    console.info('Logging on.');
     return super.login(token);
   }
 }
@@ -168,13 +172,9 @@ mongoose
     } as ConnectOptions,
   )
   .then(async () => {
-    // TODO: Do a little housekeeping with the session IDs
-    // stored in the db by removing expired ones. At the
-    // moment, they only get removed when the user explicitly
-    // click logout.
     const client = new YKSSmartBot();
     await client.login(process.env.AUTH_TOKEN!);
   })
-  .catch((err) => console.log(err));
+  .catch((err) => console.error(err));
 
 export default YKSSmartBot;

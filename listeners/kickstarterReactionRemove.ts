@@ -16,7 +16,7 @@ class KickstarterReactionRemoveListener extends Listener {
       try {
         await reaction.fetch();
       } catch (error) {
-        console.log('Unable to fetch message for partial reaction:', error);
+        console.error('Unable to fetch message for partial reaction:', error);
         return;
       }
     }

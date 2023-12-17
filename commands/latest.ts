@@ -106,7 +106,7 @@ class LatestCommand extends Command {
             );
             await message.react(this.client.util.resolveEmoji('yks', message.guild!.emojis.cache));
           } catch {
-            console.log;
+            console.error;
           }
         }
       });
@@ -128,7 +128,7 @@ class LatestCommand extends Command {
             );
             await message.react(this.client.util.resolveEmoji('yks', message.guild!.emojis.cache));
           } catch {
-            console.log;
+            console.error;
           }
         }
       });

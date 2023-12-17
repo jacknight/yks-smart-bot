@@ -15,7 +15,7 @@ class TheStoreCommand extends Command {
     try {
       message.react(this.client.util.resolveEmoji('thestore', message.guild.emojis.cache));
     } catch {
-      console.log;
+      console.error;
     }
     return;
   }

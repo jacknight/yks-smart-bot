@@ -11,8 +11,15 @@ const clipsSchema = new Schema(
       type: Object,
       required: false,
     },
+    transcription: {
+      type: String,
+      required: false,
+    },
   },
   { minimize: false },
 );
 
+clipsSchema.index({ name: 'transcriptionIndex', transcription: 'text' });
 module.exports = mongoose.model('clips', clipsSchema);
+
+export default clipsSchema;

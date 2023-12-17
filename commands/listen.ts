@@ -155,7 +155,7 @@ class ListenCommand extends Command {
       message.channel.send('Failed to join the voice channel');
       connection?.destroy();
       this.client.listen.connection = null;
-      console.log(e);
+      console.error(e);
     }
 
     this.client.listen.player.on(AudioPlayerStatus.Idle, (oldState: any, newState: any) => {
@@ -187,7 +187,7 @@ class ListenCommand extends Command {
       }
     });
 
-    this.client.listen.player.on('error', console.log);
+    this.client.listen.player.on('error', console.error);
 
     const epNum = ep.title.match(/Episode [0-9]+/i);
     let epTitle =
@@ -234,7 +234,7 @@ class ListenCommand extends Command {
 
     this.client.listen.message = await message.channel
       .send({ embeds: [mainEmbed] })
-      .catch((err) => console.log(err));
+      .catch((err) => console.error(err));
 
     await this.client.listen.message.react('⏸');
     await this.client.listen.message.react('⏹');

@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@discordjs/opus": "^0.8.0",
+    "@discordjs/rest": "^2.2.0",
     "@discordjs/voice": "^0.8.0",
     "axios": "^1.6.0",
     "canvas": "^2.9.1",

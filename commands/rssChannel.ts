@@ -37,7 +37,7 @@ class RssChannelCommand extends Command {
           allowedMentions: { repliedUser: true },
         });
       } catch (err) {
-        console.log(err);
+        console.error(err);
       }
     }
 
@@ -45,7 +45,7 @@ class RssChannelCommand extends Command {
     try {
       return channel.send(`RSS feed updates will come to ${channel}.`);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 }

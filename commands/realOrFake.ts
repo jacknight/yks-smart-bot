@@ -59,7 +59,7 @@ class RealOrFakeCommand extends Command {
       await msg.react(realEmoji);
       return msg.react(fakeEmoji);
     } else {
-      console.log(completion);
+      console.error(completion);
       return message.channel.send('Something went wrong');
     }
   }

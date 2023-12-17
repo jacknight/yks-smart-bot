@@ -52,7 +52,7 @@ class KickstarterCommand extends Command {
       return message.reply({ embeds: [embed] });
     } else {
       undoRateLimit(this.client, message.member.id, this.id);
-      console.log(completion);
+      console.error(completion);
       return message.reply('Something went wrong');
     }
   }

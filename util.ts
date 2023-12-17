@@ -101,7 +101,7 @@ export const getAIResponse = async (name: string, userID: string) => {
     if (e.response) {
       return `(OpenAI Error) ${e.response.statusText}`;
     }
-    console.log(e);
+    console.error(e);
   }
 };
 

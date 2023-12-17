@@ -67,7 +67,7 @@ As a thank you for fully embracing the dirtbag left culture cultivated here in t
 
             clips.push(attachment.proxyURL);
             ClipsModel.create({ id: attachment.proxyURL, attachment });
-            console.log(`Added new clip: ${attachment.proxyURL}`);
+            console.info(`Added new clip: ${attachment.proxyURL}`);
           }
         }),
       );
