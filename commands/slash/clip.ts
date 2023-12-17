@@ -25,7 +25,10 @@ const clipsCommand: CommandInterface = {
         return interaction.respond([{ name: 'Too short.', value: '' }]);
       }
 
-      const results = await ClipsModel.find({ $text: { $search: searchPhrase } });
+      const results = await ClipsModel.find(
+        { $text: { $search: searchPhrase } },
+        { score: { $meta: 'textScore' } },
+      ).sort({ score: { $meta: 'textScore' } });
       if (!results || results.length == 0) {
         return interaction.respond([{ name: 'No results.', value: '' }]);
       }
@@ -49,7 +52,6 @@ const clipsCommand: CommandInterface = {
     const objectId = interaction.options.getString('search');
     const clip = objectId ? await ClipsModel.findOne({ _id: objectId }) : null;
     const url = clip ? clip.id : null;
-    console.log(objectId, clip, url);
     if (objectId && clip && url) {
       interaction.editReply({ content: 'Posting now in the clips channel.' });
     } else {
