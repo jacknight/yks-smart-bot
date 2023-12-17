@@ -10,7 +10,11 @@ const clipsCommand: CommandInterface = {
     .setName(commandName)
     .setDescription('Looking for the Climp')
     .addStringOption((option) =>
-      option.setName('search').setDescription('Phrase to search for').setAutocomplete(true),
+      option
+        .setName('search')
+        .setDescription('Phrase to search for')
+        .setAutocomplete(true)
+        .setRequired(true),
     ),
 
   autocomplete: async (client: YKSSmartBot, interaction: AutocompleteInteraction) => {
