@@ -1,5 +1,5 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { AutocompleteInteraction, CommandInteraction, Message } from 'discord.js';
+import { AutocompleteInteraction, CommandInteraction, Message, MessageEmbed } from 'discord.js';
 import { CommandInterface } from '../../interfaces/command';
 import YKSSmartBot from '../../bot';
 import ClipsModel from '../../db/clips';
@@ -62,7 +62,14 @@ const clipsCommand: CommandInterface = {
       guild.channels.cache,
     );
     if (!channel || !channel.isText()) return;
-    return channel.send({ content: `Requested by ${interaction.member?.user}`, files: [url] });
+    return channel.send({
+      embeds: [
+        new MessageEmbed().setDescription(
+          `Requested by ${interaction.member?.user} using the \`/findtheclimp\` command.`,
+        ),
+      ],
+      files: [url],
+    });
   },
 };
 
