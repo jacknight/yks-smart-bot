@@ -35,8 +35,8 @@ const clipsCommand: CommandInterface = {
 
       const choices = results.map((result: { transcription: string; id: string; _id: string }) => {
         const name =
-          result.transcription.length > 50
-            ? result.transcription.substring(0, 47) + '...'
+          result.transcription.length > 100
+            ? result.transcription.substring(0, 97) + '...'
             : result.transcription;
         return { name, value: result._id };
       });
@@ -50,6 +50,10 @@ const clipsCommand: CommandInterface = {
   run: async (client: YKSSmartBot, interaction: CommandInteraction) => {
     const msg = await interaction.deferReply({ ephemeral: true, fetchReply: true });
     const objectId = interaction.options.getString('search');
+    if (typeof objectId !== 'number') {
+      return interaction.editReply({ content: 'Please wait for the autocomplete options!' });
+    }
+
     const clip = objectId ? await ClipsModel.findOne({ _id: objectId }) : null;
     const url = clip ? clip.id : null;
     if (objectId && clip && url) {
