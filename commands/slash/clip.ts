@@ -50,7 +50,7 @@ const clipsCommand: CommandInterface = {
   run: async (client: YKSSmartBot, interaction: CommandInteraction) => {
     const msg = await interaction.deferReply({ ephemeral: true, fetchReply: true });
     const objectId = interaction.options.getString('search');
-    if (typeof objectId !== 'number') {
+    if (typeof objectId !== 'string' || objectId.length !== 24) {
       return interaction.editReply({ content: 'Please wait for the autocomplete options!' });
     }
 
