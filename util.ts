@@ -198,24 +198,15 @@ export const ksProductImage = async (title: string, desc: string): Promise<strin
   const styles = [
     '3d-model',
     'analog-film',
-    'anime',
     'cinematic',
     'comic-book',
     'digital-art',
-    'enhance',
-    'fantasy-art',
-    'isometric',
-    'line-art',
-    'low-poly',
-    'modeling-compound',
     'neon-punk',
-    'origami',
     'photographic',
-    'pixel-art',
   ];
 
   const body = {
-    steps: 10,
+    steps: 40,
     width: 512,
     height: 512,
     seed: 0,
@@ -224,11 +215,11 @@ export const ksProductImage = async (title: string, desc: string): Promise<strin
     style_preset: styles[Math.random() * styles.length],
     text_prompts: [
       {
-        text: `A kickstarter campaign product image for a campaign with the title "${title}" and summary "${desc}"`,
+        text: `Clear, Exact, Marketable, Professjonal. A product image for a kickstarter campaign with the title "${title}" and summary "${desc}"`,
         weight: 1,
       },
       {
-        text: 'blurry, bad',
+        text: 'blurry, bad, unclear, approximate, low light, busy',
         weight: -1,
       },
     ],
