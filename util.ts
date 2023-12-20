@@ -199,9 +199,7 @@ export const ksProductImage = async (title: string, desc: string): Promise<strin
     '3d-model',
     'analog-film',
     'cinematic',
-    'comic-book',
     'digital-art',
-    'neon-punk',
     'photographic',
   ];
 
