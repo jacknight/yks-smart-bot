@@ -1,7 +1,7 @@
 import path from 'path';
 import express from 'express';
 import mongoose, { ConnectOptions } from 'mongoose';
-import { Channel, Constants, Guild, Intents } from 'discord.js';
+import { Channel, CommandInteraction, Constants, Guild, Intents } from 'discord.js';
 import cors from 'cors';
 import {
   AkairoClient,
@@ -29,6 +29,7 @@ class YKSSmartBot extends AkairoClient {
     typeof import('http').ServerResponse
   >;
   clientID: string;
+  commandInteractions: CommandInteraction[];
   constructor() {
     super(
       { ownerID: '329288617564569602' },
@@ -51,6 +52,7 @@ class YKSSmartBot extends AkairoClient {
 
     this.slashCommands = commandList;
     this.clientID = '';
+    this.commandInteractions = [];
     // Database provider stored on the client.
     this.settings = new MongooseProvider(guildModel);
     this.clips = new MongooseProvider(clipsModel);

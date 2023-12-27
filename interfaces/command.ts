@@ -5,5 +5,5 @@ export interface CommandInterface {
   data: any;
   run: (client: YKSSmartBot, interaction: CommandInteraction) => Promise<any>;
   autocomplete?: (client: YKSSmartBot, interaction: AutocompleteInteraction) => Promise<any>;
-  handleButton?: (interaction: ButtonInteraction) => Promise<any>;
+  handleButton?: (client: YKSSmartBot, interaction: ButtonInteraction) => Promise<any>;
 }

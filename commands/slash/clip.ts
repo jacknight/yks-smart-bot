@@ -1,9 +1,18 @@
 import { SlashCommandBuilder } from '@discordjs/builders';
-import { AutocompleteInteraction, CommandInteraction, Message, MessageEmbed } from 'discord.js';
+import {
+  AutocompleteInteraction,
+  ButtonInteraction,
+  CommandInteraction,
+  Message,
+  MessageActionRow,
+  MessageAttachment,
+  MessageButton,
+  MessageEmbed,
+  MessageInteraction,
+} from 'discord.js';
 import { CommandInterface } from '../../interfaces/command';
 import YKSSmartBot from '../../bot';
 import ClipsModel from '../../db/clips';
-var ObjectId = require('mongoose').Types.ObjectId;
 
 const commandName = 'findtheclimp';
 const clipsCommand: CommandInterface = {
@@ -48,7 +57,8 @@ const clipsCommand: CommandInterface = {
   },
 
   run: async (client: YKSSmartBot, interaction: CommandInteraction) => {
-    const msg = await interaction.deferReply({ ephemeral: true, fetchReply: true });
+    await interaction.deferReply({ ephemeral: true, fetchReply: true });
+    client.commandInteractions.push(interaction);
     const objectId = interaction.options.getString('search');
     if (typeof objectId !== 'string' || objectId.length !== 24) {
       return interaction.editReply({ content: 'Please wait for the autocomplete options!' });
@@ -57,25 +67,82 @@ const clipsCommand: CommandInterface = {
     const clip = objectId ? await ClipsModel.findOne({ _id: objectId }) : null;
     const url = clip ? clip.id : null;
     if (objectId && clip && url) {
-      interaction.editReply({ content: 'Posting now in the clips channel.' });
-    } else {
-      return interaction.editReply({ content: 'Something went wrong.' });
+      return interaction.editReply({
+        files: [url],
+        components: [
+          new MessageActionRow().addComponents(
+            new MessageButton()
+              .setCustomId(`${commandName}-confirm-${objectId}`)
+              .setLabel('Post it')
+              .setStyle('SUCCESS'),
+            new MessageButton()
+              .setCustomId(`${commandName}-reject`)
+              .setLabel(`Don't post it`)
+              .setStyle('DANGER'),
+          ),
+        ],
+      });
     }
-    const guild = client.util.resolveGuild(process.env.YKS_GUILD_ID!, client.guilds.cache);
-    if (!guild) return;
-    const channel = client.util.resolveChannel(
-      process.env.YKS_CLIP_CHANNEL_ID!,
-      guild.channels.cache,
-    );
-    if (!channel || !channel.isText()) return;
-    return channel.send({
-      embeds: [
-        new MessageEmbed().setDescription(
-          `Requested by ${interaction.member?.user} using the \`/findtheclimp\` command.`,
-        ),
-      ],
-      files: [url],
-    });
+
+    return interaction.editReply({ content: 'Something went wrong.' });
+  },
+
+  handleButton: async (client: YKSSmartBot, interaction: ButtonInteraction) => {
+    try {
+      await interaction.deferUpdate();
+      const confirm = interaction.customId.split('-')[1] === 'confirm';
+
+      const original = client.commandInteractions.findIndex(
+        (i) => i.id === interaction.message.interaction?.id,
+      );
+
+      const guild = client.util.resolveGuild(process.env.YKS_GUILD_ID!, client.guilds.cache);
+      if (!guild) return;
+      const channel = client.util.resolveChannel(
+        process.env.YKS_CLIP_CHANNEL_ID!,
+        guild.channels.cache,
+      );
+      if (!channel || !channel.isText()) return;
+
+      if (confirm) {
+        if (original >= 0) {
+          await client.commandInteractions[original].editReply({
+            content: 'Posted.',
+            files: [],
+            attachments: [],
+            components: [],
+          });
+          client.commandInteractions.splice(original, 1);
+        }
+        const objectId = interaction.customId.split('-')[2];
+        if (typeof objectId !== 'string' || objectId.length !== 24) {
+          return;
+        }
+
+        const url = (await ClipsModel.findOne({ _id: objectId }))?.id;
+        if (!url) return;
+
+        return channel.send({
+          embeds: [
+            new MessageEmbed().setDescription(
+              `Requested by ${interaction.member?.user} using the \`/findtheclimp\` command.`,
+            ),
+          ],
+          files: [url],
+        });
+      } else {
+        if (original >= 0) {
+          await client.commandInteractions[original].editReply({
+            content: `Didn't post. Is that a first for you?`,
+            files: [],
+            attachments: [],
+            components: [],
+          });
+          client.commandInteractions.splice(original, 1);
+        }
+        return;
+      }
+    } catch {}
   },
 };
 
