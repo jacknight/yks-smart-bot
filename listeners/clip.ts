@@ -14,6 +14,7 @@ class ClipListener extends Listener {
   async exec(message: Message) {
     // Check if it's a clip posted to the clips channel, and if so, store
     // the link in the database.
+    console.info('Clip listener...\n', message.channel.id, message.attachments);
     if (
       message.author.id !== this.client.user.id &&
       message.channel.id === process.env.YKS_CLIP_CHANNEL_ID &&
@@ -21,7 +22,8 @@ class ClipListener extends Listener {
     )
       await Promise.all(
         message.attachments.map(async (attachment) => {
-          const filetype = attachment.proxyURL.substring(attachment.proxyURL.lastIndexOf('.') + 1);
+          const filetype = attachment.proxyURL.split('?')[0].split('.').pop();
+          console.log(filetype);
           if (
             filetype === 'mov' ||
             filetype === 'mp4' ||
