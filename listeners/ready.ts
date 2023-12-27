@@ -50,6 +50,8 @@ class ReadyListener extends Listener {
     });
 
     await setupSlashCommands(this.client);
+
+    await updateClips(this.client);
   }
 }
 
@@ -207,5 +209,29 @@ async function removeOldMailbagMessages(client: YKSSmartBot) {
   console.info('Cleared old mailbag messages.');
   return client.settings.set(process.env.YKS_GUILD_ID!, 'mailbagMessages', mailbagMessages);
 }
+
+const updateClips = async (client: YKSSmartBot) => {
+  const guild = client.util.resolveGuild(process.env.YKS_GUILD_ID!, client.guilds.cache);
+  if (!guild) return null;
+  const channel = client.util.resolveChannel(
+    process.env.YKS_CLIP_CHANNEL_ID!,
+    guild.channels.cache,
+  );
+  if (!channel || !channel.isText()) return null;
+
+  console.info('Fetching all messages in the YKS clips channel and fillng in the gaps.');
+  let messages = Array.from((await channel.messages.fetch({ limit: 100 }))?.values() || []);
+  while (messages.length > 0) {
+    const message = messages.pop();
+    const clipListener = client.listenerHandler.findCategory('default').get('clip');
+    await clipListener?.exec(message);
+    if (messages.length === 0) {
+      messages = Array.from(
+        (await channel.messages.fetch({ limit: 100, before: message!.id }))?.values() || [],
+      );
+    }
+  }
+  console.info('Ah. Done updating clips.');
+};
 
 module.exports = ReadyListener;
