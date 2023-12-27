@@ -1,7 +1,7 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+import mongoose from 'mongoose';
+import { Schema } from 'mongoose';
 
-const clipsSchema = new Schema(
+export const clipsSchema = new Schema(
   {
     id: {
       type: String,
@@ -19,7 +19,6 @@ const clipsSchema = new Schema(
   { minimize: false },
 );
 
-clipsSchema.index({ name: 'transcriptionIndex', transcription: 'text' });
-module.exports = mongoose.model('clips', clipsSchema);
-
-export default clipsSchema;
+clipsSchema.index({ transcriptionIndex: 'text' }, { sparse: true });
+const clipModel = mongoose.model('clips', clipsSchema);
+export default clipModel;

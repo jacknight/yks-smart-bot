@@ -42,7 +42,7 @@ const clipsCommand: CommandInterface = {
         return interaction.respond([{ name: 'No results.', value: '' }]);
       }
 
-      const choices = results.map((result: { transcription: string; id: string; _id: string }) => {
+      const choices = results.map((result: any) => {
         const name =
           result.transcription.length > 100
             ? result.transcription.substring(0, 97) + '...'

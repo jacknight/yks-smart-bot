@@ -1,4 +1,5 @@
 import { Message } from 'discord.js';
+import clipModel from '../db/clips';
 
 const axios = require('axios');
 const { Command } = require('discord-akairo');
@@ -33,54 +34,24 @@ class ClipCommand extends Command {
 
   async exec(message: Message & { isViaSite: boolean; clip: number }) {
     if (!message.guild) return;
+    let foundValidLink = false;
+    let url = '';
+    while (!foundValidLink) {
+      const clip = (await clipModel.aggregate([{ $sample: { size: 1 } }])).pop();
+      url = clip.id;
+      const result = await this.checkLink(url);
+      foundValidLink = result.valid;
 
-    const clips = this.client.settings.get(message.guild.id, 'clips', []);
-    if (clips.length > 0) {
-      let content = '';
-      let index = Math.floor(Math.random() * clips.length);
-
-      if (message.isViaSite && message.clip >= 0 && message.clip < clips.length) {
-        index = message.clip;
-        if (message.member) {
-          content = `${message.member} shared this clip via https://pisscord.site/clips/${
-            message.clip + 1
-          }`;
-        }
-      }
-
-      let foundValidLink = false;
-      while (!foundValidLink && clips.length > 0) {
-        const url = clips[index];
-        const result = await this.checkLink(url);
-        foundValidLink = result.valid;
-
-        // Remove from clips if it threw a 404 (someone deleted the post)
-        if (result.remove) {
-          const loc = clips.indexOf(url);
-          if (loc >= 0) {
-            clips.splice(loc);
-            this.client.settings.set(message.guild.id, 'clips', clips);
-          }
-        }
-
-        // If invalid, find a new random index to poke.
-        if (!foundValidLink) {
-          index = Math.floor(Math.random() * clips.length);
-          console.debug('clips- set new random index and trying again: ', index);
-        }
-      }
-
-      if (content != '') {
-        console.debug('clips - Sending message w/ content: ', content);
-        message.channel.send({
-          content,
-          files: [clips[index]],
-        });
-      } else {
-        console.debug('clips - Sending message w/o content.');
-        message.channel.send({ files: [clips[index]] });
+      // Remove from clips if it threw a 404 (someone deleted the post)
+      if (result.remove) {
+        const loc = await clipModel.deleteOne({ id: clip.id });
       }
     }
+
+    if (url) {
+      return message.channel.send({ files: [url] });
+    }
+    return null;
   }
 }
 

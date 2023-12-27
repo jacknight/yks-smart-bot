@@ -51,7 +51,9 @@ class ReadyListener extends Listener {
 
     await setupSlashCommands(this.client);
 
-    await updateClips(this.client);
+    //- Break in case of emergency -//
+    // await gatherAllClips(this.client);
+    //- Break in case of emergency -//
   }
 }
 
@@ -210,7 +212,7 @@ async function removeOldMailbagMessages(client: YKSSmartBot) {
   return client.settings.set(process.env.YKS_GUILD_ID!, 'mailbagMessages', mailbagMessages);
 }
 
-const updateClips = async (client: YKSSmartBot) => {
+const gatherAllClips = async (client: YKSSmartBot) => {
   const guild = client.util.resolveGuild(process.env.YKS_GUILD_ID!, client.guilds.cache);
   if (!guild) return null;
   const channel = client.util.resolveChannel(

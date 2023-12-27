@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
 
 const { Listener } = require('discord-akairo');
-const ClipsModel = require('../db/clips');
+import ClipsModel from '../db/clips';
 
 class ClipListener extends Listener {
   constructor() {
@@ -32,12 +32,7 @@ class ClipListener extends Listener {
             filetype === 'ogg'
           ) {
             if (!message.guild) return;
-            const clips: string[] = await this.client.settings.get(message.guild.id, 'clips', []);
-            if (clips.find((clip) => clip === url)) return;
-
-            clips.push(url);
-            await this.client.settings.set(message.guild.id, 'clips', clips);
-            await ClipsModel.create({ id: url, attachment });
+            await ClipsModel.updateOne({ id: url }, { $set: { id: url } }, { upsert: true });
             console.info(`Added new clip: ${url}`);
           }
         }),
