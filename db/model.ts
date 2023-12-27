@@ -1,5 +1,5 @@
-const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
+import mongoose from 'mongoose';
+import { Schema } from 'mongoose';
 
 const guildSchema = new Schema(
   {
@@ -15,4 +15,4 @@ const guildSchema = new Schema(
   { minimize: false },
 );
 
-module.exports = mongoose.model('model', guildSchema);
+export default mongoose.model('model', guildSchema);

@@ -20,5 +20,4 @@ export const clipsSchema = new Schema(
 );
 
 clipsSchema.index({ transcriptionIndex: 'text' }, { sparse: true });
-const clipModel = mongoose.model('clips', clipsSchema);
-export default clipModel;
+export default mongoose.model('clips', clipsSchema);

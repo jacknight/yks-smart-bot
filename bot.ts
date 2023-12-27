@@ -13,8 +13,8 @@ import {
 import commandList from './commands/slash/_commands';
 import { CommandInterface } from './interfaces/command';
 require('dotenv').config();
-const guildModel = require('./db/model');
-const clipsModel = require('./db/clips');
+import guildModel from './db/model';
+import clipsModel from './db/clips';
 
 class YKSSmartBot extends AkairoClient {
   settings: MongooseProvider;
