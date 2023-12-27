@@ -22,7 +22,8 @@ class ClipListener extends Listener {
     )
       await Promise.all(
         message.attachments.map(async (attachment) => {
-          const filetype = attachment.proxyURL.split('?')[0].split('.').pop();
+          const url = attachment.proxyURL.split('?')[0];
+          const filetype = url.split('.').pop();
           console.log(filetype);
           if (
             filetype === 'mov' ||
@@ -34,7 +35,7 @@ class ClipListener extends Listener {
           ) {
             if (!message.guild) return;
             const clips: string[] = await this.client.settings.get(message.guild.id, 'clips', []);
-            if (clips.find((clip) => clip === attachment.proxyURL)) return;
+            if (clips.find((clip) => clip === url)) return;
 
             await message.guild.members.fetch();
 
@@ -67,9 +68,9 @@ As a thank you for fully embracing the dirtbag left culture cultivated here in t
               message.reply({ embeds: [embed] });
             }
 
-            clips.push(attachment.proxyURL);
-            ClipsModel.create({ id: attachment.proxyURL, attachment });
-            console.info(`Added new clip: ${attachment.proxyURL}`);
+            clips.push(url);
+            ClipsModel.create({ id: url, attachment });
+            console.info(`Added new clip: ${url}`);
           }
         }),
       );
