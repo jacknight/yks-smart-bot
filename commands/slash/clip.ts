@@ -30,8 +30,8 @@ const clipsCommand: CommandInterface = {
   autocomplete: async (client: YKSSmartBot, interaction: AutocompleteInteraction) => {
     try {
       const searchPhrase = interaction.options.getString('search');
-      if (!searchPhrase || searchPhrase.length < 4) {
-        return interaction.respond([{ name: 'Too short.', value: '' }]);
+      if (!searchPhrase || searchPhrase.length < 3) {
+        return interaction.respond([{ name: 'Enter a search term.', value: '' }]);
       }
 
       const results = await ClipsModel.find(
