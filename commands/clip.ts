@@ -24,7 +24,7 @@ class ClipCommand extends Command {
     } catch (e: any) {
       console.error('Failed to GET URL: ', e);
       if (e?.response?.status === 404) {
-        console.error('Remvoing url from clips: ', url);
+        console.error('Soft removing url from clips: ', url);
         result.remove = true;
         result.valid = false;
       }
@@ -38,13 +38,16 @@ class ClipCommand extends Command {
     let url = '';
     while (!foundValidLink) {
       const clip = (await clipModel.aggregate([{ $sample: { size: 1 } }])).pop();
+
+      if (clip.deleted) continue;
+
       url = clip.id;
       const result = await this.checkLink(url);
       foundValidLink = result.valid;
 
       // Remove from clips if it threw a 404 (someone deleted the post)
       if (result.remove) {
-        const loc = await clipModel.deleteOne({ id: clip.id });
+        const loc = await clipModel.updateOne({ id: clip.id, deleted: true });
       }
     }
 

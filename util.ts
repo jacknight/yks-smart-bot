@@ -1,11 +1,9 @@
 import { createApi } from 'unsplash-js';
-import fetch from 'node-fetch';
 import { MessageEmbed } from 'discord.js';
 import axios from 'axios';
 
 export const unsplash = createApi({
   accessKey: process.env.UNSPLASH_ACCESS_KEY!,
-  fetch,
 });
 
 export const shuffle = (array: string[]) => {
@@ -195,13 +193,7 @@ export const ksProductImage = async (title: string, desc: string): Promise<strin
     Authorization: `Bearer ${process.env.STABLE_DIFFUSION_API_KEY}`,
   };
 
-  const styles = [
-    '3d-model',
-    'analog-film',
-    'cinematic',
-    'digital-art',
-    'photographic',
-  ];
+  const styles = ['3d-model', 'analog-film', 'cinematic', 'digital-art', 'photographic'];
 
   const body = {
     steps: 40,

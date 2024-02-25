@@ -52,7 +52,9 @@ class ReadyListener extends Listener {
     await setupSlashCommands(this.client);
 
     //- Break in case of emergency -//
-    // await gatherAllClips(this.client);
+    if (process.env.GATHER_ALL_CLIPS) {
+      await gatherAllClips(this.client);
+    }
     //- Break in case of emergency -//
   }
 }

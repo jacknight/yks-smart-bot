@@ -12,6 +12,7 @@ class ClipListener extends Listener {
   }
 
   async exec(message: Message) {
+    if (!message.guild) return;
     // Check if it's a clip posted to the clips channel, and if so, store
     // the link in the database.
     if (
@@ -21,17 +22,9 @@ class ClipListener extends Listener {
     )
       await Promise.all(
         message.attachments.map(async (attachment) => {
-          const url = attachment.proxyURL.split('?')[0];
-          const filetype = url.split('.').pop();
-          if (
-            filetype === 'mov' ||
-            filetype === 'mp4' ||
-            filetype === 'webm' ||
-            filetype === 'wav' ||
-            filetype === 'mp3' ||
-            filetype === 'ogg'
-          ) {
-            if (!message.guild) return;
+          const contentType = attachment.contentType?.split('/')[0];
+          const url = attachment.proxyURL;
+          if (contentType === 'video' || contentType === 'audio') {
             await ClipsModel.updateOne({ id: url }, { $set: { id: url } }, { upsert: true });
             console.info(`Added new clip: ${url}`);
           }
