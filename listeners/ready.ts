@@ -227,12 +227,16 @@ const gatherAllClips = async (client: YKSSmartBot) => {
   let messages = Array.from((await channel.messages.fetch({ limit: 100 }))?.values() || []);
   while (messages.length > 0) {
     const message = messages.pop();
+    if (!message) continue;
+
     const clipListener = client.listenerHandler.findCategory('default').get('clip');
     await clipListener?.exec(message);
     if (messages.length === 0) {
+      console.log('Fetching more messages before ID: ', message.id);
       messages = Array.from(
-        (await channel.messages.fetch({ limit: 100, before: message!.id }))?.values() || [],
+        (await channel.messages.fetch({ limit: 100, before: message.id }))?.values() || [],
       );
+      messages.reverse();
     }
   }
   console.info('Ah. Done updating clips.');
