@@ -1,9 +1,11 @@
 import { createApi } from 'unsplash-js';
 import { MessageEmbed } from 'discord.js';
 import axios from 'axios';
+import fetch from 'node-fetch';
 
 export const unsplash = createApi({
   accessKey: process.env.UNSPLASH_ACCESS_KEY!,
+  fetch,
 });
 
 export const shuffle = (array: string[]) => {
