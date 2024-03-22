@@ -13,46 +13,19 @@ class ClipCommand extends Command {
     });
   }
 
-  async checkLink(url: string) {
-    const result = { valid: false, remove: false };
-    try {
-      console.debug('1. Checking URL:', url);
-      await axios.get(url.replace('cdn.discordapp.com', 'media.discordapp.net'));
-      console.debug("2. Successfully GET'ed URL.");
-      result.valid = true;
-      result.remove = false;
-    } catch (e: any) {
-      console.error('Failed to GET URL: ', e);
-      if (e?.response?.status === 404) {
-        console.error('Soft removing url from clips: ', url);
-        result.remove = true;
-        result.valid = false;
-      }
-    }
-    return result;
-  }
-
   async exec(message: Message & { isViaSite: boolean; clip: number }) {
     if (!message.guild) return;
-    let foundValidLink = false;
     let url = '';
-    while (!foundValidLink) {
+    let count = 100;
+    while (count) {
+      count--;
       const clip = (await clipModel.aggregate([{ $sample: { size: 1 } }])).pop();
-
       if (clip.deleted) continue;
-
       url = clip.id;
-      const result = await this.checkLink(url);
-      foundValidLink = result.valid;
-
-      // Remove from clips if it threw a 404 (someone deleted the post)
-      if (result.remove) {
-        const loc = await clipModel.updateOne({ id: clip.id, deleted: true });
-      }
     }
 
     if (url) {
-      return message.channel.send({ files: [url] });
+      return message.channel.send({ content: url });
     }
     return null;
   }

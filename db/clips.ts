@@ -15,6 +15,10 @@ export const clipsSchema = new Schema(
       type: String,
       required: false,
     },
+    deleted: {
+      type: Boolean,
+      required: false,
+    },
   },
   { minimize: false },
 );

@@ -35,14 +35,24 @@ const clipsCommand: CommandInterface = {
       }
 
       const results = await ClipsModel.find(
-        { $text: { $search: searchPhrase } },
+        {
+          $text: { $search: searchPhrase },
+          deleted: { $exists: false },
+          failed: { $exists: false },
+        },
         { score: { $meta: 'textScore' } },
       ).sort({ score: { $meta: 'textScore' } });
+
+      const resultsHash = new Map();
       if (!results || results.length == 0) {
         return interaction.respond([{ name: 'No results.', value: '' }]);
       }
 
-      const choices = results.map((result: any) => {
+      results.forEach((result) => {
+        resultsHash.set(result.transcription?.toLowerCase(), result);
+      });
+
+      const choices = Array.from(resultsHash.values()).map((result: any) => {
         const name =
           result.transcription.length > 100
             ? result.transcription.substring(0, 97) + '...'
@@ -68,7 +78,7 @@ const clipsCommand: CommandInterface = {
     const url = clip ? clip.id : null;
     if (objectId && clip && url) {
       return interaction.editReply({
-        files: [url],
+        content: url,
         components: [
           new MessageActionRow().addComponents(
             new MessageButton()
@@ -122,13 +132,15 @@ const clipsCommand: CommandInterface = {
         const url = (await ClipsModel.findOne({ _id: objectId }))?.id;
         if (!url) return;
 
+        await channel.send({
+          content: url,
+        });
         return channel.send({
           embeds: [
             new MessageEmbed().setDescription(
               `Requested by ${interaction.member?.user} using the \`/findtheclimp\` command.`,
             ),
           ],
-          files: [url],
         });
       } else {
         if (original >= 0) {
