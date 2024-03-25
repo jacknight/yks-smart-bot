@@ -37,8 +37,7 @@ const clipsCommand: CommandInterface = {
       const results = await ClipsModel.find(
         {
           $text: { $search: searchPhrase },
-          deleted: { $exists: false },
-          failed: { $exists: false },
+          transcription: { $exists: true },
         },
         { score: { $meta: 'textScore' } },
       ).sort({ score: { $meta: 'textScore' } });
