@@ -43,11 +43,11 @@ const clipsCommand: CommandInterface = {
         { score: { $meta: 'textScore' } },
       ).sort({ score: { $meta: 'textScore' } });
 
-      const resultsHash = new Map();
       if (!results || results.length == 0) {
         return interaction.respond([{ name: 'No results.', value: '' }]);
       }
 
+      const resultsHash = new Map();
       results.forEach((result) => {
         resultsHash.set(result.transcription?.toLowerCase(), result);
       });
@@ -75,23 +75,30 @@ const clipsCommand: CommandInterface = {
     }
 
     const clip = objectId ? await ClipsModel.findOne({ _id: objectId }) : null;
-    const url = clip ? clip.id : null;
-    if (objectId && clip && url) {
-      return interaction.editReply({
-        content: url,
-        components: [
-          new MessageActionRow().addComponents(
-            new MessageButton()
-              .setCustomId(`${commandName}-confirm-${objectId}`)
-              .setLabel('Post it')
-              .setStyle('SUCCESS'),
-            new MessageButton()
-              .setCustomId(`${commandName}-reject`)
-              .setLabel(`Don't post it`)
-              .setStyle('DANGER'),
-          ),
-        ],
-      });
+    if (objectId && clip) {
+      const msg = await interaction.channel?.messages.fetch(clip.id);
+      if (msg && msg.attachments.size > 0) {
+        const index = Math.floor(Math.random() * msg.attachments.size);
+        const attachment = msg.attachments.at(index);
+        if (attachment) {
+          const url = attachment.proxyURL;
+          return interaction.editReply({
+            files: [url],
+            components: [
+              new MessageActionRow().addComponents(
+                new MessageButton()
+                  .setCustomId(`${commandName}-confirm-${objectId}-${index}`)
+                  .setLabel('Post it')
+                  .setStyle('SUCCESS'),
+                new MessageButton()
+                  .setCustomId(`${commandName}-reject`)
+                  .setLabel(`Don't post it`)
+                  .setStyle('DANGER'),
+              ),
+            ],
+          });
+        }
+      }
     }
 
     return interaction.editReply({ content: 'Something went wrong.' });
@@ -100,7 +107,8 @@ const clipsCommand: CommandInterface = {
   handleButton: async (client: YKSSmartBot, interaction: ButtonInteraction) => {
     try {
       await interaction.deferUpdate();
-      const confirm = interaction.customId.split('-')[1] === 'confirm';
+      const [, confirmStr, objectIdStr, indexStr] = interaction.customId.split('-');
+      const confirm = confirmStr === 'confirm';
 
       const original = client.commandInteractions.findIndex(
         (i) => i.id === interaction.message.interaction?.id,
@@ -124,24 +132,30 @@ const clipsCommand: CommandInterface = {
           });
           client.commandInteractions.splice(original, 1);
         }
-        const objectId = interaction.customId.split('-')[2];
-        if (typeof objectId !== 'string' || objectId.length !== 24) {
+        if (typeof objectIdStr !== 'string' || objectIdStr.length !== 24) {
           return;
         }
 
-        const url = (await ClipsModel.findOne({ _id: objectId }))?.id;
-        if (!url) return;
+        const clip = await ClipsModel.findOne({ _id: objectIdStr });
+        if (clip) {
+          const msg = await interaction.channel?.messages.fetch(clip.id);
+          if (msg && msg.attachments.size > 0) {
+            const attachment = msg.attachments.at(parseInt(indexStr));
+            if (attachment) {
+              const url = attachment.proxyURL;
+              if (!url) return;
 
-        await channel.send({
-          content: url,
-        });
-        return channel.send({
-          embeds: [
-            new MessageEmbed().setDescription(
-              `Requested by ${interaction.member?.user} using the \`/findtheclimp\` command.`,
-            ),
-          ],
-        });
+              return channel.send({
+                files: [url],
+                embeds: [
+                  new MessageEmbed().setDescription(
+                    `Requested by ${interaction.member?.user} using the \`/findtheclimp\` command.`,
+                  ),
+                ],
+              });
+            }
+          }
+        }
       } else {
         if (original >= 0) {
           await client.commandInteractions[original].editReply({

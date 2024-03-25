@@ -25,7 +25,12 @@ class ClipListener extends Listener {
           const contentType = attachment.contentType?.split('/')[0];
           const url = attachment.proxyURL;
           if (contentType === 'video' || contentType === 'audio') {
-            await ClipsModel.updateOne({ id: url }, { $set: { id: url } }, { upsert: true });
+            const truncatedUrl = url.split('?')[0];
+            await ClipsModel.updateOne(
+              { id: message.id },
+              { $set: { id: message.id, url, truncatedUrl } },
+              { upsert: true },
+            );
             console.info(`Added new clip: ${url}`);
           }
         }),

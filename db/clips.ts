@@ -7,6 +7,14 @@ export const clipsSchema = new Schema(
       type: String,
       required: true,
     },
+    url: {
+      type: String,
+      required: true,
+    },
+    truncatedUrl: {
+      type: String,
+      required: true,
+    },
     attachment: {
       type: Object,
       required: false,

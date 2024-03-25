@@ -52,9 +52,9 @@ class ReadyListener extends Listener {
     await setupSlashCommands(this.client);
 
     //- Break in case of emergency -//
-    // if (process.env.GATHER_ALL_CLIPS) {
-    //   await gatherAllClips(this.client);
-    // }
+    if (process.env.GATHER_ALL_CLIPS === 'true') {
+      await gatherAllClips(this.client);
+    }
     //- Break in case of emergency -//
   }
 }
@@ -232,7 +232,7 @@ const gatherAllClips = async (client: YKSSmartBot) => {
     const clipListener = client.listenerHandler.findCategory('default').get('clip');
     await clipListener?.exec(message);
     if (messages.length === 0) {
-      console.log('Fetching more messages before ID: ', message.id);
+      console.info('Fetching more messages before ID: ', message.id);
       messages = Array.from(
         (await channel.messages.fetch({ limit: 100, before: message.id }))?.values() || [],
       );

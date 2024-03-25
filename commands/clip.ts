@@ -20,12 +20,18 @@ class ClipCommand extends Command {
     while (count) {
       count--;
       const clip = (await clipModel.aggregate([{ $sample: { size: 1 } }])).pop();
-      if (clip.deleted) continue;
-      url = clip.id;
+      const msg = await message.channel.messages.fetch(clip.id);
+      if (msg && msg.attachments.size > 0) {
+        const attachment = msg.attachments.at(Math.floor(Math.random() * msg.attachments.size));
+        if (attachment) {
+          url = attachment?.proxyURL;
+          break;
+        }
+      }
     }
 
     if (url) {
-      return message.channel.send({ content: url });
+      return message.channel.send({ files: [url] });
     }
     return null;
   }
