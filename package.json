@@ -8,6 +8,11 @@
     "node": "^16.6.1"
   },
   "dependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/ffmpeg-static": "^3.0.3",
+    "@types/fluent-ffmpeg": "^2.1.24",
+    "@types/follow-redirects": "^1.14.4",
+    "@types/node": "^20.5.0",
     "@discordjs/opus": "^0.8.0",
     "@discordjs/rest": "^2.2.0",
     "@discordjs/voice": "^0.8.0",
@@ -51,11 +56,6 @@
     "dev": "nodemon ./bot.ts"
   },
   "devDependencies": {
-    "@types/axios": "^0.14.0",
-    "@types/ffmpeg-static": "^3.0.3",
-    "@types/fluent-ffmpeg": "^2.1.24",
-    "@types/follow-redirects": "^1.14.4",
-    "@types/node": "^20.5.0",
     "nodemon": "^2.0.15",
     "ts-node": "^10.9.1"
   },
