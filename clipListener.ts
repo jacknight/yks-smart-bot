@@ -1,7 +1,7 @@
 import { Message } from 'discord.js';
-
 const { Listener } = require('discord-akairo');
-import ClipsModel from '../db/clips';
+import ClipsModel from './db/clips';
+import { transcribeClip } from './transcribe';
 
 class ClipListener extends Listener {
   constructor() {
@@ -32,6 +32,11 @@ class ClipListener extends Listener {
               { upsert: true },
             );
             console.info(`Added new clip: ${url}`);
+            const transcription = await transcribeClip(url);
+            if (transcription) {
+              console.log(transcription);
+              await ClipsModel.updateOne({ id: message.id }, { $set: { transcription } });
+            }
           }
         }),
       );

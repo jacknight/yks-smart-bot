@@ -148,6 +148,7 @@ class YKSSmartBot extends AkairoClient {
     this.inhibitorHandler.loadAll();
     this.commandHandler.useListenerHandler(this.listenerHandler);
     this.listenerHandler.loadAll();
+    this.listenerHandler.load(`${__dirname}/clipListener.ts`);
   }
 
   async login(token: string) {
