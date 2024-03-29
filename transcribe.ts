@@ -57,17 +57,17 @@ export const convertTo16KhzWav = (fileName: string): Promise<string> => {
 
 export const transcribeFile = async (fileName: string): Promise<string> => {
   return whisper(fileName, {
-    modelPath: `${__dirname}/ggml-large-v3.bin`,
+    modelPath: `${__dirname}/ggml-small.bin`,
     whisperOptions: { word_timestamps: false, gen_file_txt: true },
   });
 };
 
 export const transcribeClip = async (url: string): Promise<string | null> => {
-  if (!fs.existsSync(`${__dirname}/ggml-large-v3.bin`)) {
+  if (!fs.existsSync(`${__dirname}/ggml-small.bin`)) {
     try {
       console.info('Downloading');
       await downloadFile(
-        `https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-large-v3.bin`,
+        `https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-small.bin`,
       );
     } catch {
       return null;
