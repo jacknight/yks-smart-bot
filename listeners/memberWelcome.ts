@@ -26,7 +26,7 @@ class MemberWelcomeListener extends Listener {
     // their own display name and avatar.
     const canvas = Canvas.createCanvas(1000, 1000);
     const ctx = canvas.getContext('2d');
-    const background = await Canvas.loadImage('~/assets/jf-blessing.png');
+    const background = await Canvas.loadImage('${HOME}/assets/jf-blessing.png');
     ctx.drawImage(background, 0, 0, 423, canvas.height);
 
     ctx.font = applyText(
