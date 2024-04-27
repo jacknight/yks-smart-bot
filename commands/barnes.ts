@@ -25,7 +25,7 @@ class BarnesCommand extends Command {
         self.client.globalRates.get(message.guild!.id).delete('barnes');
       }, 1000 * 60); // once per min
 
-      const attachment = this.client.util.attachment('./assets/barmes.jpg');
+      const attachment = this.client.util.attachment('~/assets/barmes.jpg');
       message.channel.send({ files: [attachment] });
     }
   }

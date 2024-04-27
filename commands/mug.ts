@@ -28,7 +28,7 @@ class MugCommand extends Command {
         self.client.globalRates.get(message.guild!.id).delete('mug');
       }, 1000 * 60); // once per min
 
-      const mugs = ['./assets/mug.png', './assets/mug2.jpg', './assets/mug3.png'];
+      const mugs = ['~/assets/mug.png', '~/assets/mug2.jpg', '~/assets/mug3.png'];
       const mug = mugs[random(2)];
       const attachment = this.client.util.attachment(mug);
       message.channel.send({ files: [attachment] });
