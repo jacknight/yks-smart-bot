@@ -7,7 +7,7 @@ class CunchCommand extends Command {
     super('cunch', {
       cooldown: 3600000,
       ratelimit: 1,
-      regex: /^cunch$/i,
+      regex: /^cunch/i,
       category: 'eater-egg',
     });
   }
@@ -25,7 +25,7 @@ class CunchCommand extends Command {
       setTimeout(function () {
         self.client.globalRates.get(message.guild!.id).delete('cunch');
       }, 1000 * 60 * 60 * 12); // twice a day.
-      message.channel.send('cunch');
+      message.channel.send('cunch wrap supreme');
     }
   }
 }
