@@ -32,8 +32,9 @@ class MugCommand extends Command {
         `${__dirname}/../assets/mug.png`,
         `${__dirname}/../assets/mug2.jpg`,
         `${__dirname}/../assets/mug3.png`,
+        `${__dirname}/../assets/mug4.jpg`,
       ];
-      const mug = mugs[random(2)];
+      const mug = mugs[random(mugs.length - 1)];
       const attachment = this.client.util.attachment(mug);
       message.channel.send({ files: [attachment] });
     }
