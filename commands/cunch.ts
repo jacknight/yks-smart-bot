@@ -7,7 +7,7 @@ class CunchCommand extends Command {
     super('cunch', {
       cooldown: 3600000,
       ratelimit: 1,
-      regex: /^cunch/i,
+      regex: /cunch/i,
       category: 'eater-egg',
     });
   }
