@@ -102,7 +102,7 @@ class LatestCommand extends Command {
             );
             await message.react(this.client.util.resolveEmoji('3did', message.guild!.emojis.cache));
             await message.react(
-              this.client.util.resolveEmoji('4another', message.guild!.emojis.cache),
+              this.client.util.resolveEmoji('40another', message.guild!.emojis.cache),
             );
             await message.react(this.client.util.resolveEmoji('yks', message.guild!.emojis.cache));
           } catch {
@@ -124,7 +124,7 @@ class LatestCommand extends Command {
             );
             await message.react(this.client.util.resolveEmoji('3did', message.guild!.emojis.cache));
             await message.react(
-              this.client.util.resolveEmoji('4another', message.guild!.emojis.cache),
+              this.client.util.resolveEmoji('40another', message.guild!.emojis.cache),
             );
             await message.react(this.client.util.resolveEmoji('yks', message.guild!.emojis.cache));
           } catch {
