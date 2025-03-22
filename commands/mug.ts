@@ -10,7 +10,7 @@ class MugCommand extends Command {
       aliases: ['mug', 'burgymug'],
       ...((globalToday.getDate() !== 7 || globalToday.getMonth() !== 3) && {
         cooldown: 1000 * 60,
-        rateLimit: 1,
+        rateLimit: 4,
       }),
     });
   }
