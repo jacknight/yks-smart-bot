@@ -29,10 +29,11 @@ class MugCommand extends Command {
       }, 1000 * 60); // once per min
 
       const mugs = [
-        `${__dirname}/../assets/mug.png`,
+        `${__dirname}/../assets/mug1.png`,
         `${__dirname}/../assets/mug2.jpg`,
         `${__dirname}/../assets/mug3.png`,
         `${__dirname}/../assets/mug4.jpg`,
+        `${__dirname}/../assets/mug5.jpg`,
       ];
       const mug = mugs[random(mugs.length - 1)];
       const attachment = this.client.util.attachment(mug);
